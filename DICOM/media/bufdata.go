@@ -2,6 +2,7 @@ package media
 
 import (
 	"encoding/binary"
+	"net"
 )
 
 // BufData buffer manipulation class
@@ -18,7 +19,13 @@ func (bd *BufData) setPosition(pos int) {
 	bd.Ms.Position = pos
 }
 
-func (bd *BufData) readUint16() uint16 {
+func (bd *BufData) ReadByte() byte{
+	c:= make([]byte, 1)
+	bd.Ms.Read(c, 1)
+	return c[0]
+}
+
+func (bd *BufData) ReadUint16() uint16 {
 	var val uint16
 
 	c := make([]byte, 2)
@@ -31,7 +38,7 @@ func (bd *BufData) readUint16() uint16 {
 	return val
 }
 
-func (bd *BufData) readUint32() uint32 {
+func (bd *BufData) ReadUint32() uint32 {
 	var val uint32
 
 	c := make([]byte, 4)
@@ -44,7 +51,13 @@ func (bd *BufData) readUint32() uint32 {
 	return val
 }
 
-func (bd *BufData) writeUint16(val uint16) {
+func (bd *BufData) WriteByte(val byte) {
+	c := make([]byte, 1)
+	c[0] = val
+	bd.Ms.Write(c, 1)
+}
+
+func (bd *BufData) WriteUint16(val uint16) {
 	c := make([]byte, 2)
 	if bd.BigEndian {
 		binary.BigEndian.PutUint16(c, val)
@@ -54,7 +67,7 @@ func (bd *BufData) writeUint16(val uint16) {
 	bd.Ms.Write(c, 2)
 }
 
-func (bd *BufData) writeUint32(val uint32) {
+func (bd *BufData) WriteUint32(val uint32) {
 	c := make([]byte, 4)
 	if bd.BigEndian {
 		binary.BigEndian.PutUint32(c, val)
@@ -71,28 +84,32 @@ func (bd *BufData) readString(length int) string {
 	return val
 }
 
+func (bd *BufData) WriteString(val string) {
+	bd.Ms.Write([]byte(val), len(val))
+}
+
 // ReadTag - read a single tag from the Stream
 func (bd *BufData) ReadTag(tag *DcmTag, explicitVR bool) bool {
 	tag.VR = ""
 	internalVR := explicitVR
-	tag.Group = bd.readUint16()
-	tag.Element = bd.readUint16()
+	tag.Group = bd.ReadUint16()
+	tag.Element = bd.ReadUint16()
 	if tag.Group == 0x0002 {
 		internalVR = true
 	}
 	if (tag.Group != 0x0000) && (tag.Group != 0xfffe) && (internalVR) {
 		tag.VR = bd.readString(2)
 		if (tag.VR == "OB") || (tag.VR == "OW") || (tag.VR == "SQ") || (tag.VR == "UN") || (tag.VR == "UT") {
-			bd.readUint16()
-			tag.Length = bd.readUint32()
+			bd.ReadUint16()
+			tag.Length = bd.ReadUint32()
 		} else {
-			tag.Length = uint32(bd.readUint16())
+			tag.Length = uint32(bd.ReadUint16())
 		}
 	} else {
 		if internalVR == false {
 			tag.VR = AddVRData(tag.Group, tag.Element)
 		}
-		tag.Length = bd.readUint32()
+		tag.Length = bd.ReadUint32()
 	}
 
 	if (tag.Length != 0) && (tag.Length != 0xFFFFFFFF) {
@@ -106,18 +123,18 @@ func (bd *BufData) ReadTag(tag *DcmTag, explicitVR bool) bool {
 
 // WriteTag - Write a single tag to stream
 func (bd *BufData) WriteTag(tag DcmTag, explicitVR bool) {
-	bd.writeUint16(tag.Group)
-	bd.writeUint16(tag.Element)
+	bd.WriteUint16(tag.Group)
+	bd.WriteUint16(tag.Element)
 	if (tag.Group != 0x0000) && (tag.Group != 0xfffe) && (explicitVR) {
 		bd.Ms.Write([]byte(tag.VR), 2)
 		if (tag.VR == "OB") || (tag.VR == "OW") || (tag.VR == "SQ") || (tag.VR == "UN") || (tag.VR == "UT") {
-			bd.writeUint16(0)
-			bd.writeUint32(tag.Length)
+			bd.WriteUint16(0)
+			bd.WriteUint32(tag.Length)
 		} else {
-			bd.writeUint16(uint16(tag.Length))
+			bd.WriteUint16(uint16(tag.Length))
 		}
 	} else {
-		bd.writeUint32(tag.Length)
+		bd.WriteUint32(tag.Length)
 	}
 	if (tag.Length != 0) && (tag.Length != 0xFFFFFFFF) {
 		bd.Ms.Write(tag.Data, int(tag.Length))
@@ -226,4 +243,16 @@ func (bd *BufData) WriteObj(obj *DcmObj) {
 		tag := obj.GetTag(i)
 		bd.WriteTag(tag, obj.ExplicitVR)
 	}
+}
+
+func (bd *BufData) Send(conn net.Conn) bool {
+	buffer := make([]byte, bd.Ms.Size)
+	bd.Ms.Position = 0
+	bd.Ms.Read(buffer, bd.Ms.Size)
+	bd.Ms.Clear()
+	_, err := conn.Write(buffer)
+	if err != nil {
+		return false
+	}
+	return true
 }

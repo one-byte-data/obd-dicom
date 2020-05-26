@@ -40,6 +40,7 @@ func decapsulate(msg []byte) ([]byte, error) {
 }
 
 func handleConnection(c net.Conn) {
+	flag := false
 	fmt.Print(".")
 	reader := bufio.NewReader(c)
 	rawMsg, err := reader.ReadBytes(endBlock)
@@ -75,13 +76,18 @@ func handleConnection(c net.Conn) {
 		}
 		if strings.Contains(line, "OBX") {
 			hl7.ParseOBX(line)
+			flag = true
 		}
 	}
 	if err != nil {
 		return
 	}
-	hl7.SaveDICOMSR("test.dcm")
-	c.Write([]byte("Ack"))
+	if flag == true {
+		hl7.SaveDICOMSR("test.dcm")
+		c.Write([]byte("Ack"))
+	} else {
+		c.Write([]byte("Nack"))
+	}
 	c.Close()
 }
 

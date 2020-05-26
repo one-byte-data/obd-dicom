@@ -44,7 +44,7 @@ func (ms *MemoryStream) Write(buffer []byte, count int) int {
 func (ms *MemoryStream) LoadFromFile(FileName string) bool {
 	flag := false
 
-	file, err := os.Open("test.dcm")
+	file, err := os.Open(FileName)
 	if err != nil {
 		fmt.Println("ERROR, opening file")
 		return flag
@@ -88,4 +88,10 @@ func (ms *MemoryStream) SaveToFile(FileName string) bool {
 		return true
 	}
 	return false
+}
+
+func (ms *MemoryStream) Clear() {
+	ms.data = ms.data[:0]
+	ms.Position = 0
+	ms.Size = 0
 }

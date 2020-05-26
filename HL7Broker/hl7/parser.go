@@ -3,6 +3,7 @@ package hl7
 // HL7 parser class
 import (
 	"rafael/DICOM/media"
+	"rafael/uuids"
 	"strings"
 )
 
@@ -80,7 +81,9 @@ func SaveDICOMSR(fileName string) {
 	srobj.ExplicitVR = true
 	srobj.BigEndian = false
 	srobj.TransferSyntax = "1.2.840.10008.1.2.1"
-	study.StudyInstanceUID = "9999.9999.1"
-	srobj.CreateSR(study, "8888.8888.1", "7777.7777.1")
+	study.StudyInstanceUID = uuids.CreateStudyUID(study.PatientName, study.PatientID, study.AccessionNumber, study.ReportDate)
+	SeriesUID := uuids.CreateSeriesUID(study.StudyInstanceUID, "SR", "100")
+	InstanceUID := uuids.CreateInstanceUID(SeriesUID, "1")
+	srobj.CreateSR(study, SeriesUID, InstanceUID)
 	srobj.Write(fileName)
 }

@@ -198,3 +198,39 @@ func (obj *DcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanc
 	obj.WriteString(0x0040, 0xa493, "CS", "VERIFIED") // VerificationFlag
 	obj.AddSRText(study.ReportText)
 }
+
+// CreatePDF - Create a DICOM SR object
+func (obj *DcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, FileName string) {
+	// Instance Creation Date
+	obj.WriteString(0x08, 0x12, "DA", time.Now().Format("20060102"))
+	// Instance Creation Time
+	obj.WriteString(0x08, 0x13, "TM", time.Now().Format("150405"))
+	// DICOM PDF SOP Class
+	obj.WriteString(0x08, 0x16, "UI", "1.2.840.10008.5.1.4.1.1.104.1")
+	obj.WriteString(0x0008, 0x0018, "UI", SOPInstanceUID)
+	obj.WriteString(0x0008, 0x0050, "SH", study.AccessionNumber) // Accession Number
+	obj.WriteString(0x0008, 0x0060, "CS", "OT")
+	obj.WriteString(0x0008, 0x0080, "LO", study.InstitutionName)
+	obj.WriteString(0x0008, 0x0090, "PN", study.ReferringPhysician)
+	obj.WriteString(0x0008, 0x1030, "LO", study.Description)
+	obj.WriteString(0x0010, 0x0010, "PN", study.PatientName)
+	obj.WriteString(0x0010, 0x0020, "LO", study.PatientID)  // Patient ID
+	obj.WriteString(0x0010, 0x0030, "DA", study.PatientBD)  // Patient's Birth Date
+	obj.WriteString(0x0010, 0x0040, "CS", study.PatientSex) // Patient's Sex
+	obj.WriteString(0x0020, 0x000d, "UI", study.StudyInstanceUID)
+	obj.WriteString(0x0020, 0x000e, "UI", SeriesInstanceUID)
+	obj.WriteString(0x0020, 0x0011, "IS", "300")
+	obj.WriteString(0x0020, 0x0013, "IS", "1")
+
+	var mstream MemoryStream
+	mstream.LoadFromFile(FileName)
+	mstream.Position = 0
+	size := uint32(mstream.Size)
+	if size%2 == 1 {
+		size++
+		mstream.data=append(mstream.data, 0)
+	}
+	obj.WriteString(0x42, 0x10, "ST", FileName)
+	obj.Add(DcmTag{0x42, 0x11, size, "OB", mstream.data, obj.BigEndian})
+	obj.WriteString(0x42, 0x12, "LO", "application/pdf")
+}

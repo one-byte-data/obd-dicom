@@ -8,12 +8,17 @@ func Resetuniq() {
 	uniqid = 1
 }
 
-func uniq8() byte {
+func Uniq8() byte {
 	uniqid++
-	return byte(uniqid & 0xff);
+	return byte(uniqid & 0xff)
 }
 
-func uniq8odd() byte {
+func Uniq16() uint16 {
+	uniqid++
+	return uint16(uniqid&0xffff)
+}
+
+func Uniq8odd() byte {
 
 	if uniqid&0x01 == 1 {
 		uniqid++
@@ -22,4 +27,15 @@ func uniq8odd() byte {
 	uniqid++
 	uniqid++
 	return byte(uniqid & 0xff)
+}
+
+func Uniq16odd() uint16 {
+
+	if uniqid&0x01 == 1 {
+		uniqid++
+		return uint16(uniqid & 0xffff)
+	}
+	uniqid++
+	uniqid++
+	return uint16(uniqid & 0xffff)
 }

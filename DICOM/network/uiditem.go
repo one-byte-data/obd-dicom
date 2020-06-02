@@ -42,6 +42,8 @@ func (uid *UIDitem) Read(conn net.Conn) bool {
 func (uid *UIDitem) ReadDynamic(conn net.Conn) bool {
 	uid.Reserved1 =ReadByte(conn)
 	uid.Length =ReadUint16(conn)
-	conn.Read([]byte(uid.UIDName))
+	buffer:=make([]byte, uid.Length)
+	conn.Read(buffer)
+	uid.UIDName=string(buffer)
 	return true;
 }

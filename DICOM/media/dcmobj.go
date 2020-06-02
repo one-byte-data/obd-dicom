@@ -1,6 +1,7 @@
 package media
 
 import (
+	"encoding/binary"
 	"os"
 	"time"
 )
@@ -31,6 +32,56 @@ func (obj *DcmObj) TagCount() int {
 // GetTag - return the Tag at position i
 func (obj *DcmObj) GetTag(i int) DcmTag {
 	return obj.tags[i]
+}
+
+// GetUShort - return the Uint16 for this group & element
+func (obj *DcmObj) GetUShort(group uint16, element uint16) uint16 {
+	var i int
+	var tag DcmTag
+	sq := 0
+	for i = 0; i < obj.TagCount(); i++ {
+		tag = obj.GetTag(i)
+		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
+			sq++
+		}
+		if (sq == 0) && (tag.Length > 0) && (tag.Length != 0xFFFFFFFF) {
+			if (tag.Group == group) && (tag.Element == element) {
+				break
+			}
+		}
+		if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {
+			sq--
+		}
+	}
+	if i < obj.TagCount() {
+		return tag.GetUShort()
+	}
+	return 0
+}
+
+// GetUInt - return the Uint32 for this group & element
+func (obj *DcmObj) GetUInt(group uint16, element uint16) uint32 {
+	var i int
+	var tag DcmTag
+	sq := 0
+	for i = 0; i < obj.TagCount(); i++ {
+		tag = obj.GetTag(i)
+		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
+			sq++
+		}
+		if (sq == 0) && (tag.Length > 0) && (tag.Length != 0xFFFFFFFF) {
+			if (tag.Group == group) && (tag.Element == element) {
+				break
+			}
+		}
+		if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {
+			sq--
+		}
+	}
+	if i < obj.TagCount() {
+		return tag.GetUInt()
+	}
+	return 0
 }
 
 // GetString - return the String for this group & element
@@ -102,6 +153,32 @@ func (obj *DcmObj) Write(FileName string) bool {
 	bufdata.WriteObj(obj)
 	bufdata.Ms.Position = 0
 	return (bufdata.Ms.SaveToFile(FileName))
+}
+
+// WriteUint16 - Writes a Uint16 to a DICOM tag
+func (obj *DcmObj) WriteUint16(group uint16, element uint16, vr string, val uint16) {
+	c := make([]byte, 2)
+	if obj.BigEndian {
+		binary.BigEndian.PutUint16(c, val)
+	} else {
+		binary.LittleEndian.PutUint16(c, val)
+	}
+
+	tag := DcmTag{group, element, 2, vr, c, obj.BigEndian}
+	obj.tags = append(obj.tags, tag)
+}
+
+// WriteUint32 - Writes a Uint32 to a DICOM tag
+func (obj *DcmObj) WriteUint32(group uint16, element uint16, vr string, val uint32) {
+	c := make([]byte, 4)
+	if obj.BigEndian {
+		binary.BigEndian.PutUint32(c, val)
+	} else {
+		binary.LittleEndian.PutUint32(c, val)
+	}
+
+	tag := DcmTag{group, element, 4, vr, c, obj.BigEndian}
+	obj.tags = append(obj.tags, tag)
 }
 
 // WriteString - Writes a String to a DICOM tag

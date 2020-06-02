@@ -1,13 +1,13 @@
 package network
 
 import (
-	"net"
 	"encoding/binary"
+	"net"
 	"rafael/DICOM/media"
 )
 
-func ReadByte(conn net.Conn) byte{
-	c:=make([]byte, 1)
+func ReadByte(conn net.Conn) byte {
+	c := make([]byte, 1)
 	_, err := conn.Read(c)
 	if err != nil {
 		return 0
@@ -15,9 +15,9 @@ func ReadByte(conn net.Conn) byte{
 	return c[0]
 }
 
-func ReadUint16(conn net.Conn) uint16{
+func ReadUint16(conn net.Conn) uint16 {
 	var val uint16
-	c:=make([]byte, 2)
+	c := make([]byte, 2)
 	_, err := conn.Read(c)
 	if err != nil {
 		return 0
@@ -26,9 +26,9 @@ func ReadUint16(conn net.Conn) uint16{
 	return val
 }
 
-func ReadUint32(conn net.Conn) uint32{
+func ReadUint32(conn net.Conn) uint32 {
 	var val uint32
-	c:=make([]byte, 4)
+	c := make([]byte, 4)
 	_, err := conn.Read(c)
 	if err != nil {
 		return 0
@@ -52,8 +52,8 @@ type PresentationContextAccept struct {
 func NewPresentationContextAccept() *PresentationContextAccept {
 	pc := &PresentationContextAccept{}
 	pc.ItemType = 0x21
-	pc.PresentationContextID = uniq8()
-	pc.Result=2
+	pc.PresentationContextID = Uniq8()
+	pc.Result = 2
 	return pc
 }
 
@@ -71,10 +71,10 @@ func (pc *PresentationContextAccept) SetAbstractSyntax(Abst string) {
 }
 
 func (pc *PresentationContextAccept) SetTransferSyntax(Tran string) {
-	pc.TrnSyntax.ItemType=0x40
-	pc.TrnSyntax.Reserved1=0
-	pc.TrnSyntax.UIDName=Tran
-	pc.TrnSyntax.Length=uint16(len(Tran))
+	pc.TrnSyntax.ItemType = 0x40
+	pc.TrnSyntax.Reserved1 = 0
+	pc.TrnSyntax.UIDName = Tran
+	pc.TrnSyntax.Length = uint16(len(Tran))
 }
 
 func (pc *PresentationContextAccept) Write(conn net.Conn) bool {
@@ -91,38 +91,38 @@ func (pc *PresentationContextAccept) Write(conn net.Conn) bool {
 	bd.WriteByte(pc.Result)
 	bd.WriteByte(pc.Reserved4)
 	if bd.Send(conn) {
-		flag=pc.TrnSyntax.Write(conn)
+		flag = pc.TrnSyntax.Write(conn)
 	}
 	return flag
 }
 func (pc *PresentationContextAccept) Read(conn net.Conn) bool {
-	pc.ItemType=ReadByte(conn)
+	pc.ItemType = ReadByte(conn)
 	return pc.ReadDynamic(conn)
 }
 
 func (pc *PresentationContextAccept) ReadDynamic(conn net.Conn) bool {
-	pc.Reserved1=ReadByte(conn)
-	pc.Length=ReadUint16(conn)
-	pc.PresentationContextID=ReadByte(conn)
-	pc.Reserved2=ReadByte(conn)
-	pc.Result=ReadByte(conn)
-	pc.Reserved4=ReadByte(conn)
+	pc.Reserved1 = ReadByte(conn)
+	pc.Length = ReadUint16(conn)
+	pc.PresentationContextID = ReadByte(conn)
+	pc.Reserved2 = ReadByte(conn)
+	pc.Result = ReadByte(conn)
+	pc.Reserved4 = ReadByte(conn)
 	pc.TrnSyntax.Read(conn)
 	return true
 }
 
 type AAssociationAC struct {
-	ItemType        byte // 0x02
-	Reserved1       byte
-	Length          uint32
-	ProtocolVersion uint16 // 0x01
-	Reserved2       uint16
-	CallingApTitle  [16]byte // 16 bytes transfered
-	CalledApTitle   [16]byte // 16 bytes transfered
-	Reserved3       [32]byte
-	AppContext      UIDitem
-	PresContextAccepts    []PresentationContextAccept
-	UserInfo UserInformation
+	ItemType           byte // 0x02
+	Reserved1          byte
+	Length             uint32
+	ProtocolVersion    uint16 // 0x01
+	Reserved2          uint16
+	CallingApTitle     [16]byte // 16 bytes transfered
+	CalledApTitle      [16]byte // 16 bytes transfered
+	Reserved3          [32]byte
+	AppContext         UIDitem
+	PresContextAccepts []PresentationContextAccept
+	UserInfo           UserInformation
 }
 
 func NewAAssociationAC() *AAssociationAC {
@@ -151,7 +151,7 @@ func (aaac *AAssociationAC) Size() uint32 {
 }
 
 func (aaac *AAssociationAC) SetUserInformation(UserInfo UserInformation) {
-aaac.UserInfo=UserInfo
+	aaac.UserInfo = UserInfo
 }
 
 func (aaac *AAssociationAC) Write(conn net.Conn) bool {
@@ -175,51 +175,50 @@ func (aaac *AAssociationAC) Write(conn net.Conn) bool {
 			PresContextAccept := aaac.PresContextAccepts[i]
 			PresContextAccept.Write(conn)
 		}
-		flag=aaac.UserInfo.Write(conn)
+		flag = aaac.UserInfo.Write(conn)
 	}
 	return flag
 }
 
 func (aaac *AAssociationAC) Read(conn net.Conn) bool {
-	aaac.ItemType=ReadByte(conn)
+	aaac.ItemType = ReadByte(conn)
 	return aaac.ReadDynamic(conn)
 }
 
 func (aaac *AAssociationAC) ReadDynamic(conn net.Conn) bool {
-	aaac.Reserved1=ReadByte(conn)
-	aaac.Length=ReadUint32(conn)
-	aaac.ProtocolVersion=ReadUint16(conn)
-	aaac.Reserved2=ReadUint16(conn)
+	aaac.Reserved1 = ReadByte(conn)
+	aaac.Length = ReadUint32(conn)
+	aaac.ProtocolVersion = ReadUint16(conn)
+	aaac.Reserved2 = ReadUint16(conn)
 	conn.Read(aaac.CalledApTitle[:])
 	conn.Read(aaac.CallingApTitle[:])
 	conn.Read(aaac.Reserved3[:])
 
 	var Count int
-	Count= int(aaac.Length-4-16-16-32)
-	for(Count>0){
+	Count = int(aaac.Length - 4 - 16 - 16 - 32)
+	for Count > 0 {
 		TempByte := ReadByte(conn)
-		switch(TempByte){
-		case 0x50: // User Information
-			aaac.UserInfo.ReadDynamic(conn)
-			Count = Count - int(aaac.UserInfo.Size())
-		break
+		switch TempByte {
+		case 0x10:
+			aaac.AppContext.ReadDynamic(conn)
+			Count = Count - int(aaac.AppContext.Size())
+			break
 		case 0x21:
 			PresContextAccept := NewPresentationContextAccept()
 			PresContextAccept.ReadDynamic(conn)
-			Count = Count-int(PresContextAccept.Size())
-			aaac.PresContextAccepts=append(aaac.PresContextAccepts, *PresContextAccept)
+			Count = Count - int(PresContextAccept.Size())
+			aaac.PresContextAccepts = append(aaac.PresContextAccepts, *PresContextAccept)
 			break
-		case 0x10:
-			aaac.AppContext.ReadDynamic(conn)
-			Count = Count-int(aaac.AppContext.Size())
+		case 0x50: // User Information
+			aaac.UserInfo.ReadDynamic(conn)
+			Count = Count - int(aaac.UserInfo.Size())
 			break
 		default:
-				conn.Close()
-				Count=-1
-				break
+			conn.Close()
+			Count = -1
 		}
 	}
-	if(Count==0){
+	if Count == 0 {
 		return true
 	}
 	return (false)

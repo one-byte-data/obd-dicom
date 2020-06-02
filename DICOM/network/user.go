@@ -15,6 +15,7 @@ type MaximumSubLength struct {
 func NewMaximumSubLength() *MaximumSubLength {
 	maxim := &MaximumSubLength{}
 	maxim.ItemType = 0x53
+	maxim.Length = 4
 	return maxim
 }
 
@@ -145,6 +146,9 @@ type UserInformation struct {
 func NewUserInformation() *UserInformation {
 	ui := &UserInformation{}
 	ui.ItemType = 0x50
+	ui.MaxSubLength = *NewMaximumSubLength()
+	ui.AsyncOpWindow = *NewAsyncOperationWindow()
+	ui.SCPSCURole = *NewSCPSCURoleSelect()
 	return ui
 }
 

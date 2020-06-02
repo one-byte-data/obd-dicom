@@ -20,7 +20,7 @@ type PresentationContext struct {
 func NewPresentationContext() *PresentationContext {
 	pc := &PresentationContext{}
 	pc.ItemType = 0x20
-	pc.PresentationContextID = uniq8odd()
+	pc.PresentationContextID = Uniq8odd()
 	return pc
 }
 
@@ -67,6 +67,35 @@ func (pc *PresentationContext) Write(conn net.Conn) bool {
 		}
 	}
 	return flag
+}
+
+func (pc *PresentationContext) Read(conn net.Conn) bool {
+	pc.ItemType=ReadByte(conn)
+	return pc.ReadDynamic(conn);
+}
+
+func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
+	pc.Reserved1=ReadByte(conn)
+	pc.Length = ReadUint16(conn)
+	pc.PresentationContextID=ReadByte(conn)
+	pc.Reserved2=ReadByte(conn)
+	pc.Reserved3=ReadByte(conn)
+	pc.Reserved4=ReadByte(conn)
+
+	pc.AbsSyntax.Read(conn)
+	Count := pc.Length-4-pc.AbsSyntax.Size()
+	for Count > 0 {
+		var TrnSyntax UIDitem
+		TrnSyntax.Read(conn)
+		Count = Count-TrnSyntax.Size()
+		if(TrnSyntax.Size()>0){
+			pc.TrnSyntaxs=append(pc.TrnSyntaxs, TrnSyntax)
+		}
+	}
+	if(Count==0) {
+		return true
+	}
+	return false
 }
 
 type AAssociationRQ struct {
@@ -132,4 +161,47 @@ func (aarq *AAssociationRQ) Write(conn net.Conn) bool {
 		aarq.UserInfo.Write(conn)
 	}
 	return flag
+}
+
+func (aarq *AAssociationRQ) Read(conn net.Conn) bool {
+	aarq.ItemType=ReadByte(conn)
+	return aarq.ReadDynamic(conn)
+}
+
+func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
+	aarq.Reserved1=ReadByte(conn)
+	aarq.Length=ReadUint32(conn)
+	aarq.ProtocolVersion=ReadUint16(conn)
+	aarq.Reserved2=ReadUint16(conn)
+	conn.Read(aarq.CalledApTitle[:])
+	conn.Read(aarq.CallingApTitle[:])
+	conn.Read(aarq.Reserved3[:])
+
+	var Count int
+	Count= int(aarq.Length-4-16-16-32)
+	for(Count>0){
+		TempByte := ReadByte(conn)
+		switch(TempByte){
+		case 0x10:
+			aarq.AppContext.ReadDynamic(conn)
+			Count = Count-int(aarq.AppContext.Size())
+			break
+		case 0x20:
+			PresContext := NewPresentationContext()
+			PresContext.ReadDynamic(conn)
+			Count = Count-int(PresContext.Size())
+			aarq.PresContexts=append(aarq.PresContexts, *PresContext)
+			break
+		case 0x50: // User Information
+			aarq.UserInfo.ReadDynamic(conn)
+			Count = Count - int(aarq.UserInfo.Size())
+		break
+		default:
+				Count=-1
+		}
+	}
+	if(Count==0){
+		return true
+	}
+	return (false)
 }

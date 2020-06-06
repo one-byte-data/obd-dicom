@@ -37,7 +37,7 @@ func (pd *PDataTF) ReadDynamic(conn net.Conn) bool {
 		pd.pdv.Length = ReadUint32(conn)
 		pd.pdv.PresentationContextID = ReadByte(conn)
 		pd.pdv.MsgHeader = ReadByte(conn)
-		buff := make([]byte, pd.pdv.Length)
+		buff := make([]byte, pd.pdv.Length-2)
 		_, err := conn.Read(buff)
 		if err != nil {
 			return false

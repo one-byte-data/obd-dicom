@@ -235,10 +235,9 @@ func (bd *BufData) ReadObj(obj *DcmObj) bool {
 
 // WriteObj - Write a DICOM Object to a BufData
 func (bd *BufData) WriteObj(obj *DcmObj) {
-	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
-		bd.BigEndian = true
-	}
-
+//	bd.BigEndian = BigEndian
+// Si lo limpio elimino el meta!!
+//	bd.Ms.Clear()
 	for i := 0; i < obj.TagCount(); i++ {
 		tag := obj.GetTag(i)
 		bd.WriteTag(tag, obj.ExplicitVR)

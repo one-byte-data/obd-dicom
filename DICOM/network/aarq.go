@@ -112,7 +112,7 @@ type AAssociationRQ struct {
 	UserInfo UserInformation
 }
 
-func NewAAAssociationRQ() *AAssociationRQ {
+func NewAAssociationRQ() *AAssociationRQ {
 	aarq := &AAssociationRQ{}
 	aarq.ItemType = 0x01
 	aarq.Reserved1 = 0x00
@@ -122,7 +122,16 @@ func NewAAAssociationRQ() *AAssociationRQ {
 	aarq.AppContext.Reserved1 = 0x00
 	aarq.AppContext.UIDName = "1.2.840.10008.3.1.1.1"
 	aarq.AppContext.Length = uint16(len(aarq.AppContext.UIDName))
+	aarq.UserInfo = *NewUserInformation()
 	return aarq
+}
+
+func (aarq *AAssociationRQ) SetCallingApTitle(AET string) {
+	copy(aarq.CallingApTitle[:], AET)
+}
+
+func (aarq *AAssociationRQ) SetCalledApTitle(AET string) {
+	copy(aarq.CalledApTitle[:], AET)
 }
 
 func (aarq *AAssociationRQ) Size() uint32 {
@@ -183,6 +192,7 @@ func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
 		TempByte := ReadByte(conn)
 		switch(TempByte){
 		case 0x10:
+			aarq.AppContext.ItemType=TempByte
 			aarq.AppContext.ReadDynamic(conn)
 			Count = Count-int(aarq.AppContext.Size())
 			break
@@ -193,6 +203,7 @@ func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
 			aarq.PresContexts=append(aarq.PresContexts, *PresContext)
 			break
 		case 0x50: // User Information
+			aarq.UserInfo.ItemType=TempByte
 			aarq.UserInfo.ReadDynamic(conn)
 			Count = Count - int(aarq.UserInfo.Size())
 		break

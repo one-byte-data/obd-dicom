@@ -14,7 +14,7 @@ type MaximumSubLength struct {
 
 func NewMaximumSubLength() *MaximumSubLength {
 	maxim := &MaximumSubLength{}
-	maxim.ItemType = 0x53
+	maxim.ItemType = 0x51
 	maxim.Length = 4
 	return maxim
 }

@@ -21,7 +21,7 @@ type Sites struct {
 	EmailDomain  string
 }
 
-func mongo() {
+func mongotest() {
 	clientOpts := options.Client().ApplyURI("mongodb://localhost:27017")
 	client, err := mongo.Connect(context.TODO(), clientOpts)
 	if err != nil {

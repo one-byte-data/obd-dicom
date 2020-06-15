@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"rafael/DICOM/media"
-	"rafael/uuids"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uuids"
 )
 
 func GetFolderFiles() []os.FileInfo {

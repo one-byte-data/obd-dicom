@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"rafael/HL7Broker/hl7"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/test/HL7Broker/hl7"
 	"strings"
 )
 

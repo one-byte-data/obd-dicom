@@ -2,8 +2,8 @@ package hl7
 
 // HL7 parser class
 import (
-	"rafael/DICOM/media"
-	"rafael/uuids"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uuids"
 	"strings"
 )
 

@@ -84,7 +84,7 @@ func StoreSCU(LAET string, RAET string, RIP string, RPort string, FileName strin
 		SOPClassUID:=DDO.GetString(0x08, 0x16)
 		if len(SOPClassUID) > 0 {
 			pdu:=network.NewPDUService()
-			if(OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout)) {
+			if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
 				if(WriteStoreRQ(*pdu, DDO, SOPClassUID)==0x00){
 					if(dimsec.CStoreReadRSP(*pdu)==0x00) {
 						flag=true
@@ -97,3 +97,22 @@ func StoreSCU(LAET string, RAET string, RIP string, RPort string, FileName strin
 	return flag
 }
 
+func FindSCU(LAET string, RAET string, RIP string, RPort string, Query media.DcmObj, Results []media.DcmObj, timeout int) bool{
+	flag:=false
+	status:=0
+	var DDO media.DcmObj
+	SOPClassUID:="1.2.840.10008.5.1.4.1.2.2.1"
+
+	pdu:=network.NewPDUService()
+	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
+		if(CFindWriteRQ(pdu, Query, SOPClassUID)){
+			for(status!=-1){
+				status=CFindReadRSP(pdu, &DDO)
+				if status!=-1 {
+					Results = append(Results, DDO)
+				}
+			}
+		}
+	}
+	return flag
+}

@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
 func handleConnection(conn net.Conn) {
-	pdu:= *network.NewPDUService()
+	pdu := *network.NewPDUService()
 	if pdu.Multiplex(conn) {
 		var DCO media.DcmObj
 		flag := true
@@ -21,10 +22,43 @@ func handleConnection(conn net.Conn) {
 				if dimsec.CStoreReadRQ(pdu, DCO, &DDO) {
 					if dimsec.CStoreWriteRSP(pdu, DCO, 0) {
 						DDO.Write("test.dcm")
-						flag=true
+						flag = true
 					} else {
-						flag=false
+						flag = false
 					}
+				}
+				break
+			case 0x20: // C-Find
+				var DDO media.DcmObj
+				if dimsec.CFindReadRQ(pdu, DCO, &DDO) {
+					QueryLevel := DDO.GetString(0x08, 0x52) // Get Query Level
+					var Out media.DcmObj                    // This is for the result
+					if QueryLevel == "STUDY" {
+						// Process Study Query
+					}
+					if QueryLevel == "SERIES" {
+						// Process Series Query
+					}
+					if QueryLevel == "IMAGE" {
+						// Process Image Query
+					}
+					dimsec.CFindWriteRSP(pdu, DCO, Out, 0x00)
+				}
+				break
+			case 0x21: // C-Move
+				var DDO media.DcmObj
+				if dimsec.CMoveReadRQ(pdu, DCO, &DDO) {
+					MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
+					if MoveLevel == "STUDY" {
+						// Process Study Move
+					}
+					if MoveLevel == "SERIES" {
+						// Process Series Move
+					}
+					if MoveLevel == "IMAGE" {
+						// Process Image Move
+					}
+					dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
 				}
 				break
 			case 0x30: // C-Echo
@@ -38,8 +72,8 @@ func handleConnection(conn net.Conn) {
 				}
 				break
 			default:
-				fmt.Println("ERROR, service not implemented: "+string(command))
-				flag=false
+				fmt.Println("ERROR, service not implemented: " + string(command))
+				flag = false
 			}
 		}
 	}

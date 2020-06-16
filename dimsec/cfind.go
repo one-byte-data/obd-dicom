@@ -93,7 +93,7 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 		valor := DCO.GetUShort(0x00, 0x0110)
 		DCOR.WriteUint16(0x00, 0x0120, "US", valor)    //Message ID
 		DCOR.WriteUint16(0x00, 0x0800, "US", leDSType) //Data Set type
-		DCOR.WriteUint16(0x00, 0x0900, "US", status)   //Data Set type
+		DCOR.WriteUint16(0x00, 0x0900, "US", status)   // Status
 		flag = pdu.Write(DCOR, SOPClassUID, 0x01)
 		if flag && (DDO.TagCount() > 0) {
 			flag = pdu.Write(DDO, SOPClassUID, 0x00)

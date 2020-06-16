@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -123,7 +124,7 @@ func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) bool {
 	scpscu.Reserved1 = ReadByte(conn)
 	scpscu.Length = ReadUint16(conn)
 	tl := ReadUint16(conn)
-	tuid:=make([]byte, tl)
+	tuid := make([]byte, tl)
 	conn.Read(tuid)
 	scpscu.uid = string(tuid)
 	scpscu.SCURole = ReadByte(conn)

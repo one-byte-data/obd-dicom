@@ -4,10 +4,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uuids"
 )
 
+// GetFolderFiles get files in a folder
 func GetFolderFiles() []os.FileInfo {
 	pathS, err := os.Getwd()
 	if err != nil {
@@ -21,6 +23,7 @@ func GetFolderFiles() []os.FileInfo {
 	return files
 }
 
+// ConvertPDF convert a DICOM to PDF file
 func ConvertPDF(DCMFile string, PDFFile string) bool {
 	flag := false
 	var obj media.DcmObj

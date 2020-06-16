@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -59,52 +60,52 @@ func (pd *PDataTF) ReadDynamic(conn net.Conn) bool {
 }
 
 func (pd *PDataTF) Write(conn net.Conn) bool {
-TotalSize := uint32(pd.Buffer.Ms.Size)
-pd.Buffer.Ms.Position=0
-if pd.BlockSize==0 {
-	pd.BlockSize=4096
+	TotalSize := uint32(pd.Buffer.Ms.Size)
+	pd.Buffer.Ms.Position = 0
+	if pd.BlockSize == 0 {
+		pd.BlockSize = 4096
 	}
-SentSize:= uint32(0)
-TLength := pd.Length
-for (SentSize < TotalSize){
-	if (TotalSize-SentSize) < pd.BlockSize {
-		pd.BlockSize = TotalSize-SentSize
+	SentSize := uint32(0)
+	TLength := pd.Length
+	for SentSize < TotalSize {
+		if (TotalSize - SentSize) < pd.BlockSize {
+			pd.BlockSize = TotalSize - SentSize
 		}
-	if (pd.BlockSize+SentSize) == TotalSize {
-			pd.MsgHeader=pd.MsgHeader | 0x02
-		} else{
-			pd.MsgHeader=pd.MsgHeader & 0x01
+		if (pd.BlockSize + SentSize) == TotalSize {
+			pd.MsgHeader = pd.MsgHeader | 0x02
+		} else {
+			pd.MsgHeader = pd.MsgHeader & 0x01
 		}
-	pd.pdv.PresentationContextID = pd.PresentationContextID
-	pd.pdv.MsgHeader = pd.MsgHeader
-	pd.pdv.Length = pd.BlockSize+2
-	pd.Length = pd.pdv.Length+4
-	pd.ItemType = 0x04
-	pd.Reserved1=0
-	var bd media.BufData
+		pd.pdv.PresentationContextID = pd.PresentationContextID
+		pd.pdv.MsgHeader = pd.MsgHeader
+		pd.pdv.Length = pd.BlockSize + 2
+		pd.Length = pd.pdv.Length + 4
+		pd.ItemType = 0x04
+		pd.Reserved1 = 0
+		var bd media.BufData
 
-	bd.BigEndian = true
-	bd.WriteByte(pd.ItemType)
-	bd.WriteByte(pd.Reserved1)
-	bd.WriteUint32(pd.Length)
-	bd.WriteUint32(pd.pdv.Length)
-	bd.WriteByte(pd.pdv.PresentationContextID)
-	bd.WriteByte(pd.MsgHeader)
-	if bd.Send(conn) {
-		buff := make([]byte, pd.BlockSize)
-		pd.Buffer.Ms.Read(buff, int(pd.BlockSize))
-		n, err:=conn.Write(buff)
-		if err != nil {
+		bd.BigEndian = true
+		bd.WriteByte(pd.ItemType)
+		bd.WriteByte(pd.Reserved1)
+		bd.WriteUint32(pd.Length)
+		bd.WriteUint32(pd.pdv.Length)
+		bd.WriteByte(pd.pdv.PresentationContextID)
+		bd.WriteByte(pd.MsgHeader)
+		if bd.Send(conn) {
+			buff := make([]byte, pd.BlockSize)
+			pd.Buffer.Ms.Read(buff, int(pd.BlockSize))
+			n, err := conn.Write(buff)
+			if err != nil {
+				return false
+			}
+			if n != int(pd.BlockSize) {
+				return false
+			}
+		} else {
 			return false
 		}
-		if n!=int(pd.BlockSize) {
-			return false
-		}
-	} else {
-		return false
-		}
-	SentSize += pd.BlockSize
+		SentSize += pd.BlockSize
 	}
-	pd.Length=TLength
+	pd.Length = TLength
 	return true
 }

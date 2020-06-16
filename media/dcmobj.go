@@ -305,7 +305,7 @@ func (obj *DcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 	size := uint32(mstream.Size)
 	if size%2 == 1 {
 		size++
-		mstream.data=append(mstream.data, 0)
+		mstream.data = append(mstream.data, 0)
 	}
 	obj.WriteString(0x42, 0x10, "ST", FileName)
 	obj.Add(DcmTag{0x42, 0x11, size, "OB", mstream.data, obj.BigEndian})

@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
 func handleConnection(conn net.Conn) {
-	pdu:= *network.NewPDUService()
+	pdu := *network.NewPDUService()
 	if pdu.Multiplex(conn) {
 		var DCO media.DcmObj
 		flag := true
@@ -21,9 +22,9 @@ func handleConnection(conn net.Conn) {
 				if dimsec.CStoreReadRQ(pdu, DCO, &DDO) {
 					if dimsec.CStoreWriteRSP(pdu, DCO, 0) {
 						DDO.Write("test.dcm")
-						flag=true
+						flag = true
 					} else {
-						flag=false
+						flag = false
 					}
 				}
 				break
@@ -38,8 +39,8 @@ func handleConnection(conn net.Conn) {
 				}
 				break
 			default:
-				fmt.Println("ERROR, service not implemented: "+string(command))
-				flag=false
+				fmt.Println("ERROR, service not implemented: " + string(command))
+				flag = false
 			}
 		}
 	}

@@ -1,20 +1,23 @@
 package network
 
-import(
-	 "net"
-	 "git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+import (
+	"net"
+
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// AAssociationRJ association reject struct
 type AAssociationRJ struct {
-	ItemType        byte // 0x03
-	Reserved1       byte
-	Length          uint32
+	ItemType  byte // 0x03
+	Reserved1 byte
+	Length    uint32
 	Reserved2 byte
-	Result byte
-	Source byte
-	Reason byte
+	Result    byte
+	Source    byte
+	Reason    byte
 }
 
+// NewAAssociationRJ creates an association reject
 func NewAAssociationRJ() *AAssociationRJ {
 	aarj := &AAssociationRJ{}
 	aarj.ItemType = 0x03
@@ -22,12 +25,13 @@ func NewAAssociationRJ() *AAssociationRJ {
 	aarj.Reserved2 = 0x00
 	aarj.Result = 0x01
 	aarj.Source = 0x03
-	aarj.Reason =1
+	aarj.Reason = 1
 	return aarj
 }
 
+// Size gets the size
 func (aarj *AAssociationRJ) Size() uint32 {
-	aarj.Length = 4 
+	aarj.Length = 4
 	return aarj.Length + 6
 }
 
@@ -45,32 +49,35 @@ func (aarj *AAssociationRJ) Write(conn net.Conn) bool {
 	bd.WriteByte(aarj.Source)
 	bd.WriteByte(aarj.Reason)
 
-	flag=bd.Send(conn)
+	flag = bd.Send(conn)
 	return flag
 }
 
 func (aarj *AAssociationRJ) Read(conn net.Conn) bool {
-	aarj.ItemType=ReadByte(conn)
+	aarj.ItemType = ReadByte(conn)
 	return aarj.ReadDynamic(conn)
 }
 
+// ReadDynamic ReadDynamic
 func (aarj *AAssociationRJ) ReadDynamic(conn net.Conn) bool {
-	aarj.Reserved1=ReadByte(conn)
-	aarj.Length=ReadUint32(conn)
-	aarj.Reserved2=ReadByte(conn)
-	aarj.Result=ReadByte(conn)
-	aarj.Source=ReadByte(conn)
-	aarj.Reason=ReadByte(conn)
+	aarj.Reserved1 = ReadByte(conn)
+	aarj.Length = ReadUint32(conn)
+	aarj.Reserved2 = ReadByte(conn)
+	aarj.Result = ReadByte(conn)
+	aarj.Source = ReadByte(conn)
+	aarj.Reason = ReadByte(conn)
 	return true
 }
 
+// AReleaseRQ AReleaseRQ
 type AReleaseRQ struct {
-	ItemType        byte // 0x05
-	Reserved1       byte
-	Length          uint32
+	ItemType  byte // 0x05
+	Reserved1 byte
+	Length    uint32
 	Reserved2 uint32
 }
 
+// NewAReleaseRQ NewAReleaseRQ
 func NewAReleaseRQ() *AReleaseRQ {
 	arrq := &AReleaseRQ{}
 	arrq.ItemType = 0x05
@@ -79,8 +86,9 @@ func NewAReleaseRQ() *AReleaseRQ {
 	return arrq
 }
 
+// Size gets the size
 func (arrq *AReleaseRQ) Size() uint32 {
-	arrq.Length = 4 
+	arrq.Length = 4
 	return arrq.Length + 6
 }
 
@@ -95,26 +103,27 @@ func (arrq *AReleaseRQ) Write(conn net.Conn) bool {
 	bd.WriteUint32(arrq.Length)
 	bd.WriteUint32(arrq.Reserved2)
 
-	flag=bd.Send(conn)
+	flag = bd.Send(conn)
 	return flag
 }
 
 func (arrq *AReleaseRQ) Read(conn net.Conn) bool {
-	arrq.ItemType=ReadByte(conn)
+	arrq.ItemType = ReadByte(conn)
 	return arrq.ReadDynamic(conn)
 }
 
+// ReadDynamic ReadDynamic
 func (arrq *AReleaseRQ) ReadDynamic(conn net.Conn) bool {
-	arrq.Reserved1=ReadByte(conn)
-	arrq.Length=ReadUint32(conn)
-	arrq.Reserved2=ReadUint32(conn)
+	arrq.Reserved1 = ReadByte(conn)
+	arrq.Length = ReadUint32(conn)
+	arrq.Reserved2 = ReadUint32(conn)
 	return true
 }
 
 type AReleaseRP struct {
-	ItemType        byte // 0x06
-	Reserved1       byte
-	Length          uint32
+	ItemType  byte // 0x06
+	Reserved1 byte
+	Length    uint32
 	Reserved2 uint32
 }
 
@@ -126,8 +135,9 @@ func NewAReleaseRP() *AReleaseRP {
 	return arrp
 }
 
+// Size gets the size
 func (arrp *AReleaseRP) Size() uint32 {
-	arrp.Length = 4 
+	arrp.Length = 4
 	return arrp.Length + 6
 }
 
@@ -142,30 +152,31 @@ func (arrp *AReleaseRP) Write(conn net.Conn) bool {
 	bd.WriteUint32(arrp.Length)
 	bd.WriteUint32(arrp.Reserved2)
 
-	flag=bd.Send(conn)
+	flag = bd.Send(conn)
 	return flag
 }
 
 func (arrp *AReleaseRP) Read(conn net.Conn) bool {
-	arrp.ItemType=ReadByte(conn)
+	arrp.ItemType = ReadByte(conn)
 	return arrp.ReadDynamic(conn)
 }
 
+// ReadDynamic ReadDynamic
 func (arrp *AReleaseRP) ReadDynamic(conn net.Conn) bool {
-	arrp.Reserved1=ReadByte(conn)
-	arrp.Length=ReadUint32(conn)
-	arrp.Reserved2=ReadUint32(conn)
+	arrp.Reserved1 = ReadByte(conn)
+	arrp.Length = ReadUint32(conn)
+	arrp.Reserved2 = ReadUint32(conn)
 	return true
 }
 
 type AAbortRQ struct {
-	ItemType        byte // 0x07
-	Reserved1       byte
-	Length          uint32
+	ItemType  byte // 0x07
+	Reserved1 byte
+	Length    uint32
 	Reserved2 byte
 	Reserved3 byte
-	Source byte
-	Reason byte
+	Source    byte
+	Reason    byte
 }
 
 func NewAAbortRQ() *AAbortRQ {
@@ -175,12 +186,13 @@ func NewAAbortRQ() *AAbortRQ {
 	aarq.Reserved2 = 0x00
 	aarq.Reserved3 = 0x01
 	aarq.Source = 0x03
-	aarq.Reason =0x01
+	aarq.Reason = 0x01
 	return aarq
 }
 
+// Size gets the size
 func (aarq *AAbortRQ) Size() uint32 {
-	aarq.Length = 4 
+	aarq.Length = 4
 	return aarq.Length + 6
 }
 
@@ -198,21 +210,21 @@ func (aarq *AAbortRQ) Write(conn net.Conn) bool {
 	bd.WriteByte(aarq.Source)
 	bd.WriteByte(aarq.Reason)
 
-	flag=bd.Send(conn)
+	flag = bd.Send(conn)
 	return flag
 }
 
 func (aarq *AAbortRQ) Read(conn net.Conn) bool {
-	aarq.ItemType=ReadByte(conn)
+	aarq.ItemType = ReadByte(conn)
 	return aarq.ReadDynamic(conn)
 }
 
 func (aarq *AAbortRQ) ReadDynamic(conn net.Conn) bool {
-	aarq.Reserved1=ReadByte(conn)
-	aarq.Length=ReadUint32(conn)
-	aarq.Reserved2=ReadByte(conn)
-	aarq.Reserved3=ReadByte(conn)
-	aarq.Source=ReadByte(conn)
-	aarq.Reason=ReadByte(conn)
+	aarq.Reserved1 = ReadByte(conn)
+	aarq.Length = ReadUint32(conn)
+	aarq.Reserved2 = ReadByte(conn)
+	aarq.Reserved3 = ReadByte(conn)
+	aarq.Source = ReadByte(conn)
+	aarq.Reason = ReadByte(conn)
 	return true
 }

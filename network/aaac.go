@@ -3,9 +3,11 @@ package network
 import (
 	"encoding/binary"
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// ReadByte reads a byte
 func ReadByte(conn net.Conn) byte {
 	c := make([]byte, 1)
 	_, err := conn.Read(c)
@@ -15,6 +17,7 @@ func ReadByte(conn net.Conn) byte {
 	return c[0]
 }
 
+// ReadUint16 read unsigned int
 func ReadUint16(conn net.Conn) uint16 {
 	var val uint16
 	c := make([]byte, 2)
@@ -26,6 +29,7 @@ func ReadUint16(conn net.Conn) uint16 {
 	return val
 }
 
+// ReadUint32 read unsigned int
 func ReadUint32(conn net.Conn) uint32 {
 	var val uint32
 	c := make([]byte, 4)
@@ -37,6 +41,7 @@ func ReadUint32(conn net.Conn) uint32 {
 	return val
 }
 
+// PresentationContextAccept accepted presentation context
 type PresentationContextAccept struct {
 	ItemType              byte //0x21
 	Reserved1             byte
@@ -49,6 +54,7 @@ type PresentationContextAccept struct {
 	TrnSyntax             UIDitem
 }
 
+// NewPresentationContextAccept creates a PresentationContextAccept
 func NewPresentationContextAccept() *PresentationContextAccept {
 	pc := &PresentationContextAccept{}
 	pc.ItemType = 0x21
@@ -57,12 +63,14 @@ func NewPresentationContextAccept() *PresentationContextAccept {
 	return pc
 }
 
+// Size gets the size of presentation
 func (pc *PresentationContextAccept) Size() uint16 {
 	pc.Length = 4
 	pc.Length += pc.TrnSyntax.Size()
 	return pc.Length + 4
 }
 
+// SetAbstractSyntax sets abstrct syntax
 func (pc *PresentationContextAccept) SetAbstractSyntax(Abst string) {
 	pc.AbsSyntax.ItemType = 0x30
 	pc.AbsSyntax.Reserved1 = 0x00
@@ -70,6 +78,7 @@ func (pc *PresentationContextAccept) SetAbstractSyntax(Abst string) {
 	pc.AbsSyntax.Length = uint16(len(Abst))
 }
 
+// SetTransferSyntax sets the transfer syntax
 func (pc *PresentationContextAccept) SetTransferSyntax(Tran string) {
 	pc.TrnSyntax.ItemType = 0x40
 	pc.TrnSyntax.Reserved1 = 0
@@ -100,6 +109,7 @@ func (pc *PresentationContextAccept) Read(conn net.Conn) bool {
 	return pc.ReadDynamic(conn)
 }
 
+// ReadDynamic ReadDynamic
 func (pc *PresentationContextAccept) ReadDynamic(conn net.Conn) bool {
 	pc.Reserved1 = ReadByte(conn)
 	pc.Length = ReadUint16(conn)
@@ -111,6 +121,7 @@ func (pc *PresentationContextAccept) ReadDynamic(conn net.Conn) bool {
 	return true
 }
 
+// AAssociationAC AAssociationAC
 type AAssociationAC struct {
 	ItemType           byte // 0x02
 	Reserved1          byte
@@ -125,6 +136,7 @@ type AAssociationAC struct {
 	UserInfo           UserInformation
 }
 
+// NewAAssociationAC NewAAssociationAC
 func NewAAssociationAC() *AAssociationAC {
 	aaac := &AAssociationAC{}
 	aaac.ItemType = 0x02
@@ -138,6 +150,7 @@ func NewAAssociationAC() *AAssociationAC {
 	return aaac
 }
 
+// Size size of association
 func (aaac *AAssociationAC) Size() uint32 {
 	aaac.Length = 4 + 16 + 16 + 32
 	aaac.Length += uint32(aaac.AppContext.Size())
@@ -150,6 +163,7 @@ func (aaac *AAssociationAC) Size() uint32 {
 	return aaac.Length + 6
 }
 
+// SetUserInformation SetUserInformation
 func (aaac *AAssociationAC) SetUserInformation(UserInfo UserInformation) {
 	aaac.UserInfo = UserInfo
 }
@@ -185,6 +199,7 @@ func (aaac *AAssociationAC) Read(conn net.Conn) bool {
 	return aaac.ReadDynamic(conn)
 }
 
+// ReadDynamic ReadDynamic
 func (aaac *AAssociationAC) ReadDynamic(conn net.Conn) bool {
 	aaac.Reserved1 = ReadByte(conn)
 	aaac.Length = ReadUint32(conn)

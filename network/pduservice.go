@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -97,14 +98,14 @@ func (pdu *PDUService) InterogateAAssociateRQ(conn net.Conn) bool {
 	if len(pdu.AcceptedPresentationContexts) > 0 {
 		MaxSubLength := *NewMaximumSubLength()
 		UserInfo := *NewUserInformation()
-		
+
 		MaxSubLength.MaximumLength = 16384
 		UserInfo.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 		UserInfo.SetImpVersionName("One-Byte-Data")
 		UserInfo.MaxSubLength = MaxSubLength
 		pdu.AssocAC.SetUserInformation(UserInfo)
 		return pdu.AssocAC.Write(conn)
-		
+
 	}
 	pdu.AssocAC.Write(conn)
 	return false
@@ -155,13 +156,13 @@ func (pdu *PDUService) ParseRawVRIntoDCM(DCO *media.DcmObj) bool {
 		return false
 	}
 	DCO.TransferSyntax = TrnSyntax
-	if(TrnSyntax=="1.2.840.10008.1.2.1") {
-		DCO.ExplicitVR=true
+	if TrnSyntax == "1.2.840.10008.1.2.1" {
+		DCO.ExplicitVR = true
 	}
-	if(TrnSyntax=="1.2.840.10008.1.2.2") {
-		DCO.BigEndian=true
+	if TrnSyntax == "1.2.840.10008.1.2.2" {
+		DCO.BigEndian = true
 	}
-	pdu.Pdata.Buffer.Ms.Position=0
+	pdu.Pdata.Buffer.Ms.Position = 0
 	return pdu.Pdata.Buffer.ReadObj(DCO)
 }
 
@@ -281,7 +282,7 @@ func (pdu *PDUService) Close() {
 }
 
 func (pdu *PDUService) Multiplex(conn net.Conn) bool {
-	pdu.conn=conn
+	pdu.conn = conn
 	if pdu.AssocRQ.Read(pdu.conn) {
 		if pdu.InterogateAAssociateRQ(pdu.conn) {
 			return true

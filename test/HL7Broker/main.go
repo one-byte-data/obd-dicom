@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/test/HL7Broker/hl7"
 	"strings"
+
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/test/HL7Broker/hl7"
 )
 
 const (

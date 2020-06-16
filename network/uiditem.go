@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -40,10 +41,10 @@ func (uid *UIDitem) Read(conn net.Conn) bool {
 }
 
 func (uid *UIDitem) ReadDynamic(conn net.Conn) bool {
-	uid.Reserved1 =ReadByte(conn)
-	uid.Length =ReadUint16(conn)
-	buffer:=make([]byte, uid.Length)
+	uid.Reserved1 = ReadByte(conn)
+	uid.Length = ReadUint16(conn)
+	buffer := make([]byte, uid.Length)
 	conn.Read(buffer)
-	uid.UIDName=string(buffer)
-	return true;
+	uid.UIDName = string(buffer)
+	return true
 }

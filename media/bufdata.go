@@ -19,8 +19,8 @@ func (bd *BufData) setPosition(pos int) {
 	bd.Ms.Position = pos
 }
 
-func (bd *BufData) ReadByte() byte{
-	c:= make([]byte, 1)
+func (bd *BufData) ReadByte() byte {
+	c := make([]byte, 1)
 	bd.Ms.Read(c, 1)
 	return c[0]
 }
@@ -235,9 +235,9 @@ func (bd *BufData) ReadObj(obj *DcmObj) bool {
 
 // WriteObj - Write a DICOM Object to a BufData
 func (bd *BufData) WriteObj(obj *DcmObj) {
-//	bd.BigEndian = BigEndian
-// Si lo limpio elimino el meta!!
-//	bd.Ms.Clear()
+	//	bd.BigEndian = BigEndian
+	// Si lo limpio elimino el meta!!
+	//	bd.Ms.Clear()
 	for i := 0; i < obj.TagCount(); i++ {
 		tag := obj.GetTag(i)
 		bd.WriteTag(tag, obj.ExplicitVR)

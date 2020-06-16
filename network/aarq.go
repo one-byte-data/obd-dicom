@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -70,29 +71,29 @@ func (pc *PresentationContext) Write(conn net.Conn) bool {
 }
 
 func (pc *PresentationContext) Read(conn net.Conn) bool {
-	pc.ItemType=ReadByte(conn)
-	return pc.ReadDynamic(conn);
+	pc.ItemType = ReadByte(conn)
+	return pc.ReadDynamic(conn)
 }
 
 func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
-	pc.Reserved1=ReadByte(conn)
+	pc.Reserved1 = ReadByte(conn)
 	pc.Length = ReadUint16(conn)
-	pc.PresentationContextID=ReadByte(conn)
-	pc.Reserved2=ReadByte(conn)
-	pc.Reserved3=ReadByte(conn)
-	pc.Reserved4=ReadByte(conn)
+	pc.PresentationContextID = ReadByte(conn)
+	pc.Reserved2 = ReadByte(conn)
+	pc.Reserved3 = ReadByte(conn)
+	pc.Reserved4 = ReadByte(conn)
 
 	pc.AbsSyntax.Read(conn)
-	Count := pc.Length-4-pc.AbsSyntax.Size()
+	Count := pc.Length - 4 - pc.AbsSyntax.Size()
 	for Count > 0 {
 		var TrnSyntax UIDitem
 		TrnSyntax.Read(conn)
-		Count = Count-TrnSyntax.Size()
-		if(TrnSyntax.Size()>0){
-			pc.TrnSyntaxs=append(pc.TrnSyntaxs, TrnSyntax)
+		Count = Count - TrnSyntax.Size()
+		if TrnSyntax.Size() > 0 {
+			pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
 		}
 	}
-	if(Count==0) {
+	if Count == 0 {
 		return true
 	}
 	return false
@@ -109,7 +110,7 @@ type AAssociationRQ struct {
 	Reserved3       [32]byte
 	AppContext      UIDitem
 	PresContexts    []PresentationContext
-	UserInfo UserInformation
+	UserInfo        UserInformation
 }
 
 func NewAAssociationRQ() *AAssociationRQ {
@@ -173,45 +174,45 @@ func (aarq *AAssociationRQ) Write(conn net.Conn) bool {
 }
 
 func (aarq *AAssociationRQ) Read(conn net.Conn) bool {
-	aarq.ItemType=ReadByte(conn)
+	aarq.ItemType = ReadByte(conn)
 	return aarq.ReadDynamic(conn)
 }
 
 func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
-	aarq.Reserved1=ReadByte(conn)
-	aarq.Length=ReadUint32(conn)
-	aarq.ProtocolVersion=ReadUint16(conn)
-	aarq.Reserved2=ReadUint16(conn)
+	aarq.Reserved1 = ReadByte(conn)
+	aarq.Length = ReadUint32(conn)
+	aarq.ProtocolVersion = ReadUint16(conn)
+	aarq.Reserved2 = ReadUint16(conn)
 	conn.Read(aarq.CalledApTitle[:])
 	conn.Read(aarq.CallingApTitle[:])
 	conn.Read(aarq.Reserved3[:])
 
 	var Count int
-	Count= int(aarq.Length-4-16-16-32)
-	for(Count>0){
+	Count = int(aarq.Length - 4 - 16 - 16 - 32)
+	for Count > 0 {
 		TempByte := ReadByte(conn)
-		switch(TempByte){
+		switch TempByte {
 		case 0x10:
-			aarq.AppContext.ItemType=TempByte
+			aarq.AppContext.ItemType = TempByte
 			aarq.AppContext.ReadDynamic(conn)
-			Count = Count-int(aarq.AppContext.Size())
+			Count = Count - int(aarq.AppContext.Size())
 			break
 		case 0x20:
 			PresContext := NewPresentationContext()
 			PresContext.ReadDynamic(conn)
-			Count = Count-int(PresContext.Size())
-			aarq.PresContexts=append(aarq.PresContexts, *PresContext)
+			Count = Count - int(PresContext.Size())
+			aarq.PresContexts = append(aarq.PresContexts, *PresContext)
 			break
 		case 0x50: // User Information
-			aarq.UserInfo.ItemType=TempByte
+			aarq.UserInfo.ItemType = TempByte
 			aarq.UserInfo.ReadDynamic(conn)
 			Count = Count - int(aarq.UserInfo.Size())
-		break
+			break
 		default:
-				Count=-1
+			Count = -1
 		}
 	}
-	if(Count==0){
+	if Count == 0 {
 		return true
 	}
 	return (false)

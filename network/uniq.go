@@ -15,7 +15,7 @@ func Uniq8() byte {
 
 func Uniq16() uint16 {
 	uniqid++
-	return uint16(uniqid&0xffff)
+	return uint16(uniqid & 0xffff)
 }
 
 func Uniq8odd() byte {

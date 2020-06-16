@@ -97,22 +97,40 @@ func StoreSCU(LAET string, RAET string, RIP string, RPort string, FileName strin
 	return flag
 }
 
-func FindSCU(LAET string, RAET string, RIP string, RPort string, Query media.DcmObj, Results []media.DcmObj, timeout int) bool {
-	flag := false
-	status := 0
+func FindSCU(LAET string, RAET string, RIP string, RPort string, Query media.DcmObj, Results *[]media.DcmObj, timeout int) int {
+	status := 1
 	var DDO media.DcmObj
 	SOPClassUID := "1.2.840.10008.5.1.4.1.2.2.1"
 
 	pdu := network.NewPDUService()
 	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
-		if CFindWriteRQ(pdu, Query, SOPClassUID) {
-			for status != -1 {
-				status = CFindReadRSP(pdu, &DDO)
+		if dimsec.CFindWriteRQ(*pdu, Query, SOPClassUID) {
+			for (status != -1) && (status!=0) {
+				status = dimsec.CFindReadRSP(*pdu, &DDO)
 				if status != -1 {
-					Results = append(Results, DDO)
+					*Results = append(*Results, DDO)
 				}
 			}
 		}
 	}
-	return flag
+	pdu.Close()
+	return status
+}
+
+func MoveSCU(LAET string, RAET string, RIP string, RPort string, destAET string, Query media.DcmObj, timeout int) int {
+	var pending int
+	status := 0xFF00
+	SOPClassUID := "1.2.840.10008.5.1.4.1.2.2.2"
+
+	pdu := network.NewPDUService()
+	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
+		if dimsec.CMoveWriteRQ(*pdu, Query, SOPClassUID, destAET) {
+			var DDO media.DcmObj
+			for status == 0xFF00 {
+				status = dimsec.CMoveReadRSP(*pdu, &DDO, &pending)
+			}
+		}
+	}
+	pdu.Close()
+	return status
 }

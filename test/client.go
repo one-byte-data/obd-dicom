@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
-	
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/services"
 )

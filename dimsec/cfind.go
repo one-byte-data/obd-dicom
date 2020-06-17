@@ -5,6 +5,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
+// CFindReadRQ CFind request read
 func CFindReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bool {
 	if DCO.TagCount() != 0 {
 		// Is this a C-Find?
@@ -18,6 +19,7 @@ func CFindReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bo
 	return false
 }
 
+// CFindWriteRQ CFind request write
 func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) bool {
 	var DCO media.DcmObj
 	var size uint32
@@ -43,6 +45,7 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 	return false
 }
 
+// CFindReadRSP CFind response read
 func CFindReadRSP(pdu network.PDUService, DDO *media.DcmObj) int {
 	var DCO media.DcmObj
 	status := -1
@@ -65,6 +68,7 @@ func CFindReadRSP(pdu network.PDUService, DDO *media.DcmObj) int {
 	return status
 }
 
+// CFindWriteRSP CFind response write
 func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, status uint16) bool {
 	var DCOR media.DcmObj
 	var size uint32

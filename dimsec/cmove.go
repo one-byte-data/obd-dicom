@@ -5,6 +5,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
+// CMoveReadRQ CMove request read
 func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bool {
 	if DCO.TagCount() != 0 {
 		// Is this a C-Move?
@@ -18,6 +19,7 @@ func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bo
 	return false
 }
 
+// CMoveWriteRQ CMove request write
 func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, AETDest string) bool {
 	var DCO media.DcmObj
 	var size uint32
@@ -49,6 +51,7 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 	return false
 }
 
+// CMoveReadRSP CMove response read
 func CMoveReadRSP(pdu network.PDUService, DDO *media.DcmObj, pending *int) int {
 	var DCO media.DcmObj
 	status := -1
@@ -73,6 +76,7 @@ func CMoveReadRSP(pdu network.PDUService, DDO *media.DcmObj, pending *int) int {
 	return status
 }
 
+// CMoveWriteRSP CMove response write
 func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pending uint16) bool {
 	var DCOR media.DcmObj
 	var size uint32

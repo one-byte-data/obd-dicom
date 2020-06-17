@@ -90,6 +90,7 @@ func (ms *MemoryStream) SaveToFile(FileName string) bool {
 	return false
 }
 
+// Clear - Clears position
 func (ms *MemoryStream) Clear() {
 	ms.data = ms.data[:0]
 	ms.Position = 0

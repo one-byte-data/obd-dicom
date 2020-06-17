@@ -6,6 +6,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// PDUService - struct for PDUService
 type PDUService struct {
 	AcceptedPresentationContexts []PresentationContextAccept
 	conn                         net.Conn
@@ -18,19 +19,19 @@ type PDUService struct {
 	Pdata                        PDataTF
 }
 
+// NewPDUService - creates a pointer to PDUService
 func NewPDUService() *PDUService {
-	pdu := &PDUService{}
-
-	pdu.AssocRQ = *NewAAssociationRQ()
-	pdu.AssocAC = *NewAAssociationAC()
-	pdu.AssocRJ = *NewAAssociationRJ()
-	pdu.ReleaseRQ = *NewAReleaseRQ()
-	pdu.ReleaseRP = *NewAReleaseRP()
-	pdu.AbortRQ = *NewAAbortRQ()
-
-	return pdu
+	return &PDUService{
+		AssocRQ:   *NewAAssociationRQ(),
+		AssocAC:   *NewAAssociationAC(),
+		AssocRJ:   *NewAAssociationRJ(),
+		ReleaseRQ: *NewAReleaseRQ(),
+		ReleaseRP: *NewAReleaseRP(),
+		AbortRQ:   *NewAAbortRQ(),
+	}
 }
 
+// InterogateAAssociateAC - InterogateAAssociateAC
 func (pdu *PDUService) InterogateAAssociateAC() bool {
 	var PresentationContextID byte
 	flag := false
@@ -61,6 +62,7 @@ func (pdu *PDUService) InterogateAAssociateAC() bool {
 	return flag
 }
 
+// InterogateAAssociateRQ - InterogateAAssociateRQ
 func (pdu *PDUService) InterogateAAssociateRQ(conn net.Conn) bool {
 	pdu.AssocAC.CalledApTitle = pdu.AssocRQ.CalledApTitle
 	pdu.AssocAC.CallingApTitle = pdu.AssocRQ.CallingApTitle
@@ -111,6 +113,7 @@ func (pdu *PDUService) InterogateAAssociateRQ(conn net.Conn) bool {
 	return false
 }
 
+// ParseDCMIntoRaw - ParseDCMIntoRaw
 func (pdu *PDUService) ParseDCMIntoRaw(DCO media.DcmObj) bool {
 	pdu.Pdata.Buffer.WriteObj(&DCO)
 	return true
@@ -139,6 +142,7 @@ func (pdu *PDUService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) b
 	return pdu.Pdata.Write(pdu.conn)
 }
 
+// GetTransferSyntaxUID - Gets transfer syntax UID
 func (pdu *PDUService) GetTransferSyntaxUID(pcid byte) string {
 	for i := 0; i < len(pdu.AcceptedPresentationContexts); i++ {
 		pca := pdu.AcceptedPresentationContexts[i]
@@ -149,6 +153,7 @@ func (pdu *PDUService) GetTransferSyntaxUID(pcid byte) string {
 	return ""
 }
 
+// ParseRawVRIntoDCM - ParseRawVRIntoDCM
 func (pdu *PDUService) ParseRawVRIntoDCM(DCO *media.DcmObj) bool {
 
 	TrnSyntax := pdu.GetTransferSyntaxUID(pdu.Pdata.PresentationContextID)
@@ -189,18 +194,15 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return false
-			break
 		case 0x02: // A-Associate-AC, should not get here
 			pdu.AssocAC.Read(pdu.conn)
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return false
-			break
 		case 0x03: // A-Associate-RJ, should not get here
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return false
-			break
 		case 0x04: // P-Data-TF
 			pdu.Pdata.ReadDynamic(pdu.conn)
 			if pdu.Pdata.MsgStatus > 0 {
@@ -216,15 +218,12 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 			pdu.ReleaseRQ.ReadDynamic(pdu.conn)
 			pdu.ReleaseRP.Write(pdu.conn)
 			return false
-			break
 		case 0x06: // A-Release-RP
 			pdu.conn.Close()
 			return false
-			break
 		case 0x07: //A-Abort-RQ
 			pdu.conn.Close()
 			return false
-			break
 		default:
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
@@ -234,9 +233,11 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 	return false
 }
 
+// SetTimeout - SetTimeout
 func (pdu *PDUService) SetTimeout(timeout int) {
 }
 
+// Connect - Connect
 func (pdu *PDUService) Connect(IP string, Port string) bool {
 	conn, err := net.Dial("tcp", IP+":"+Port)
 	if err != nil {
@@ -258,13 +259,11 @@ func (pdu *PDUService) Connect(IP string, Port string) bool {
 				return false
 			}
 			return true
-			break
 		case 0x03:
 			// Error, Assoc. Rejected.
 			pdu.AssocRJ.ReadDynamic(pdu.conn)
 			pdu.conn.Close()
 			return false
-			break
 		default:
 			// Error, Corrupt Transmission
 			pdu.conn.Close()
@@ -275,20 +274,21 @@ func (pdu *PDUService) Connect(IP string, Port string) bool {
 	return false
 }
 
+// Close - close connection
 func (pdu *PDUService) Close() {
 	pdu.ReleaseRQ.Write(pdu.conn)
 	pdu.ReleaseRP.Read(pdu.conn)
 	pdu.conn.Close()
 }
 
+// Multiplex - Multiplex
 func (pdu *PDUService) Multiplex(conn net.Conn) bool {
 	pdu.conn = conn
 	if pdu.AssocRQ.Read(pdu.conn) {
 		if pdu.InterogateAAssociateRQ(pdu.conn) {
 			return true
-		} else {
-			conn.Close()
 		}
+		conn.Close()
 	}
 	return false
 }

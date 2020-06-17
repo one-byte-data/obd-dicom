@@ -19,14 +19,14 @@ type AAssociationRJ struct {
 
 // NewAAssociationRJ creates an association reject
 func NewAAssociationRJ() *AAssociationRJ {
-	aarj := &AAssociationRJ{}
-	aarj.ItemType = 0x03
-	aarj.Reserved1 = 0x00
-	aarj.Reserved2 = 0x00
-	aarj.Result = 0x01
-	aarj.Source = 0x03
-	aarj.Reason = 1
-	return aarj
+	return &AAssociationRJ{
+		ItemType:  0x03,
+		Reserved1: 0x00,
+		Reserved2: 0x00,
+		Result:    0x01,
+		Source:    0x03,
+		Reason:    1,
+	}
 }
 
 // Size gets the size
@@ -79,11 +79,11 @@ type AReleaseRQ struct {
 
 // NewAReleaseRQ NewAReleaseRQ
 func NewAReleaseRQ() *AReleaseRQ {
-	arrq := &AReleaseRQ{}
-	arrq.ItemType = 0x05
-	arrq.Reserved1 = 0x00
-	arrq.Reserved2 = 0x00
-	return arrq
+	return &AReleaseRQ{
+		ItemType:  0x05,
+		Reserved1: 0x00,
+		Reserved2: 0x00,
+	}
 }
 
 // Size gets the size
@@ -120,6 +120,7 @@ func (arrq *AReleaseRQ) ReadDynamic(conn net.Conn) bool {
 	return true
 }
 
+// AReleaseRP - AReleaseRP
 type AReleaseRP struct {
 	ItemType  byte // 0x06
 	Reserved1 byte
@@ -127,12 +128,13 @@ type AReleaseRP struct {
 	Reserved2 uint32
 }
 
+// NewAReleaseRP - NewAReleaseRP
 func NewAReleaseRP() *AReleaseRP {
-	arrp := &AReleaseRP{}
-	arrp.ItemType = 0x06
-	arrp.Reserved1 = 0x00
-	arrp.Reserved2 = 0x00
-	return arrp
+	return &AReleaseRP{
+		ItemType:  0x06,
+		Reserved1: 0x00,
+		Reserved2: 0x00,
+	}
 }
 
 // Size gets the size
@@ -169,6 +171,7 @@ func (arrp *AReleaseRP) ReadDynamic(conn net.Conn) bool {
 	return true
 }
 
+// AAbortRQ - AAbortRQ
 type AAbortRQ struct {
 	ItemType  byte // 0x07
 	Reserved1 byte
@@ -179,15 +182,16 @@ type AAbortRQ struct {
 	Reason    byte
 }
 
+// NewAAbortRQ - NewAAbortRQ
 func NewAAbortRQ() *AAbortRQ {
-	aarq := &AAbortRQ{}
-	aarq.ItemType = 0x07
-	aarq.Reserved1 = 0x00
-	aarq.Reserved2 = 0x00
-	aarq.Reserved3 = 0x01
-	aarq.Source = 0x03
-	aarq.Reason = 0x01
-	return aarq
+	return &AAbortRQ{
+		ItemType:  0x07,
+		Reserved1: 0x00,
+		Reserved2: 0x00,
+		Reserved3: 0x01,
+		Source:    0x03,
+		Reason:    0x01,
+	}
 }
 
 // Size gets the size
@@ -219,6 +223,7 @@ func (aarq *AAbortRQ) Read(conn net.Conn) bool {
 	return aarq.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (aarq *AAbortRQ) ReadDynamic(conn net.Conn) bool {
 	aarq.Reserved1 = ReadByte(conn)
 	aarq.Length = ReadUint32(conn)

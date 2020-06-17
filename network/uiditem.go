@@ -6,6 +6,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// UIDitem - UIDitem
 type UIDitem struct {
 	ItemType  byte
 	Reserved1 byte
@@ -13,16 +14,18 @@ type UIDitem struct {
 	UIDName   string
 }
 
+// Size - Size
 func (uid *UIDitem) Size() uint16 {
 	return uid.Length + 4
 }
 
+// NewUIDitem - NewUIDitem
 func NewUIDitem(UIDName string, ItemType byte) *UIDitem {
-	uid := &UIDitem{}
-	uid.ItemType = ItemType
-	uid.UIDName = UIDName
-	uid.Length = uint16(len(UIDName))
-	return uid
+	return &UIDitem{
+		ItemType: ItemType,
+		UIDName:  UIDName,
+		Length:   uint16(len(UIDName)),
+	}
 }
 
 func (uid *UIDitem) Write(conn net.Conn) bool {
@@ -40,6 +43,7 @@ func (uid *UIDitem) Read(conn net.Conn) bool {
 	return uid.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (uid *UIDitem) ReadDynamic(conn net.Conn) bool {
 	uid.Reserved1 = ReadByte(conn)
 	uid.Length = ReadUint16(conn)

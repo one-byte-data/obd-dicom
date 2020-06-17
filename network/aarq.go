@@ -6,6 +6,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// PresentationContext - PresentationContext
 type PresentationContext struct {
 	ItemType              byte //0x20
 	Reserved1             byte
@@ -18,13 +19,15 @@ type PresentationContext struct {
 	TrnSyntaxs            []UIDitem
 }
 
+// NewPresentationContext - NewPresentationContext
 func NewPresentationContext() *PresentationContext {
-	pc := &PresentationContext{}
-	pc.ItemType = 0x20
-	pc.PresentationContextID = Uniq8odd()
-	return pc
+	return &PresentationContext{
+		ItemType:              0x20,
+		PresentationContextID: Uniq8odd(),
+	}
 }
 
+// Size - Size
 func (pc *PresentationContext) Size() uint16 {
 	pc.Length = 4
 	pc.Length += pc.AbsSyntax.Size()
@@ -35,6 +38,7 @@ func (pc *PresentationContext) Size() uint16 {
 	return pc.Length + 4
 }
 
+// SetAbstractSyntax - SetAbstractSyntax
 func (pc *PresentationContext) SetAbstractSyntax(Abst string) {
 	pc.AbsSyntax.ItemType = 0x30
 	pc.AbsSyntax.Reserved1 = 0x00
@@ -42,6 +46,7 @@ func (pc *PresentationContext) SetAbstractSyntax(Abst string) {
 	pc.AbsSyntax.Length = uint16(len(Abst))
 }
 
+// AddTransferSyntax - AddTransferSyntax
 func (pc *PresentationContext) AddTransferSyntax(Tran string) {
 	TrnSyntax := NewUIDitem(Tran, 0x40)
 	pc.TrnSyntaxs = append(pc.TrnSyntaxs, *TrnSyntax)
@@ -75,6 +80,7 @@ func (pc *PresentationContext) Read(conn net.Conn) bool {
 	return pc.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
 	pc.Reserved1 = ReadByte(conn)
 	pc.Length = ReadUint16(conn)
@@ -99,6 +105,7 @@ func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
 	return false
 }
 
+// AAssociationRQ - AAssociationRQ
 type AAssociationRQ struct {
 	ItemType        byte // 0x01
 	Reserved1       byte
@@ -113,28 +120,34 @@ type AAssociationRQ struct {
 	UserInfo        UserInformation
 }
 
+// NewAAssociationRQ - NewAAssociationRQ
 func NewAAssociationRQ() *AAssociationRQ {
-	aarq := &AAssociationRQ{}
-	aarq.ItemType = 0x01
-	aarq.Reserved1 = 0x00
-	aarq.ProtocolVersion = 0x01
-	aarq.Reserved2 = 0x00
-	aarq.AppContext.ItemType = 0x10
-	aarq.AppContext.Reserved1 = 0x00
-	aarq.AppContext.UIDName = "1.2.840.10008.3.1.1.1"
-	aarq.AppContext.Length = uint16(len(aarq.AppContext.UIDName))
-	aarq.UserInfo = *NewUserInformation()
-	return aarq
+	return &AAssociationRQ{
+		ItemType:        0x01,
+		Reserved1:       0x00,
+		ProtocolVersion: 0x01,
+		Reserved2:       0x00,
+		AppContext: UIDitem{
+			ItemType:  0x10,
+			Reserved1: 0x00,
+			UIDName:   "1.2.840.10008.3.1.1.1",
+			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
+		},
+		UserInfo: *NewUserInformation(),
+	}
 }
 
+// SetCallingApTitle - SetCallingApTitle
 func (aarq *AAssociationRQ) SetCallingApTitle(AET string) {
 	copy(aarq.CallingApTitle[:], AET)
 }
 
+// SetCalledApTitle - SetCalledApTitle
 func (aarq *AAssociationRQ) SetCalledApTitle(AET string) {
 	copy(aarq.CalledApTitle[:], AET)
 }
 
+// Size - Size
 func (aarq *AAssociationRQ) Size() uint32 {
 	aarq.Length = 4 + 16 + 16 + 32
 	aarq.Length += uint32(aarq.AppContext.Size())
@@ -178,6 +191,7 @@ func (aarq *AAssociationRQ) Read(conn net.Conn) bool {
 	return aarq.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
 	aarq.Reserved1 = ReadByte(conn)
 	aarq.Length = ReadUint32(conn)

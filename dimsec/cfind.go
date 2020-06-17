@@ -59,10 +59,10 @@ func CFindReadRSP(pdu network.PDUService, DDO *media.DcmObj) int {
 			if pdu.Read(DDO) {
 				status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
 			} else {
-				status=-1
+				status = -1
 			}
 		} else {
-			status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status			
+			status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
 		}
 	}
 	return status

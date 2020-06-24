@@ -5,10 +5,12 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
+// CEchoReadRQ CEcho request read
 func CEchoReadRQ(pdu network.PDUService, DCO media.DcmObj) bool {
 	return DCO.GetUShort(0x00, 0x0100) == 0x30
 }
 
+// CEchoWriteRQ CEcho request write
 func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) bool {
 	var DCO media.DcmObj
 	var size uint32
@@ -32,6 +34,7 @@ func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) bool {
 	return flag
 }
 
+// CEchoReadRSP CEcho response read
 func CEchoReadRSP(pdu network.PDUService) bool {
 	flag := false
 	var DCO media.DcmObj
@@ -45,6 +48,7 @@ func CEchoReadRSP(pdu network.PDUService) bool {
 	return flag
 }
 
+// CEchoWriteRSP CEcho response write
 func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) bool {
 	var DCOR media.DcmObj
 	var size uint32

@@ -5,6 +5,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
+// CStoreReadRQ CStore request read
 func CStoreReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bool {
 	if DCO.TagCount() != 0 {
 		// Is this a C-Store?
@@ -18,6 +19,7 @@ func CStoreReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) b
 	return false
 }
 
+// CStoreWriteRQ CStore request write
 func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) bool {
 	var DCO media.DcmObj
 	var size uint32
@@ -54,6 +56,7 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 	return false
 }
 
+// CStoreReadRSP CStore response read
 func CStoreReadRSP(pdu network.PDUService) int {
 	var DCO media.DcmObj
 
@@ -67,6 +70,7 @@ func CStoreReadRSP(pdu network.PDUService) int {
 	return -1
 }
 
+// CStoreWriteRSP CStore response write
 func CStoreWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16) bool {
 	var DCOR media.DcmObj
 	var size uint32

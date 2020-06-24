@@ -56,11 +56,11 @@ type PresentationContextAccept struct {
 
 // NewPresentationContextAccept creates a PresentationContextAccept
 func NewPresentationContextAccept() *PresentationContextAccept {
-	pc := &PresentationContextAccept{}
-	pc.ItemType = 0x21
-	pc.PresentationContextID = Uniq8()
-	pc.Result = 2
-	return pc
+	return &PresentationContextAccept{
+		ItemType:              0x21,
+		PresentationContextID: Uniq8(),
+		Result:                2,
+	}
 }
 
 // Size gets the size of presentation
@@ -138,16 +138,18 @@ type AAssociationAC struct {
 
 // NewAAssociationAC NewAAssociationAC
 func NewAAssociationAC() *AAssociationAC {
-	aaac := &AAssociationAC{}
-	aaac.ItemType = 0x02
-	aaac.Reserved1 = 0x00
-	aaac.ProtocolVersion = 0x01
-	aaac.Reserved2 = 0x00
-	aaac.AppContext.ItemType = 0x10
-	aaac.AppContext.Reserved1 = 0x00
-	aaac.AppContext.UIDName = "1.2.840.10008.3.1.1.1"
-	aaac.AppContext.Length = uint16(len(aaac.AppContext.UIDName))
-	return aaac
+	return &AAssociationAC{
+		ItemType:        0x02,
+		Reserved1:       0x00,
+		ProtocolVersion: 0x01,
+		Reserved2:       0x00,
+		AppContext: UIDitem{
+			ItemType:  0x10,
+			Reserved1: 0x00,
+			UIDName:   "1.2.840.10008.3.1.1.1",
+			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
+		},
+	}
 }
 
 // Size size of association

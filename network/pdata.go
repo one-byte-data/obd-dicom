@@ -6,12 +6,14 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// PDV - PDV
 type PDV struct {
 	Length                uint32
 	PresentationContextID byte
 	MsgHeader             byte
 }
 
+// PDataTF - PDataTF
 type PDataTF struct {
 	ItemType              byte
 	Reserved1             byte
@@ -25,6 +27,7 @@ type PDataTF struct {
 	MsgHeader             byte
 }
 
+// ReadDynamic - ReadDynamic
 func (pd *PDataTF) ReadDynamic(conn net.Conn) bool {
 	var Count uint32
 

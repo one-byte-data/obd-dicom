@@ -19,12 +19,14 @@ func (bd *BufData) setPosition(pos int) {
 	bd.Ms.Position = pos
 }
 
+// ReadByte reads a byte
 func (bd *BufData) ReadByte() byte {
 	c := make([]byte, 1)
 	bd.Ms.Read(c, 1)
 	return c[0]
 }
 
+// ReadUint16 reads an unsigned int
 func (bd *BufData) ReadUint16() uint16 {
 	var val uint16
 
@@ -38,6 +40,7 @@ func (bd *BufData) ReadUint16() uint16 {
 	return val
 }
 
+// ReadUint32 reads an unsigned int
 func (bd *BufData) ReadUint32() uint32 {
 	var val uint32
 
@@ -51,12 +54,14 @@ func (bd *BufData) ReadUint32() uint32 {
 	return val
 }
 
+// WriteByte writes a byte
 func (bd *BufData) WriteByte(val byte) {
 	c := make([]byte, 1)
 	c[0] = val
 	bd.Ms.Write(c, 1)
 }
 
+// WriteUint16 writes an unsigned int
 func (bd *BufData) WriteUint16(val uint16) {
 	c := make([]byte, 2)
 	if bd.BigEndian {
@@ -67,6 +72,7 @@ func (bd *BufData) WriteUint16(val uint16) {
 	bd.Ms.Write(c, 2)
 }
 
+// WriteUint32 writes an unsigned int
 func (bd *BufData) WriteUint32(val uint32) {
 	c := make([]byte, 4)
 	if bd.BigEndian {

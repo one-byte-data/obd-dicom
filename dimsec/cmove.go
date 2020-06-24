@@ -5,6 +5,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
+// CMoveReadRQ CMove request read
 func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bool {
 	if DCO.TagCount() != 0 {
 		// Is this a C-Move?
@@ -18,6 +19,7 @@ func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bo
 	return false
 }
 
+// CMoveWriteRQ CMove request write
 func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, AETDest string) bool {
 	var DCO media.DcmObj
 	var size uint32
@@ -33,7 +35,7 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 		valor++
 	}
 
-	size = uint32(8 + valor + 8 + 2 + 8 + 2+ 8+ largo + 8 + 2+ 8+ 2)
+	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + largo + 8 + 2 + 8 + 2)
 
 	DCO.WriteUint32(0x00, 0x00, "UL", size)                  // Length
 	DCO.WriteString(0x0000, 0x0002, "UI", SOPClassUID)       //SOP Class UID
@@ -49,6 +51,7 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 	return false
 }
 
+// CMoveReadRSP CMove response read
 func CMoveReadRSP(pdu network.PDUService, DDO *media.DcmObj, pending *int) int {
 	var DCO media.DcmObj
 	status := -1
@@ -63,16 +66,17 @@ func CMoveReadRSP(pdu network.PDUService, DDO *media.DcmObj, pending *int) int {
 				status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
 				*pending = int(DCO.GetUShort(0x00, 0x1020))
 			} else {
-				status=-1
+				status = -1
 			}
 		} else {
-			status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status			
+			status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
 			*pending = -1
 		}
 	}
 	return status
 }
 
+// CMoveWriteRSP CMove response write
 func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pending uint16) bool {
 	var DCOR media.DcmObj
 	var size uint32
@@ -87,16 +91,16 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 			sopclasslength++
 		}
 
-		size = uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2+8+2+8+2)
+		size = uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2 + 8 + 2 + 8 + 2)
 
 		DCOR.WriteUint32(0x00, 0x00, "UL", size)        // Length
 		DCOR.WriteString(0x00, 0x02, "UI", SOPClassUID) //SOP Class UID
 		DCOR.WriteUint16(0x00, 0x0100, "US", 0x8021)    //Command Field
 		valor := DCO.GetUShort(0x00, 0x0110)
-		DCOR.WriteUint16(0x00, 0x0120, "US", valor)    //Message ID
-		DCOR.WriteUint16(0x00, 0x0800, "US", 0x101)  //Data Set type
-		DCOR.WriteUint16(0x00, 0x0900, "US", status)   //Status
-		DCOR.WriteUint16(0x00, 0x1020, "US", pending)   //Pending
+		DCOR.WriteUint16(0x00, 0x0120, "US", valor)   //Message ID
+		DCOR.WriteUint16(0x00, 0x0800, "US", 0x101)   //Data Set type
+		DCOR.WriteUint16(0x00, 0x0900, "US", status)  //Status
+		DCOR.WriteUint16(0x00, 0x1020, "US", pending) //Pending
 
 		flag = pdu.Write(DCOR, SOPClassUID, 0x01)
 	}

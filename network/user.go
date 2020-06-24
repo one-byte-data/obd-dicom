@@ -6,6 +6,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// MaximumSubLength - MaximumSubLength
 type MaximumSubLength struct {
 	ItemType      byte //0x51
 	Reserved1     byte
@@ -13,13 +14,15 @@ type MaximumSubLength struct {
 	MaximumLength uint32
 }
 
+// NewMaximumSubLength - NewMaximumSubLength
 func NewMaximumSubLength() *MaximumSubLength {
-	maxim := &MaximumSubLength{}
-	maxim.ItemType = 0x51
-	maxim.Length = 4
-	return maxim
+	return &MaximumSubLength{
+		ItemType: 0x51,
+		Length:   4,
+	}
 }
 
+// Size - Size
 func (maxim *MaximumSubLength) Size() uint16 {
 	return maxim.Length + 4
 }
@@ -42,6 +45,7 @@ func (maxim *MaximumSubLength) Read(conn net.Conn) bool {
 	return maxim.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (maxim *MaximumSubLength) ReadDynamic(conn net.Conn) bool {
 	maxim.Reserved1 = ReadByte(conn)
 	maxim.Length = ReadUint16(conn)
@@ -49,20 +53,23 @@ func (maxim *MaximumSubLength) ReadDynamic(conn net.Conn) bool {
 	return true
 }
 
+// AsyncOperationWindow - AsyncOperationWindow
 type AsyncOperationWindow struct {
-	ItemType                        byte //0x53
-	Reserved1                       byte
-	Length                          uint16
-	Max_Number_Operations_invoked   uint16
-	Max_Number_Operations_performed uint16
+	ItemType                     byte //0x53
+	Reserved1                    byte
+	Length                       uint16
+	MaxNumberOperationsInvoked   uint16
+	MaxNumberOperationsPerformed uint16
 }
 
+// NewAsyncOperationWindow - NewAsyncOperationWindow
 func NewAsyncOperationWindow() *AsyncOperationWindow {
-	async := &AsyncOperationWindow{}
-	async.ItemType = 0x53
-	return async
+	return &AsyncOperationWindow{
+		ItemType: 0x53,
+	}
 }
 
+// Size - Size
 func (async *AsyncOperationWindow) Size() uint16 {
 	return async.Length + 4
 }
@@ -72,14 +79,16 @@ func (async *AsyncOperationWindow) Read(conn net.Conn) bool {
 	return async.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (async *AsyncOperationWindow) ReadDynamic(conn net.Conn) bool {
 	async.Reserved1 = ReadByte(conn)
 	async.Length = ReadUint16(conn)
-	async.Max_Number_Operations_invoked = ReadUint16(conn)
-	async.Max_Number_Operations_performed = ReadUint16(conn)
+	async.MaxNumberOperationsInvoked = ReadUint16(conn)
+	async.MaxNumberOperationsPerformed = ReadUint16(conn)
 	return true
 }
 
+// SCPSCURoleSelect - SCPSCURoleSelect
 type SCPSCURoleSelect struct {
 	ItemType  byte //0x54
 	Reserved1 byte
@@ -89,12 +98,14 @@ type SCPSCURoleSelect struct {
 	uid       string
 }
 
+// NewSCPSCURoleSelect - NewSCPSCURoleSelect
 func NewSCPSCURoleSelect() *SCPSCURoleSelect {
-	scpscu := &SCPSCURoleSelect{}
-	scpscu.ItemType = 0x54
-	return scpscu
+	return &SCPSCURoleSelect{
+		ItemType: 0x54,
+	}
 }
 
+// Size - Size
 func (scpscu *SCPSCURoleSelect) Size() uint16 {
 	return scpscu.Length + 4
 }
@@ -120,6 +131,7 @@ func (scpscu *SCPSCURoleSelect) Read(conn net.Conn) bool {
 	return scpscu.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) bool {
 	scpscu.Reserved1 = ReadByte(conn)
 	scpscu.Length = ReadUint16(conn)
@@ -132,6 +144,7 @@ func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) bool {
 	return true
 }
 
+// UserInformation - UserInformation
 type UserInformation struct {
 	ItemType        byte //0x50
 	Reserved1       byte
@@ -144,15 +157,17 @@ type UserInformation struct {
 	ImpVersion      UIDitem
 }
 
+// NewUserInformation - NewUserInformation
 func NewUserInformation() *UserInformation {
-	ui := &UserInformation{}
-	ui.ItemType = 0x50
-	ui.MaxSubLength = *NewMaximumSubLength()
-	ui.AsyncOpWindow = *NewAsyncOperationWindow()
-	ui.SCPSCURole = *NewSCPSCURoleSelect()
-	return ui
+	return &UserInformation{
+		ItemType:      0x50,
+		MaxSubLength:  *NewMaximumSubLength(),
+		AsyncOpWindow: *NewAsyncOperationWindow(),
+		SCPSCURole:    *NewSCPSCURoleSelect(),
+	}
 }
 
+// Size - Size
 func (ui *UserInformation) Size() uint16 {
 	ui.Length = ui.MaxSubLength.Size()
 	ui.Length += ui.ImpClass.Size()
@@ -160,6 +175,7 @@ func (ui *UserInformation) Size() uint16 {
 	return ui.Length + 4
 }
 
+// SetImpClassUID - SetImpClassUID
 func (ui *UserInformation) SetImpClassUID(name string) {
 	ui.ImpClass.ItemType = 0x52
 	ui.ImpClass.Reserved1 = 0x00
@@ -167,6 +183,7 @@ func (ui *UserInformation) SetImpClassUID(name string) {
 	ui.ImpClass.Length = uint16(len(name))
 }
 
+// SetImpVersionName - SetImpVersionName
 func (ui *UserInformation) SetImpVersionName(name string) {
 	ui.ImpVersion.ItemType = 0x55
 	ui.ImpVersion.Reserved1 = 0x00
@@ -197,6 +214,7 @@ func (ui *UserInformation) Read(conn net.Conn) bool {
 	return ui.ReadDynamic(conn)
 }
 
+// ReadDynamic - ReadDynamic
 func (ui *UserInformation) ReadDynamic(conn net.Conn) bool {
 	ui.Reserved1 = ReadByte(conn)
 	ui.Length = ReadUint16(conn)

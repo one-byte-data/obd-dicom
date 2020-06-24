@@ -20,6 +20,7 @@ type DCMStudy struct {
 	ObserverName       string
 }
 
+// GetInfo gets information
 func (study *DCMStudy) GetInfo(obj DcmObj) {
 	var tag DcmTag
 	for i := 0; i < len(obj.tags); i++ {

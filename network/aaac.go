@@ -2,8 +2,9 @@ package network
 
 import (
 	"encoding/binary"
+	"log"
 	"net"
-
+	"strconv"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -12,6 +13,7 @@ func ReadByte(conn net.Conn) byte {
 	c := make([]byte, 1)
 	_, err := conn.Read(c)
 	if err != nil {
+		log.Println("ERROR, aaac::ReadByte, "+err.Error())
 		return 0
 	}
 	return c[0]
@@ -23,6 +25,7 @@ func ReadUint16(conn net.Conn) uint16 {
 	c := make([]byte, 2)
 	_, err := conn.Read(c)
 	if err != nil {
+		log.Println("ERROR, aaac::ReadUint16, "+err.Error())
 		return 0
 	}
 	val = binary.BigEndian.Uint16(c)
@@ -35,6 +38,7 @@ func ReadUint32(conn net.Conn) uint32 {
 	c := make([]byte, 4)
 	_, err := conn.Read(c)
 	if err != nil {
+		log.Println("ERROR, aaac::ReadUint32, "+err.Error())
 		return 0
 	}
 	val = binary.BigEndian.Uint32(c)
@@ -231,6 +235,7 @@ func (aaac *AAssociationAC) ReadDynamic(conn net.Conn) bool {
 			Count = Count - int(aaac.UserInfo.Size())
 			break
 		default:
+			log.Println("ERROR, aaac::ReadDynamic, unknown Item, "+strconv.Itoa(int(TempByte)))
 			conn.Close()
 			Count = -1
 		}

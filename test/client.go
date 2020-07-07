@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"strconv"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -11,11 +11,11 @@ import (
 func client(AET string, IP string, Port string) {
 	media.InitDict()
 	if services.EchoSCU("TESTSCU", AET, IP, Port, 30) {
-		fmt.Println("DICOM Echo OK!!")
+		log.Println("INFO, DICOM Echo OK!!")
 		if services.StoreSCU("TESTSCU", AET, IP, Port, "test.dcm", 30) {
-			fmt.Println("DICOM Store OK!!")
+			log.Println("INFO, DICOM Store OK!!")
 		} else {
-			fmt.Println("DICOM Store Failed!!")
+			log.Println("ERROR, DICOM Store Failed!!")
 		}
 		var Results []media.DcmObj
 		var Query media.DcmObj
@@ -31,17 +31,17 @@ func client(AET string, IP string, Port string) {
 		Query.WriteString(0x10, 0x40, "CS", "")
 		Query.WriteString(0x20, 0x0D, "UI", "")
 		if services.FindSCU("TESTSCU", AET, IP, Port, Query, &Results, 30) == 0 {
-			fmt.Println("DICOM Query OK!! Results: " + strconv.Itoa(len(Results)))
+			log.Println("INFO, DICOM Query OK!! Results: " + strconv.Itoa(len(Results)))
 		} else {
-			fmt.Println("DICOM Query Failed!!")
+			log.Println("ERROR, DICOM Query Failed!!")
 		}
 		if services.MoveSCU("TESTSCU", AET, IP, Port, "DESTAET", Query, 30) == 0 {
-			fmt.Println("DICOM Move OK!!")
+			log.Println("INFO, DICOM Move OK!!")
 		} else {
-			fmt.Println("DICOM Move Failed!!")
+			log.Println("ERROR, DICOM Move Failed!!")
 		}
 	} else {
-		fmt.Println("DICOM Echo Failed!!")
+		log.Println("ERROR, DICOM Echo Failed!!")
 	}
 
 }

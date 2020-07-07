@@ -1,7 +1,9 @@
 package network
 
 import (
+	"log"
 	"net"
+	"strconv"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -248,11 +250,13 @@ func (ui *UserInformation) ReadDynamic(conn net.Conn) bool {
 			conn.Close()
 			ui.UserInfoBaggage = uint32(Count)
 			Count = -1
+			log.Println("ERROR, user::ReadDynamic, unknown TempByte: "+strconv.Itoa(int(TempByte)))
 			break
 		}
 	}
 	if Count == 0 {
 		return true
 	}
+	log.Println("ERROR, user::ReadDynamic, Count is not zero")
 	return (false)
 }

@@ -1,8 +1,10 @@
 package network
 
 import (
+	"log"
 	"net"
-
+	"strconv"
+	
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
@@ -102,6 +104,7 @@ func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
 	if Count == 0 {
 		return true
 	}
+	log.Println("ERROR, pc::ReadDynamic, Count is not zero")
 	return false
 }
 
@@ -223,11 +226,13 @@ func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
 			Count = Count - int(aarq.UserInfo.Size())
 			break
 		default:
+			log.Println("ERROR, aarq::ReadDynamic, unknown Item, "+strconv.Itoa(int(TempByte)))
 			Count = -1
 		}
 	}
 	if Count == 0 {
 		return true
 	}
+	log.Println("ERROR, aarq::ReadDynamic, Count is not zero")
 	return (false)
 }

@@ -1,6 +1,7 @@
 package dimsec
 
 import (
+	"log"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
@@ -40,6 +41,7 @@ func CEchoReadRSP(pdu network.PDUService) bool {
 	var DCO media.DcmObj
 
 	if pdu.Read(&DCO) == false {
+		log.Println("ERROR, CEchoReadRSP, failed pdu.Read(&DCO)")
 		return false
 	}
 	if DCO.GetUShort(0x00, 0x0100) == 0x8030 {

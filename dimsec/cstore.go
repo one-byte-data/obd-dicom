@@ -1,6 +1,7 @@
 package dimsec
 
 import (
+	"log"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
@@ -61,6 +62,7 @@ func CStoreReadRSP(pdu network.PDUService) int {
 	var DCO media.DcmObj
 
 	if pdu.Read(&DCO) == false {
+		log.Println("ERROR, CStoreReadRSP, failed pdu.Read(&DCO)")
 		return -1
 	}
 	// Is this a C-Store RSP?

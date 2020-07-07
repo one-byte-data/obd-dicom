@@ -1,6 +1,6 @@
 package main
 
 func main() {
-//    client("CHARRUAPACS", "localhost", "11112")
-    server("105")
+    client("CHARRUAPACS", "localhost", "11112")
+//    server("105")
 }

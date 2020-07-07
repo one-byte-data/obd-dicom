@@ -1,6 +1,7 @@
 package network
 
 import (
+	"log"
 	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -109,6 +110,7 @@ func (pdu *PDUService) InterogateAAssociateRQ(conn net.Conn) bool {
 		return pdu.AssocAC.Write(conn)
 
 	}
+	log.Println("ERROR, pduservice::InterogateAAssociateRQ, No valid AcceptedPresentationContexts")
 	pdu.AssocAC.Write(conn)
 	return false
 }
@@ -123,14 +125,17 @@ func (pdu *PDUService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) b
 	// Limpiar el buffer aqui.
 	pdu.Pdata.Buffer.Ms.Clear()
 	if pdu.Pdata.PresentationContextID == 0 {
+		log.Println("ERROR, pduservice::Write, PresentationContextID==0")
 		return false
 	}
 	if ItemType == 0x01 {
 		if pdu.ParseDCMIntoRaw(DCO) == false {
+			log.Println("ERROR, pduservice::Write, ParseDCMIntoRaw failed")
 			return false
 		}
 	} else {
 		if pdu.ParseDCMIntoRaw(DCO) == false {
+			log.Println("ERROR, pduservice::Write, ParseDCMIntoRaw failed")
 			return false
 		}
 	}
@@ -158,6 +163,7 @@ func (pdu *PDUService) ParseRawVRIntoDCM(DCO *media.DcmObj) bool {
 
 	TrnSyntax := pdu.GetTransferSyntaxUID(pdu.Pdata.PresentationContextID)
 	if len(TrnSyntax) == 0 {
+		log.Println("ERROR, pduservice::ParseRawVRIntoDCM, TrnSyntax len is 0")
 		return false
 	}
 	DCO.TransferSyntax = TrnSyntax
@@ -181,6 +187,7 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 			if pdu.ParseRawVRIntoDCM(DCO) == false {
 				pdu.AbortRQ.Write(pdu.conn)
 				pdu.conn.Close()
+				log.Println("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
 				return false
 			}
 			return true
@@ -193,15 +200,18 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 			pdu.AssocRQ.Read(pdu.conn)
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Read, A-Associate-RQ")
 			return false
 		case 0x02: // A-Associate-AC, should not get here
 			pdu.AssocAC.Read(pdu.conn)
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Read, A-Associate-AC")
 			return false
 		case 0x03: // A-Associate-RJ, should not get here
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Read, A-Associate-RJ")
 			return false
 		case 0x04: // P-Data-TF
 			pdu.Pdata.ReadDynamic(pdu.conn)
@@ -209,6 +219,7 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 				if pdu.ParseRawVRIntoDCM(DCO) == false {
 					pdu.AbortRQ.Write(pdu.conn)
 					pdu.conn.Close()
+					log.Println("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
 					return false
 				}
 				return true
@@ -217,14 +228,18 @@ func (pdu *PDUService) Read(DCO *media.DcmObj) bool {
 		case 0x05: // A-Release-RQ
 			pdu.ReleaseRQ.ReadDynamic(pdu.conn)
 			pdu.ReleaseRP.Write(pdu.conn)
+			log.Println("ERROR, pduservice::Read, A-Release-RQ")
 			return false
 		case 0x06: // A-Release-RP
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Read, A-Release-RP")
 			return false
 		case 0x07: //A-Abort-RQ
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Read, A-Abort-RQ")
 			return false
 		default:
+			log.Println("ERROR, pduservice::Read, unknown ItemType")
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return false
@@ -241,6 +256,7 @@ func (pdu *PDUService) SetTimeout(timeout int) {
 func (pdu *PDUService) Connect(IP string, Port string) bool {
 	conn, err := net.Dial("tcp", IP+":"+Port)
 	if err != nil {
+		log.Println("ERROR, pduservice::Connect, "+err.Error())
 		return false
 	}
 
@@ -256,6 +272,7 @@ func (pdu *PDUService) Connect(IP string, Port string) bool {
 			pdu.AssocAC.ReadDynamic(pdu.conn)
 			if !pdu.InterogateAAssociateAC() {
 				pdu.conn.Close()
+				log.Println("ERROR, pduservice::Connect, InterogateAAssociateAC failed")
 				return false
 			}
 			return true
@@ -263,14 +280,17 @@ func (pdu *PDUService) Connect(IP string, Port string) bool {
 			// Error, Assoc. Rejected.
 			pdu.AssocRJ.ReadDynamic(pdu.conn)
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Connect, Assoc. Rejected")
 			return false
 		default:
 			// Error, Corrupt Transmission
 			pdu.conn.Close()
+			log.Println("ERROR, pduservice::Connect, Corrupt Transmision")
 			return false
 		}
 	}
 	//Indeterminate state.
+	log.Println("ERROR, pduservice::Connect, Indeterminate State")
 	return false
 }
 
@@ -290,5 +310,6 @@ func (pdu *PDUService) Multiplex(conn net.Conn) bool {
 		}
 		conn.Close()
 	}
+	log.Println("ERROR, pduservice::Multiplex, AssocRQ.Read failed")
 	return false
 }

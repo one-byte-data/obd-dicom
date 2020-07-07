@@ -2,6 +2,7 @@ package media
 
 import (
 	"encoding/binary"
+	"log"
 	"os"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
+			log.Println("ERROR, dcmobj::fileExists, "+err.Error())
 			return false
 		}
 	}
@@ -17,7 +19,7 @@ func fileExists(name string) bool {
 
 // DcmObj - DICOM Object structure
 type DcmObj struct {
-	tags           []DcmTag
+	Tags           []DcmTag
 	TransferSyntax string
 	ExplicitVR     bool
 	BigEndian      bool
@@ -26,12 +28,12 @@ type DcmObj struct {
 
 // TagCount - return the Tags number
 func (obj *DcmObj) TagCount() int {
-	return len(obj.tags)
+	return len(obj.Tags)
 }
 
 // GetTag - return the Tag at position i
 func (obj *DcmObj) GetTag(i int) DcmTag {
-	return obj.tags[i]
+	return obj.Tags[i]
 }
 
 // GetUShort - return the Uint16 for this group & element
@@ -111,7 +113,7 @@ func (obj *DcmObj) GetString(group uint16, element uint16) string {
 
 // Add - add a new DICOM Tag to a DICOM Object
 func (obj *DcmObj) Add(tag DcmTag) {
-	obj.tags = append(obj.tags, tag)
+	obj.Tags = append(obj.Tags, tag)
 }
 
 // Read - Read from a DICOM file into a DICOM Object
@@ -165,7 +167,7 @@ func (obj *DcmObj) WriteUint16(group uint16, element uint16, vr string, val uint
 	}
 
 	tag := DcmTag{group, element, 2, vr, c, obj.BigEndian}
-	obj.tags = append(obj.tags, tag)
+	obj.Tags = append(obj.Tags, tag)
 }
 
 // WriteUint32 - Writes a Uint32 to a DICOM tag
@@ -178,7 +180,7 @@ func (obj *DcmObj) WriteUint32(group uint16, element uint16, vr string, val uint
 	}
 
 	tag := DcmTag{group, element, 4, vr, c, obj.BigEndian}
-	obj.tags = append(obj.tags, tag)
+	obj.Tags = append(obj.Tags, tag)
 }
 
 // WriteString - Writes a String to a DICOM tag
@@ -195,7 +197,7 @@ func (obj *DcmObj) WriteString(group uint16, element uint16, vr string, content 
 		}
 	}
 	tag := DcmTag{group, element, length, vr, []byte(content), false}
-	obj.tags = append(obj.tags, tag)
+	obj.Tags = append(obj.Tags, tag)
 }
 
 // AddConceptNameSeq - Concept Name Sequence for DICOM SR

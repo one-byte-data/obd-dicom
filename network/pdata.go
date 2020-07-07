@@ -1,6 +1,7 @@
 package network
 
 import (
+	"log"
 	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -44,6 +45,7 @@ func (pd *PDataTF) ReadDynamic(conn net.Conn) bool {
 		buff := make([]byte, pd.pdv.Length-2)
 		_, err := conn.Read(buff)
 		if err != nil {
+			log.Println("ERROR, pdata::ReadDynamic, "+err.Error())
 			return false
 		}
 		pd.Buffer.Ms.Write(buff, int(pd.pdv.Length-2))
@@ -99,12 +101,15 @@ func (pd *PDataTF) Write(conn net.Conn) bool {
 			pd.Buffer.Ms.Read(buff, int(pd.BlockSize))
 			n, err := conn.Write(buff)
 			if err != nil {
+				log.Println("ERROR, pdata::Write, "+err.Error())
 				return false
 			}
 			if n != int(pd.BlockSize) {
+				log.Println("ERROR, pdata::Write, n!=int(pd.BlockSize)")
 				return false
 			}
 		} else {
+			log.Println("ERROR, pdata::Write, bd.Send(conn) failed")
 			return false
 		}
 		SentSize += pd.BlockSize

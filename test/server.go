@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
@@ -11,6 +11,7 @@ import (
 
 func handleConnection(conn net.Conn) {
 	pdu := *network.NewPDUService()
+	log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
 	if pdu.Multiplex(conn) {
 		var DCO media.DcmObj
 		flag := true
@@ -22,8 +23,10 @@ func handleConnection(conn net.Conn) {
 				if dimsec.CStoreReadRQ(pdu, DCO, &DDO) {
 					if dimsec.CStoreWriteRSP(pdu, DCO, 0) {
 						DDO.Write("test.dcm")
+						log.Println("INFO, handleConnection, CStore Success")
 						flag = true
 					} else {
+						log.Println("ERROR, handleConnection, CStore failed")
 						flag = false
 					}
 				}
@@ -64,15 +67,15 @@ func handleConnection(conn net.Conn) {
 			case 0x30: // C-Echo
 				if dimsec.CEchoReadRQ(pdu, DCO) {
 					if dimsec.CEchoWriteRSP(pdu, DCO) {
-						fmt.Println("Echo Success!")
+						log.Println("INFO, handleConnection, Echo Success!")
 					} else {
-						fmt.Println("Echo failed!")
+						log.Println("ERROR, handleConnection, Echo failed!")
 						flag = false
 					}
 				}
 				break
 			default:
-				fmt.Println("ERROR, service not implemented: " + string(command))
+				log.Println("ERROR, handleConnection, service not implemented: " + string(command))
 				flag = false
 			}
 		}
@@ -82,7 +85,7 @@ func handleConnection(conn net.Conn) {
 func server(Port string) {
 	l, err := net.Listen("tcp4", ":"+Port)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer l.Close()
@@ -91,7 +94,7 @@ func server(Port string) {
 	for {
 		c, err := l.Accept()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 		go handleConnection(c)

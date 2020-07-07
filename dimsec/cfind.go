@@ -1,6 +1,7 @@
 package dimsec
 
 import (
+	"log"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
@@ -51,6 +52,7 @@ func CFindReadRSP(pdu network.PDUService, DDO *media.DcmObj) int {
 	status := -1
 
 	if pdu.Read(&DCO) == false {
+		log.Println("ERROR, CFindReadRSP, failed pdu.Read(&DCO)")
 		return status
 	}
 	// Is this a C-Find RSP?
@@ -59,6 +61,7 @@ func CFindReadRSP(pdu network.PDUService, DDO *media.DcmObj) int {
 			if pdu.Read(DDO) {
 				status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
 			} else {
+				log.Println("ERROR, CEchoReadRSP, failed pdu.Read(DDO)")
 				status = -1
 			}
 		} else {

@@ -2,6 +2,7 @@ package media
 
 import (
 	"encoding/binary"
+	"log"
 	"net"
 )
 
@@ -121,6 +122,7 @@ func (bd *BufData) ReadTag(tag *DcmTag, explicitVR bool) bool {
 	if (tag.Length != 0) && (tag.Length != 0xFFFFFFFF) {
 		tag.Data = make([]byte, tag.Length)
 		if bd.Ms.Read(tag.Data, int(tag.Length)) != int(tag.Length) {
+			log.Println("ERROR, bufdata::ReadTag, failed bd.Ms.Read")
 			return false
 		}
 	}
@@ -257,6 +259,7 @@ func (bd *BufData) Send(conn net.Conn) bool {
 	bd.Ms.Clear()
 	_, err := conn.Write(buffer)
 	if err != nil {
+		log.Println("ERROR, bufdata::Send, "+err.Error())
 		return false
 	}
 	return true

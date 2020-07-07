@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
@@ -30,8 +31,14 @@ func EchoSCU(LAET string, RAET string, RIP string, RPort string, timeout int) bo
 		if dimsec.CEchoWriteRQ(*pdu, "1.2.840.10008.1.1") {
 			if dimsec.CEchoReadRSP(*pdu) {
 				flag = true
+			} else {
+				log.Println("ERROR, serviceuser::EchoSCU, dimsec.CEchoReadRSP failed")
 			}
+		} else {
+			log.Println("ERROR, serviceuser::EchoSCU, dimsec.CEchoWriteRQ failed")
 		}
+	} else {
+		log.Println("ERROR, serviceuser::EchoSCU, OpenAssociation failed, RAET: "+RAET)
 	}
 	pdu.Close()
 	return flag
@@ -42,11 +49,13 @@ func WriteStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 
 	PCID := pdu.Pdata.PresentationContextID
 	if PCID == 0 {
+		log.Println("ERROR, serviceuser::WriteStoreRQ, PCID==0")
 		return -1
 	}
 	TrnSyntOUT := pdu.GetTransferSyntaxUID(PCID)
 
 	if len(TrnSyntOUT) == 0 {
+		log.Println("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
 		return -2
 	}
 
@@ -54,6 +63,7 @@ func WriteStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 		if dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID) {
 			status = 0
 		} else {
+			log.Println("ERROR, serviceuser::WriteStoreRQ, dimsec.CStoreWriteRQ failed")
 			status = -4
 		}
 	} else {
@@ -69,6 +79,7 @@ func WriteStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 		if dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID) {
 			status = 0
 		} else {
+			log.Println("ERROR, serviceuser::WriteStoreRQ, dimsec.CStoreWriteRQ failed")
 			status = -4
 		}
 	}
@@ -88,11 +99,21 @@ func StoreSCU(LAET string, RAET string, RIP string, RPort string, FileName strin
 				if WriteStoreRQ(*pdu, DDO, SOPClassUID) == 0x00 {
 					if dimsec.CStoreReadRSP(*pdu) == 0x00 {
 						flag = true
+					} else {
+						log.Println("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
 					}
+				} else {
+					log.Println("ERROR, serviceuser::StoreSCU, dimsec.CStoreWriteRQ failed")
 				}
+			} else {
+				log.Println("ERROR, serviceuser::StoreSCU, OpenAssociation failed, RAET: "+RAET)
 			}
 			pdu.Close()
+		} else {
+			log.Println("ERROR, serviceuser::StoreSCU, SOPClassUID is empty")			
 		}
+	} else {
+		log.Println("ERROR, serviceuser::StoreSCU, DDO.Read failed for: "+FileName)
 	}
 	return flag
 }
@@ -109,9 +130,15 @@ func FindSCU(LAET string, RAET string, RIP string, RPort string, Query media.Dcm
 				status = dimsec.CFindReadRSP(*pdu, &DDO)
 				if status != -1 {
 					*Results = append(*Results, DDO)
+				} else {
+					log.Println("ERROR, serviceuser::FindSCU, dimsec.CFindReadRSP failed")
 				}
 			}
+		} else {
+			log.Println("ERROR, serviceuser::FindSCU, dimsec.CFindWriteRQ failed")
 		}
+	} else {
+		log.Println("ERROR, serviceuser::FindSCU, OpenAssociation failed, RAET: "+RAET)
 	}
 	pdu.Close()
 	return status
@@ -129,7 +156,11 @@ func MoveSCU(LAET string, RAET string, RIP string, RPort string, destAET string,
 			for status == 0xFF00 {
 				status = dimsec.CMoveReadRSP(*pdu, &DDO, &pending)
 			}
+		} else {
+			log.Println("ERROR, serviceuser::MoveSCU, dimsec.CMoveWriteRQ failed")
 		}
+	} else {
+		log.Println("ERROR, serviceuser::MoveSCU, OpenAssociation failed, RAET: "+RAET)
 	}
 	pdu.Close()
 	return status

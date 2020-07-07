@@ -59,12 +59,12 @@ func SaveToFile(FileName string, buffer []byte) bool {
 // Decode JPEG File to RAW
 func Decode(filename string, width int, height int, samples int) bool {
 	flag := false
-	var jpeg_data []byte
-	if LoadFromFile(filename, &jpeg_data) {
-		output_size := width * height * samples // Image Size, have to know in advance.
-		output_data := make([]byte, output_size)
-		if C.decode8((*C.uchar)(unsafe.Pointer(&jpeg_data[0])), C.int(len(jpeg_data)), (*C.uchar)(unsafe.Pointer(&output_data[0])), C.int(output_size)) == 1 {
-			if SaveToFile("out.raw", output_data) {
+	var jpegData []byte
+	if LoadFromFile(filename, &jpegData) {
+		outputSize := width * height * samples // Image Size, have to know in advance.
+		outputData := make([]byte, outputSize)
+		if C.decode8((*C.uchar)(unsafe.Pointer(&jpegData[0])), C.int(len(jpegData)), (*C.uchar)(unsafe.Pointer(&outputData[0])), C.int(outputSize)) == 1 {
+			if SaveToFile("out.raw", outputData) {
 				fmt.Println("INFO, saved raw data")
 				flag = true
 			}
@@ -78,18 +78,18 @@ func Decode(filename string, width int, height int, samples int) bool {
 // Encode RAW File to JPEG
 func Encode(filename string, width int, height int, samples int) bool {
 	flag := false
-	var raw_data []byte
-	if LoadFromFile(filename, &raw_data) {
-		var jpeg_data *C.uchar
+	var rawData []byte
+	if LoadFromFile(filename, &rawData) {
+		var jpegData *C.uchar
 		var jpegSize C.int
-		if C.encode8((*C.uchar)(unsafe.Pointer(&raw_data[0])), C.ushort(width), C.ushort(height), C.ushort(samples), &jpeg_data, &jpegSize, C.int(0)) == 1 {
+		if C.encode8((*C.uchar)(unsafe.Pointer(&rawData[0])), C.ushort(width), C.ushort(height), C.ushort(samples), &jpegData, &jpegSize, C.int(0)) == 1 {
 			if jpegSize > 0 {
-				imgdata := C.GoBytes(unsafe.Pointer(jpeg_data), jpegSize)
+				imgdata := C.GoBytes(unsafe.Pointer(jpegData), jpegSize)
 				if SaveToFile("out.jpg", imgdata) {
 					fmt.Println("INFO, saved jpeg data")
 					flag = true
 				}
-				C.free(unsafe.Pointer(jpeg_data))
+				C.free(unsafe.Pointer(jpegData))
 			}
 		}
 	}

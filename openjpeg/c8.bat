@@ -1,0 +1,1 @@
+gcc decomj2k.c -Iinclude -Iwin64 -Llib -lopenjpeg.dll

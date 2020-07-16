@@ -31,6 +31,10 @@ func (obj *DcmObj) TagCount() int {
 	return len(obj.Tags)
 }
 
+func (obj *DcmObj) Clear() {
+	obj.Tags=nil
+}
+
 // GetTag - return the Tag at position i
 func (obj *DcmObj) GetTag(i int) DcmTag {
 	return obj.Tags[i]

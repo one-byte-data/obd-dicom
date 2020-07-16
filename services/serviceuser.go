@@ -126,13 +126,12 @@ func FindSCU(LAET string, RAET string, RIP string, RPort string, Query media.Dcm
 	pdu := network.NewPDUService()
 	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
 		if dimsec.CFindWriteRQ(*pdu, Query, SOPClassUID) {
-			for (status != -1) && (status!=0) {
+			for (status!=-1) && (status!=0) {
 				status = dimsec.CFindReadRSP(*pdu, &DDO)
-				if status != -1 {
+				if (status==0xFF00)||(status==0xFF01) {
 					*Results = append(*Results, DDO)
-				} else {
-					log.Println("ERROR, serviceuser::FindSCU, dimsec.CFindReadRSP failed")
-				}
+				} 
+				DDO.Clear();
 			}
 		} else {
 			log.Println("ERROR, serviceuser::FindSCU, dimsec.CFindWriteRQ failed")
@@ -155,6 +154,7 @@ func MoveSCU(LAET string, RAET string, RIP string, RPort string, destAET string,
 			var DDO media.DcmObj
 			for status == 0xFF00 {
 				status = dimsec.CMoveReadRSP(*pdu, &DDO, &pending)
+				DDO.Clear()
 			}
 		} else {
 			log.Println("ERROR, serviceuser::MoveSCU, dimsec.CMoveWriteRQ failed")

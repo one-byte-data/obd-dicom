@@ -5,3 +5,6 @@ debug
 vendor
 Gopkg.lock
 Gopkg.toml
+.dll
+.dll.a
+.exe

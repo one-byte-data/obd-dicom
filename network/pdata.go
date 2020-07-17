@@ -1,7 +1,7 @@
 package network
 
 import (
-	"log"
+	"errors"
 	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -29,44 +29,61 @@ type PDataTF struct {
 }
 
 // ReadDynamic - ReadDynamic
-func (pd *PDataTF) ReadDynamic(conn net.Conn) bool {
+func (pd *PDataTF) ReadDynamic(conn net.Conn) (err error) {
 	var Count uint32
 
 	if pd.Length == 0 {
-		pd.Reserved1 = ReadByte(conn)
-		pd.Length = ReadUint32(conn)
+		pd.Reserved1, err = ReadByte(conn)
+		if err != nil {
+			return
+		}
+		pd.Length, err = ReadUint32(conn)
+		if err != nil {
+			return
+		}
 	}
+
 	Count = pd.Length
 	pd.MsgStatus = 0
+
 	for Count > 0 {
-		pd.pdv.Length = ReadUint32(conn)
-		pd.pdv.PresentationContextID = ReadByte(conn)
-		pd.pdv.MsgHeader = ReadByte(conn)
+		pd.pdv.Length, err = ReadUint32(conn)
+		if err != nil {
+			return
+		}
+		pd.pdv.PresentationContextID, err = ReadByte(conn)
+		if err != nil {
+			return
+		}
+		pd.pdv.MsgHeader, err = ReadByte(conn)
+		if err != nil {
+			return
+		}
+
 		buff := make([]byte, pd.pdv.Length-2)
 		_, err := conn.Read(buff)
 		if err != nil {
-			log.Println("ERROR, pdata::ReadDynamic, "+err.Error())
-			return false
+			return errors.New("ERROR, pdata::ReadDynamic, " + err.Error())
 		}
-		pd.Buffer.Ms.Write(buff, int(pd.pdv.Length-2))
+		pd.Buffer.Write(buff, int(pd.pdv.Length-2))
 		Count = Count - pd.pdv.Length - 4
 		pd.Length = pd.Length - pd.pdv.Length - 4
 		if pd.pdv.MsgHeader&0x02 > 0 {
 			pd.MsgStatus = 1
 			pd.PresentationContextID = pd.pdv.PresentationContextID
-			return true
+			return nil
 		}
 	}
 	if pd.pdv.MsgHeader&0x02 > 0 {
 		pd.MsgStatus = 1
 	}
 	pd.PresentationContextID = pd.pdv.PresentationContextID
-	return true
+	return nil
 }
 
-func (pd *PDataTF) Write(conn net.Conn) bool {
-	TotalSize := uint32(pd.Buffer.Ms.Size)
-	pd.Buffer.Ms.Position = 0
+func (pd *PDataTF) Write(conn net.Conn) error {
+	TotalSize := uint32(pd.Buffer.GetSize())
+	pd.Buffer.SetPosition(0)
 	if pd.BlockSize == 0 {
 		pd.BlockSize = 4096
 	}
@@ -87,33 +104,29 @@ func (pd *PDataTF) Write(conn net.Conn) bool {
 		pd.Length = pd.pdv.Length + 4
 		pd.ItemType = 0x04
 		pd.Reserved1 = 0
-		var bd media.BufData
+		bd := media.NewEmptyBufData()
 
-		bd.BigEndian = true
+		bd.SetBigEndian(true)
 		bd.WriteByte(pd.ItemType)
 		bd.WriteByte(pd.Reserved1)
 		bd.WriteUint32(pd.Length)
 		bd.WriteUint32(pd.pdv.Length)
 		bd.WriteByte(pd.pdv.PresentationContextID)
 		bd.WriteByte(pd.MsgHeader)
-		if bd.Send(conn) {
-			buff := make([]byte, pd.BlockSize)
-			pd.Buffer.Ms.Read(buff, int(pd.BlockSize))
+		if err := bd.Send(conn); err == nil {
+			buff, err := pd.Buffer.Read(int(pd.BlockSize))
 			n, err := conn.Write(buff)
 			if err != nil {
-				log.Println("ERROR, pdata::Write, "+err.Error())
-				return false
+				return errors.New("ERROR, pdata::Write, " + err.Error())
 			}
 			if n != int(pd.BlockSize) {
-				log.Println("ERROR, pdata::Write, n!=int(pd.BlockSize)")
-				return false
+				return errors.New("ERROR, pdata::Write, n!=int(pd.BlockSize)")
 			}
 		} else {
-			log.Println("ERROR, pdata::Write, bd.Send(conn) failed")
-			return false
+			return errors.New("ERROR, pdata::Write, bd.Send(conn) failed")
 		}
 		SentSize += pd.BlockSize
 	}
 	pd.Length = TLength
-	return true
+	return nil
 }

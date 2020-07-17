@@ -1,16 +1,151 @@
 package services
 
 import (
-	"log"
+	"errors"
+	"strconv"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+
+	"git.onebytedata.com/OneByteDataPlatform/one-byte-module/models"
 )
 
-func OpenAssociation(pdu *network.PDUService, LAET string, RAET string, RIP string, RPort string, AbstractSyntax string, timeout int) bool {
+// SCU - inteface to a scu
+type SCU interface {
+	EchoSCU(timeout int) error
+	FindSCU(Query media.DcmObj, Results *[]media.DcmObj, timeout int) (int, error)
+	MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, error)
+	StoreSCU(FileName string, timeout int) error
+	openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error
+	writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) (int, error)
+}
+
+type scu struct {
+	destination *models.Destination
+}
+
+// NewSCU - Creates an interface to scu
+func NewSCU(destination *models.Destination) SCU {
+	return &scu{
+		destination: destination,
+	}
+}
+
+func (d *scu) EchoSCU(timeout int) error {
+	pdu := network.NewPDUService()
+	err := d.openAssociation(pdu, "1.2.840.10008.1.1", timeout)
+	if err != nil {
+		return err
+	}
+	err = dimsec.CEchoWriteRQ(pdu, "1.2.840.10008.1.1")
+	if err != nil {
+		return err
+	}
+	err = dimsec.CEchoReadRSP(pdu)
+	if err != nil {
+		return err
+	}
+	pdu.Close()
+	return nil
+}
+
+func (d *scu) FindSCU(Query media.DcmObj, Results *[]media.DcmObj, timeout int) (int, error) {
+	status := 1
+	SOPClassUID := "1.2.840.10008.5.1.4.1.2.2.1"
+
+	pdu := network.NewPDUService()
+	err := d.openAssociation(pdu, SOPClassUID, timeout)
+	if err != nil {
+		return -1, err
+	}
+	err = dimsec.CFindWriteRQ(pdu, Query, SOPClassUID)
+	if err != nil {
+		return -1, err
+	}
+	for (status != -1) && (status != 0) {
+		DDO := media.NewEmptyDCMObj()
+		status, err = dimsec.CFindReadRSP(pdu, DDO)
+		if err != nil {
+			return status, err
+		}
+		if (status == 0xFF00) || (status == 0xFF01) {
+			*Results = append(*Results, DDO)
+		}
+	}
+
+	pdu.Close()
+	return status, nil
+}
+
+func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, error) {
+	var pending int
+	status := 0xFF00
+	SOPClassUID := "1.2.840.10008.5.1.4.1.2.2.2"
+
+	pdu := network.NewPDUService()
+	err := d.openAssociation(pdu, SOPClassUID, timeout)
+	if err != nil {
+		return -1, err
+	}
+	err = dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID, destAET)
+	if err != nil {
+		return -1, err
+	}
+
+	for status == 0xFF00 {
+		DDO := media.NewEmptyDCMObj()
+		status, err = dimsec.CMoveReadRSP(pdu, DDO, &pending)
+		if err != nil {
+			return -1, err
+		}
+		DDO.DumpTags()
+	}
+
+	pdu.Close()
+	return status, nil
+}
+
+func (d *scu) StoreSCU(FileName string, timeout int) error {
+	DDO, err := media.NewDCMObjFromFile(FileName)
+	if err != nil {
+		return err
+	}
+
+	DDO.DumpTags()
+
+	SOPClassUID := DDO.GetString(0x08, 0x16)
+	if len(SOPClassUID) > 0 {
+		pdu := network.NewPDUService()
+		err := d.openAssociation(pdu, SOPClassUID, timeout)
+		if err != nil {
+			return err
+		}
+		r, err := d.writeStoreRQ(pdu, DDO, SOPClassUID)
+		if err != nil {
+			return err
+		}
+		if r != 0x00 {
+			return errors.New("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
+		}
+		c, err := dimsec.CStoreReadRSP(pdu)
+		if err != nil {
+			return err
+		}
+		if c != 0x00 {
+			return errors.New("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
+		}
+
+		pdu.Close()
+		return nil
+	}
+	return errors.New("ERROR, serviceuser::StoreSCU, OpenAssociation failed, RAET: " + d.destination.CalledAE)
+}
+
+func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error {
 	// DICOM Application Context
-	pdu.AssocRQ.SetCallingApTitle(LAET)
-	pdu.AssocRQ.SetCalledApTitle(RAET)
+	pdu.SetCallingAE(d.destination.CallingAE)
+	pdu.SetCalledAE(d.destination.CalledAE)
 	pdu.SetTimeout(timeout)
 
 	network.Resetuniq()
@@ -18,150 +153,45 @@ func OpenAssociation(pdu *network.PDUService, LAET string, RAET string, RIP stri
 	PresContext.SetAbstractSyntax(AbstractSyntax)
 	PresContext.AddTransferSyntax("1.2.840.10008.1.2")
 	PresContext.AddTransferSyntax("1.2.840.10008.1.2.1")
-	pdu.AssocRQ.PresContexts = append(pdu.AssocRQ.PresContexts, *PresContext)
+	pdu.AddPresContexts(PresContext)
 
-	return (pdu.Connect(RIP, RPort))
+	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))
 }
 
-func EchoSCU(LAET string, RAET string, RIP string, RPort string, timeout int) bool {
-	flag := false
-
-	pdu := network.NewPDUService()
-	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, "1.2.840.10008.1.1", timeout) {
-		if dimsec.CEchoWriteRQ(*pdu, "1.2.840.10008.1.1") {
-			if dimsec.CEchoReadRSP(*pdu) {
-				flag = true
-			} else {
-				log.Println("ERROR, serviceuser::EchoSCU, dimsec.CEchoReadRSP failed")
-			}
-		} else {
-			log.Println("ERROR, serviceuser::EchoSCU, dimsec.CEchoWriteRQ failed")
-		}
-	} else {
-		log.Println("ERROR, serviceuser::EchoSCU, OpenAssociation failed, RAET: "+RAET)
-	}
-	pdu.Close()
-	return flag
-}
-
-func WriteStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) int {
+func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) (int, error) {
 	status := -1
 
-	PCID := pdu.Pdata.PresentationContextID
+	PCID := pdu.GetPresentationContextID()
 	if PCID == 0 {
-		log.Println("ERROR, serviceuser::WriteStoreRQ, PCID==0")
-		return -1
+		return -1, errors.New("ERROR, serviceuser::WriteStoreRQ, PCID==0")
 	}
 	TrnSyntOUT := pdu.GetTransferSyntaxUID(PCID)
 
 	if len(TrnSyntOUT) == 0 {
-		log.Println("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
-		return -2
+		return -1, errors.New("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
 	}
 
-	if TrnSyntOUT == DDO.TransferSyntax {
-		if dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID) {
-			status = 0
-		} else {
-			log.Println("ERROR, serviceuser::WriteStoreRQ, dimsec.CStoreWriteRQ failed")
-			status = -4
+	if TrnSyntOUT == DDO.GetTransferSynxtax() {
+		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
+		if err != nil {
+			return status, err
 		}
 	} else {
-		DDO.TransferSyntax = TrnSyntOUT
-		DDO.ExplicitVR = true
-		DDO.BigEndian = false
+		DDO.SetTransferSyntax(TrnSyntOUT)
+		DDO.SetExplicitVR(true)
+		DDO.SetBigEndian(false)
 		if TrnSyntOUT == "1.2.840.10008.1.2" {
-			DDO.ExplicitVR = false
+			DDO.SetExplicitVR(false)
 		}
 		if TrnSyntOUT == "1.2.840.10008.1.2.2" {
-			DDO.BigEndian = true
+			DDO.SetBigEndian(true)
 		}
-		if dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID) {
-			status = 0
-		} else {
-			log.Println("ERROR, serviceuser::WriteStoreRQ, dimsec.CStoreWriteRQ failed")
-			status = -4
+		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
+		if err != nil {
+			return -1, err
 		}
+		status = 0
 	}
 
-	return status
-}
-
-func StoreSCU(LAET string, RAET string, RIP string, RPort string, FileName string, timeout int) bool {
-	flag := false
-	var DDO media.DcmObj
-
-	if DDO.Read(FileName) {
-		SOPClassUID := DDO.GetString(0x08, 0x16)
-		if len(SOPClassUID) > 0 {
-			pdu := network.NewPDUService()
-			if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
-				if WriteStoreRQ(*pdu, DDO, SOPClassUID) == 0x00 {
-					if dimsec.CStoreReadRSP(*pdu) == 0x00 {
-						flag = true
-					} else {
-						log.Println("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
-					}
-				} else {
-					log.Println("ERROR, serviceuser::StoreSCU, dimsec.CStoreWriteRQ failed")
-				}
-			} else {
-				log.Println("ERROR, serviceuser::StoreSCU, OpenAssociation failed, RAET: "+RAET)
-			}
-			pdu.Close()
-		} else {
-			log.Println("ERROR, serviceuser::StoreSCU, SOPClassUID is empty")			
-		}
-	} else {
-		log.Println("ERROR, serviceuser::StoreSCU, DDO.Read failed for: "+FileName)
-	}
-	return flag
-}
-
-func FindSCU(LAET string, RAET string, RIP string, RPort string, Query media.DcmObj, Results *[]media.DcmObj, timeout int) int {
-	status := 1
-	var DDO media.DcmObj
-	SOPClassUID := "1.2.840.10008.5.1.4.1.2.2.1"
-
-	pdu := network.NewPDUService()
-	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
-		if dimsec.CFindWriteRQ(*pdu, Query, SOPClassUID) {
-			for (status!=-1) && (status!=0) {
-				status = dimsec.CFindReadRSP(*pdu, &DDO)
-				if (status==0xFF00)||(status==0xFF01) {
-					*Results = append(*Results, DDO)
-				} 
-				DDO.Clear();
-			}
-		} else {
-			log.Println("ERROR, serviceuser::FindSCU, dimsec.CFindWriteRQ failed")
-		}
-	} else {
-		log.Println("ERROR, serviceuser::FindSCU, OpenAssociation failed, RAET: "+RAET)
-	}
-	pdu.Close()
-	return status
-}
-
-func MoveSCU(LAET string, RAET string, RIP string, RPort string, destAET string, Query media.DcmObj, timeout int) int {
-	var pending int
-	status := 0xFF00
-	SOPClassUID := "1.2.840.10008.5.1.4.1.2.2.2"
-
-	pdu := network.NewPDUService()
-	if OpenAssociation(pdu, LAET, RAET, RIP, RPort, SOPClassUID, timeout) {
-		if dimsec.CMoveWriteRQ(*pdu, Query, SOPClassUID, destAET) {
-			var DDO media.DcmObj
-			for status == 0xFF00 {
-				status = dimsec.CMoveReadRSP(*pdu, &DDO, &pending)
-				DDO.Clear()
-			}
-		} else {
-			log.Println("ERROR, serviceuser::MoveSCU, dimsec.CMoveWriteRQ failed")
-		}
-	} else {
-		log.Println("ERROR, serviceuser::MoveSCU, OpenAssociation failed, RAET: "+RAET)
-	}
-	pdu.Close()
-	return status
+	return status, nil
 }

@@ -1,15 +1,30 @@
 package network
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
-	
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
 // PresentationContext - PresentationContext
-type PresentationContext struct {
+type PresentationContext interface {
+	GetPresentationContextID() byte
+	SetPresentationContextID(id byte)
+	GetAbstractSyntax() UIDitem
+	SetAbstractSyntax(Abst string)
+	AddTransferSyntax(Tran string)
+	GetTransferSyntaxes() []UIDitem
+	Size() uint16
+	Write(conn net.Conn) error
+	Read(conn net.Conn) (bool, error)
+	ReadDynamic(conn net.Conn) (bool, error)
+}
+
+type presentationContext struct {
 	ItemType              byte //0x20
 	Reserved1             byte
 	Length                uint16
@@ -22,15 +37,42 @@ type PresentationContext struct {
 }
 
 // NewPresentationContext - NewPresentationContext
-func NewPresentationContext() *PresentationContext {
-	return &PresentationContext{
+func NewPresentationContext() PresentationContext {
+	return &presentationContext{
 		ItemType:              0x20,
 		PresentationContextID: Uniq8odd(),
 	}
 }
 
-// Size - Size
-func (pc *PresentationContext) Size() uint16 {
+func (pc *presentationContext) GetPresentationContextID() byte {
+	return pc.PresentationContextID
+}
+
+func (pc *presentationContext) SetPresentationContextID(id byte) {
+	pc.PresentationContextID = id
+}
+
+func (pc *presentationContext) GetAbstractSyntax() UIDitem {
+	return pc.AbsSyntax
+}
+
+func (pc *presentationContext) SetAbstractSyntax(Abst string) {
+	pc.AbsSyntax.ItemType = 0x30
+	pc.AbsSyntax.Reserved1 = 0x00
+	pc.AbsSyntax.UIDName = Abst
+	pc.AbsSyntax.Length = uint16(len(Abst))
+}
+
+func (pc *presentationContext) AddTransferSyntax(Tran string) {
+	TrnSyntax := NewUIDitem(Tran, 0x40)
+	pc.TrnSyntaxs = append(pc.TrnSyntaxs, *TrnSyntax)
+}
+
+func (pc *presentationContext) GetTransferSyntaxes() []UIDitem {
+	return pc.TrnSyntaxs
+}
+
+func (pc *presentationContext) Size() uint16 {
 	pc.Length = 4
 	pc.Length += pc.AbsSyntax.Size()
 	for i := 0; i < len(pc.TrnSyntaxs); i++ {
@@ -40,25 +82,10 @@ func (pc *PresentationContext) Size() uint16 {
 	return pc.Length + 4
 }
 
-// SetAbstractSyntax - SetAbstractSyntax
-func (pc *PresentationContext) SetAbstractSyntax(Abst string) {
-	pc.AbsSyntax.ItemType = 0x30
-	pc.AbsSyntax.Reserved1 = 0x00
-	pc.AbsSyntax.UIDName = Abst
-	pc.AbsSyntax.Length = uint16(len(Abst))
-}
+func (pc *presentationContext) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
 
-// AddTransferSyntax - AddTransferSyntax
-func (pc *PresentationContext) AddTransferSyntax(Tran string) {
-	TrnSyntax := NewUIDitem(Tran, 0x40)
-	pc.TrnSyntaxs = append(pc.TrnSyntaxs, *TrnSyntax)
-}
-
-func (pc *PresentationContext) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
-
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	pc.Size()
 	bd.WriteByte(pc.ItemType)
 	bd.WriteByte(pc.Reserved1)
@@ -67,29 +94,60 @@ func (pc *PresentationContext) Write(conn net.Conn) bool {
 	bd.WriteByte(pc.Reserved2)
 	bd.WriteByte(pc.Reserved3)
 	bd.WriteByte(pc.Reserved4)
-	if bd.Send(conn) {
-		flag = pc.AbsSyntax.Write(conn)
-		for i := 0; i < len(pc.TrnSyntaxs); i++ {
-			TrnSyntax := pc.TrnSyntaxs[i]
-			TrnSyntax.Write(conn)
+	err := bd.Send(conn)
+	if err != nil {
+		return err
+	}
+	err = pc.AbsSyntax.Write(conn)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(pc.TrnSyntaxs); i++ {
+		TrnSyntax := pc.TrnSyntaxs[i]
+		err := TrnSyntax.Write(conn)
+		if err != nil {
+			return err
 		}
 	}
-	return flag
+	return nil
 }
 
-func (pc *PresentationContext) Read(conn net.Conn) bool {
-	pc.ItemType = ReadByte(conn)
+func (pc *presentationContext) Read(conn net.Conn) (bool, error) {
+	var err error
+	pc.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
 	return pc.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
-	pc.Reserved1 = ReadByte(conn)
-	pc.Length = ReadUint16(conn)
-	pc.PresentationContextID = ReadByte(conn)
-	pc.Reserved2 = ReadByte(conn)
-	pc.Reserved3 = ReadByte(conn)
-	pc.Reserved4 = ReadByte(conn)
+func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
+	var err error
+	pc.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	pc.Length, err = ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+	pc.PresentationContextID, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	pc.Reserved2, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	pc.Reserved3, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	pc.Reserved4, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
 
 	pc.AbsSyntax.Read(conn)
 	Count := pc.Length - 4 - pc.AbsSyntax.Size()
@@ -102,21 +160,42 @@ func (pc *PresentationContext) ReadDynamic(conn net.Conn) bool {
 		}
 	}
 	if Count == 0 {
-		return true
+		return true, nil
 	}
-	log.Println("ERROR, pc::ReadDynamic, Count is not zero")
-	return false
+	return false, errors.New("ERROR, pc::ReadDynamic, Count is not zero")
 }
 
 // AAssociationRQ - AAssociationRQ
-type AAssociationRQ struct {
+type AAssociationRQ interface {
+	GetAppContext() UIDitem
+	SetAppContext(context UIDitem)
+	GetCallingAE() string
+	SetCallingAE(AET string)
+	GetCalledAE() string
+	SetCalledAE(AET string)
+	GetPresContexts() []PresentationContext
+	GetUserInformation() UserInformation
+	SetUserInformation(userInfo UserInformation)
+	GetMaxSubLength() uint32
+	SetMaxSubLength(length uint32)
+	GetImpClass() UIDitem
+	SetImpClassUID(uid string)
+	SetImpVersionName(name string)
+	Size() uint32
+	Write(conn net.Conn) error
+	Read(conn net.Conn) error
+	ReadDynamic(conn net.Conn) error
+	AddPresContexts(presentationContext PresentationContext)
+}
+
+type aassociationRQ struct {
 	ItemType        byte // 0x01
 	Reserved1       byte
 	Length          uint32
 	ProtocolVersion uint16 // 0x01
 	Reserved2       uint16
-	CallingApTitle  [16]byte // 16 bytes transfered
-	CalledApTitle   [16]byte // 16 bytes transfered
+	CallingAE       [16]byte // 16 bytes transfered
+	CalledAE        [16]byte // 16 bytes transfered
 	Reserved3       [32]byte
 	AppContext      UIDitem
 	PresContexts    []PresentationContext
@@ -124,8 +203,8 @@ type AAssociationRQ struct {
 }
 
 // NewAAssociationRQ - NewAAssociationRQ
-func NewAAssociationRQ() *AAssociationRQ {
-	return &AAssociationRQ{
+func NewAAssociationRQ() AAssociationRQ {
+	return &aassociationRQ{
 		ItemType:        0x01,
 		Reserved1:       0x00,
 		ProtocolVersion: 0x01,
@@ -136,22 +215,68 @@ func NewAAssociationRQ() *AAssociationRQ {
 			UIDName:   "1.2.840.10008.3.1.1.1",
 			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
 		},
-		UserInfo: *NewUserInformation(),
+		PresContexts: make([]PresentationContext, 0),
+		UserInfo:     *NewUserInformation(),
 	}
 }
 
-// SetCallingApTitle - SetCallingApTitle
-func (aarq *AAssociationRQ) SetCallingApTitle(AET string) {
-	copy(aarq.CallingApTitle[:], AET)
+func (aarq *aassociationRQ) GetAppContext() UIDitem {
+	return aarq.AppContext
 }
 
-// SetCalledApTitle - SetCalledApTitle
-func (aarq *AAssociationRQ) SetCalledApTitle(AET string) {
-	copy(aarq.CalledApTitle[:], AET)
+func (aarq *aassociationRQ) SetAppContext(context UIDitem) {
+	aarq.AppContext = context
 }
 
-// Size - Size
-func (aarq *AAssociationRQ) Size() uint32 {
+func (aarq *aassociationRQ) GetCallingAE() string {
+	return fmt.Sprintf("%s", aarq.CallingAE)
+}
+
+func (aarq *aassociationRQ) SetCallingAE(AET string) {
+	copy(aarq.CallingAE[:], AET)
+}
+
+func (aarq *aassociationRQ) GetCalledAE() string {
+	return fmt.Sprintf("%s", aarq.CalledAE)
+}
+
+func (aarq *aassociationRQ) SetCalledAE(AET string) {
+	copy(aarq.CalledAE[:], AET)
+}
+
+func (aarq *aassociationRQ) GetPresContexts() []PresentationContext {
+	return aarq.PresContexts
+}
+
+func (aarq *aassociationRQ) GetUserInformation() UserInformation {
+	return aarq.UserInfo
+}
+
+func (aarq *aassociationRQ) SetUserInformation(userInfo UserInformation) {
+	aarq.UserInfo = userInfo
+}
+
+func (aarq *aassociationRQ) GetMaxSubLength() uint32 {
+	return aarq.UserInfo.MaxSubLength.MaximumLength
+}
+
+func (aarq *aassociationRQ) SetMaxSubLength(length uint32) {
+	aarq.UserInfo.MaxSubLength.MaximumLength = length
+}
+
+func (aarq *aassociationRQ) GetImpClass() UIDitem {
+	return aarq.UserInfo.ImpClass
+}
+
+func (aarq *aassociationRQ)	SetImpClassUID(uid string) {
+	aarq.UserInfo.SetImpClassUID(uid)
+}
+
+func (aarq *aassociationRQ) SetImpVersionName(name string) {
+	aarq.UserInfo.SetImpVersionName(name)
+}
+
+func (aarq *aassociationRQ) Size() uint32 {
 	aarq.Length = 4 + 16 + 16 + 32
 	aarq.Length += uint32(aarq.AppContext.Size())
 
@@ -163,51 +288,74 @@ func (aarq *AAssociationRQ) Size() uint32 {
 	return aarq.Length + 6
 }
 
-func (aarq *AAssociationRQ) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+func (aarq *aassociationRQ) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	aarq.Size()
 	bd.WriteByte(aarq.ItemType)
 	bd.WriteByte(aarq.Reserved1)
 	bd.WriteUint32(aarq.Length)
 	bd.WriteUint16(aarq.ProtocolVersion)
 	bd.WriteUint16(aarq.Reserved2)
-	bd.Ms.Write(aarq.CalledApTitle[:], 16)
-	bd.Ms.Write(aarq.CallingApTitle[:], 16)
-	bd.Ms.Write(aarq.Reserved3[:], 32)
+	bd.Write(aarq.CalledAE[:], 16)
+	bd.Write(aarq.CallingAE[:], 16)
+	bd.Write(aarq.Reserved3[:], 32)
 
-	if bd.Send(conn) {
-		flag = aarq.AppContext.Write(conn)
+	if err := bd.Send(conn); err == nil {
+		err = aarq.AppContext.Write(conn)
+		if err != nil {
+			return err
+		}
 		for i := 0; i < len(aarq.PresContexts); i++ {
 			PresContext := aarq.PresContexts[i]
 			PresContext.Write(conn)
 		}
 		aarq.UserInfo.Write(conn)
 	}
-	return flag
+	return nil
 }
 
-func (aarq *AAssociationRQ) Read(conn net.Conn) bool {
-	aarq.ItemType = ReadByte(conn)
+func (aarq *aassociationRQ) Read(conn net.Conn) error {
+	var err error
+	aarq.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return err
+	}
 	return aarq.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
-func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
-	aarq.Reserved1 = ReadByte(conn)
-	aarq.Length = ReadUint32(conn)
-	aarq.ProtocolVersion = ReadUint16(conn)
-	aarq.Reserved2 = ReadUint16(conn)
-	conn.Read(aarq.CalledApTitle[:])
-	conn.Read(aarq.CallingApTitle[:])
+func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) error {
+	var err error
+	aarq.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return err
+	}
+	aarq.Length, err = ReadUint32(conn)
+	if err != nil {
+		return err
+	}
+	aarq.ProtocolVersion, err = ReadUint16(conn)
+	if err != nil {
+		return err
+	}
+	aarq.Reserved2, err = ReadUint16(conn)
+	if err != nil {
+		return err
+	}
+
+	conn.Read(aarq.CalledAE[:])
+	conn.Read(aarq.CallingAE[:])
 	conn.Read(aarq.Reserved3[:])
 
 	var Count int
 	Count = int(aarq.Length - 4 - 16 - 16 - 32)
 	for Count > 0 {
-		TempByte := ReadByte(conn)
+		TempByte, err := ReadByte(conn)
+		if err != nil {
+			return err
+		}
+
 		switch TempByte {
 		case 0x10:
 			aarq.AppContext.ItemType = TempByte
@@ -218,7 +366,7 @@ func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
 			PresContext := NewPresentationContext()
 			PresContext.ReadDynamic(conn)
 			Count = Count - int(PresContext.Size())
-			aarq.PresContexts = append(aarq.PresContexts, *PresContext)
+			aarq.PresContexts = append(aarq.PresContexts, PresContext)
 			break
 		case 0x50: // User Information
 			aarq.UserInfo.ItemType = TempByte
@@ -226,13 +374,16 @@ func (aarq *AAssociationRQ) ReadDynamic(conn net.Conn) bool {
 			Count = Count - int(aarq.UserInfo.Size())
 			break
 		default:
-			log.Println("ERROR, aarq::ReadDynamic, unknown Item, "+strconv.Itoa(int(TempByte)))
+			log.Println("ERROR, aarq::ReadDynamic, unknown Item, " + strconv.Itoa(int(TempByte)))
 			Count = -1
 		}
 	}
 	if Count == 0 {
-		return true
+		return nil
 	}
-	log.Println("ERROR, aarq::ReadDynamic, Count is not zero")
-	return (false)
+	return errors.New("ERROR, aarq::ReadDynamic, Count is not zero")
+}
+
+func (aarq *aassociationRQ) AddPresContexts(presentationContext PresentationContext) {
+	aarq.PresContexts = append(aarq.PresContexts, presentationContext)
 }

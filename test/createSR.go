@@ -2,15 +2,19 @@ package main
 
 import (
 	"fmt"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"log"
 	"strconv"
+
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
 func createSR() {
 	sq := 0
 	media.InitDict()
-	var obj media.DcmObj
-	obj.Read("test.dcm")
+	obj, err := media.NewDCMObjFromFile("test.dcm")
+	if err != nil {
+		log.Panic(err)
+	}
 
 	for i := 0; i < obj.TagCount(); i++ {
 		tag := obj.GetTag(i)
@@ -34,13 +38,14 @@ func createSR() {
 			sq--
 		}
 	}
+
 	//	obj.Write("output.dcm")
-	var srobj media.DcmObj
+	srobj := media.NewEmptyDCMObj()
 	var study media.DCMStudy
 
-	srobj.ExplicitVR = true
-	srobj.BigEndian = false
-	srobj.TransferSyntax = "1.2.840.10008.1.2.1"
+	srobj.SetExplicitVR(true)
+	srobj.SetBigEndian(false)
+	srobj.SetTransferSyntax("1.2.840.10008.1.2.1")
 
 	study.AccessionNumber = "123456"
 	study.Description = "Complete Thorax"
@@ -55,5 +60,5 @@ func createSR() {
 	study.ReportText = "This is a normal study, nothing to report."
 	study.StudyInstanceUID = "9999.9999.1"
 	srobj.CreateSR(study, "8888.8888.1", "7777.7777.1")
-	srobj.Write("samplesr.dcm")
+	srobj.WriteToFile("samplesr.dcm")
 }

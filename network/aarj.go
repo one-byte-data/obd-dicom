@@ -7,7 +7,14 @@ import (
 )
 
 // AAssociationRJ association reject struct
-type AAssociationRJ struct {
+type AAssociationRJ interface {
+	Size() uint32
+	Write(conn net.Conn) error
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
+}
+
+type aassociationRJ struct {
 	ItemType  byte // 0x03
 	Reserved1 byte
 	Length    uint32
@@ -18,8 +25,8 @@ type AAssociationRJ struct {
 }
 
 // NewAAssociationRJ creates an association reject
-func NewAAssociationRJ() *AAssociationRJ {
-	return &AAssociationRJ{
+func NewAAssociationRJ() AAssociationRJ {
+	return &aassociationRJ{
 		ItemType:  0x03,
 		Reserved1: 0x00,
 		Reserved2: 0x00,
@@ -30,16 +37,15 @@ func NewAAssociationRJ() *AAssociationRJ {
 }
 
 // Size gets the size
-func (aarj *AAssociationRJ) Size() uint32 {
+func (aarj *aassociationRJ) Size() uint32 {
 	aarj.Length = 4
 	return aarj.Length + 6
 }
 
-func (aarj *AAssociationRJ) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+func (aarj *aassociationRJ) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	aarj.Size()
 	bd.WriteByte(aarj.ItemType)
 	bd.WriteByte(aarj.Reserved1)
@@ -49,28 +55,52 @@ func (aarj *AAssociationRJ) Write(conn net.Conn) bool {
 	bd.WriteByte(aarj.Source)
 	bd.WriteByte(aarj.Reason)
 
-	flag = bd.Send(conn)
-	return flag
+	return bd.Send(conn)
 }
 
-func (aarj *AAssociationRJ) Read(conn net.Conn) bool {
-	aarj.ItemType = ReadByte(conn)
+func (aarj *aassociationRJ) Read(conn net.Conn) (err error) {
+	aarj.ItemType, err = ReadByte(conn)
 	return aarj.ReadDynamic(conn)
 }
 
 // ReadDynamic ReadDynamic
-func (aarj *AAssociationRJ) ReadDynamic(conn net.Conn) bool {
-	aarj.Reserved1 = ReadByte(conn)
-	aarj.Length = ReadUint32(conn)
-	aarj.Reserved2 = ReadByte(conn)
-	aarj.Result = ReadByte(conn)
-	aarj.Source = ReadByte(conn)
-	aarj.Reason = ReadByte(conn)
-	return true
+func (aarj *aassociationRJ) ReadDynamic(conn net.Conn) (err error) {
+	aarj.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarj.Length, err = ReadUint32(conn)
+	if err != nil {
+		return
+	}
+	aarj.Reserved2, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarj.Result, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarj.Source, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarj.Reason, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	return
 }
 
 // AReleaseRQ AReleaseRQ
-type AReleaseRQ struct {
+type AReleaseRQ interface {
+	Size() uint32
+	Write(conn net.Conn) error
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
+}
+
+type areleaseRQ struct {
 	ItemType  byte // 0x05
 	Reserved1 byte
 	Length    uint32
@@ -78,8 +108,8 @@ type AReleaseRQ struct {
 }
 
 // NewAReleaseRQ NewAReleaseRQ
-func NewAReleaseRQ() *AReleaseRQ {
-	return &AReleaseRQ{
+func NewAReleaseRQ() AReleaseRQ {
+	return &areleaseRQ{
 		ItemType:  0x05,
 		Reserved1: 0x00,
 		Reserved2: 0x00,
@@ -87,41 +117,55 @@ func NewAReleaseRQ() *AReleaseRQ {
 }
 
 // Size gets the size
-func (arrq *AReleaseRQ) Size() uint32 {
+func (arrq *areleaseRQ) Size() uint32 {
 	arrq.Length = 4
 	return arrq.Length + 6
 }
 
-func (arrq *AReleaseRQ) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+func (arrq *areleaseRQ) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	arrq.Size()
 	bd.WriteByte(arrq.ItemType)
 	bd.WriteByte(arrq.Reserved1)
 	bd.WriteUint32(arrq.Length)
 	bd.WriteUint32(arrq.Reserved2)
 
-	flag = bd.Send(conn)
-	return flag
+	return bd.Send(conn)
 }
 
-func (arrq *AReleaseRQ) Read(conn net.Conn) bool {
-	arrq.ItemType = ReadByte(conn)
+func (arrq *areleaseRQ) Read(conn net.Conn) (err error) {
+	arrq.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
 	return arrq.ReadDynamic(conn)
 }
 
 // ReadDynamic ReadDynamic
-func (arrq *AReleaseRQ) ReadDynamic(conn net.Conn) bool {
-	arrq.Reserved1 = ReadByte(conn)
-	arrq.Length = ReadUint32(conn)
-	arrq.Reserved2 = ReadUint32(conn)
-	return true
+func (arrq *areleaseRQ) ReadDynamic(conn net.Conn) (err error) {
+	arrq.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	arrq.Length, err = ReadUint32(conn)
+	if err != nil {
+		return
+	}
+	arrq.Reserved2, err = ReadUint32(conn)
+	return
 }
 
 // AReleaseRP - AReleaseRP
-type AReleaseRP struct {
+type AReleaseRP interface {
+	Size() uint32
+	Write(conn net.Conn) error
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
+}
+
+type areleaseRP struct {
 	ItemType  byte // 0x06
 	Reserved1 byte
 	Length    uint32
@@ -129,8 +173,8 @@ type AReleaseRP struct {
 }
 
 // NewAReleaseRP - NewAReleaseRP
-func NewAReleaseRP() *AReleaseRP {
-	return &AReleaseRP{
+func NewAReleaseRP() AReleaseRP {
+	return &areleaseRP{
 		ItemType:  0x06,
 		Reserved1: 0x00,
 		Reserved2: 0x00,
@@ -138,41 +182,55 @@ func NewAReleaseRP() *AReleaseRP {
 }
 
 // Size gets the size
-func (arrp *AReleaseRP) Size() uint32 {
+func (arrp *areleaseRP) Size() uint32 {
 	arrp.Length = 4
 	return arrp.Length + 6
 }
 
-func (arrp *AReleaseRP) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+func (arrp *areleaseRP) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	arrp.Size()
 	bd.WriteByte(arrp.ItemType)
 	bd.WriteByte(arrp.Reserved1)
 	bd.WriteUint32(arrp.Length)
 	bd.WriteUint32(arrp.Reserved2)
 
-	flag = bd.Send(conn)
-	return flag
+	return bd.Send(conn)
 }
 
-func (arrp *AReleaseRP) Read(conn net.Conn) bool {
-	arrp.ItemType = ReadByte(conn)
+func (arrp *areleaseRP) Read(conn net.Conn) (err error) {
+	arrp.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
 	return arrp.ReadDynamic(conn)
 }
 
 // ReadDynamic ReadDynamic
-func (arrp *AReleaseRP) ReadDynamic(conn net.Conn) bool {
-	arrp.Reserved1 = ReadByte(conn)
-	arrp.Length = ReadUint32(conn)
-	arrp.Reserved2 = ReadUint32(conn)
-	return true
+func (arrp *areleaseRP) ReadDynamic(conn net.Conn) (err error) {
+	arrp.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	arrp.Length, err = ReadUint32(conn)
+	if err != nil {
+		return
+	}
+	arrp.Reserved2, err = ReadUint32(conn)
+	return
 }
 
 // AAbortRQ - AAbortRQ
-type AAbortRQ struct {
+type AAbortRQ interface {
+	Size() uint32
+	Write(conn net.Conn) error
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
+}
+
+type aabortRQ struct {
 	ItemType  byte // 0x07
 	Reserved1 byte
 	Length    uint32
@@ -183,8 +241,8 @@ type AAbortRQ struct {
 }
 
 // NewAAbortRQ - NewAAbortRQ
-func NewAAbortRQ() *AAbortRQ {
-	return &AAbortRQ{
+func NewAAbortRQ() AAbortRQ {
+	return &aabortRQ{
 		ItemType:  0x07,
 		Reserved1: 0x00,
 		Reserved2: 0x00,
@@ -195,16 +253,15 @@ func NewAAbortRQ() *AAbortRQ {
 }
 
 // Size gets the size
-func (aarq *AAbortRQ) Size() uint32 {
+func (aarq *aabortRQ) Size() uint32 {
 	aarq.Length = 4
 	return aarq.Length + 6
 }
 
-func (aarq *AAbortRQ) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+func (aarq *aabortRQ) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	aarq.Size()
 	bd.WriteByte(aarq.ItemType)
 	bd.WriteByte(aarq.Reserved1)
@@ -214,22 +271,39 @@ func (aarq *AAbortRQ) Write(conn net.Conn) bool {
 	bd.WriteByte(aarq.Source)
 	bd.WriteByte(aarq.Reason)
 
-	flag = bd.Send(conn)
-	return flag
+	return bd.Send(conn)
 }
 
-func (aarq *AAbortRQ) Read(conn net.Conn) bool {
-	aarq.ItemType = ReadByte(conn)
+func (aarq *aabortRQ) Read(conn net.Conn) (err error) {
+	aarq.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
 	return aarq.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (aarq *AAbortRQ) ReadDynamic(conn net.Conn) bool {
-	aarq.Reserved1 = ReadByte(conn)
-	aarq.Length = ReadUint32(conn)
-	aarq.Reserved2 = ReadByte(conn)
-	aarq.Reserved3 = ReadByte(conn)
-	aarq.Source = ReadByte(conn)
-	aarq.Reason = ReadByte(conn)
-	return true
+func (aarq *aabortRQ) ReadDynamic(conn net.Conn) (err error) {
+	aarq.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarq.Length, err = ReadUint32(conn)
+	if err != nil {
+		return
+	}
+	aarq.Reserved2, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarq.Reserved3, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarq.Source, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	aarq.Reason, err = ReadByte(conn)
+	return
 }

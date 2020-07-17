@@ -1,7 +1,8 @@
 package dimsec
 
 import (
-	"log"
+	"errors"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
@@ -12,11 +13,10 @@ func CEchoReadRQ(pdu network.PDUService, DCO media.DcmObj) bool {
 }
 
 // CEchoWriteRQ CEcho request write
-func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) bool {
-	var DCO media.DcmObj
+func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) error {
+	DCO := media.NewEmptyDCMObj()
 	var size uint32
 	var valor uint16
-	flag := false
 
 	valor = uint16(len(SOPClassUID))
 	if valor%2 == 1 {
@@ -31,33 +31,31 @@ func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) bool {
 	DCO.WriteUint16(0x00, 0x0110, "US", network.Uniq16odd()) //Message ID
 	DCO.WriteUint16(0x00, 0x0800, "US", 0x0101)              //Data Set type
 
-	flag = pdu.Write(DCO, SOPClassUID, 0x01)
-	return flag
+	return pdu.Write(DCO, SOPClassUID, 0x01)
 }
 
 // CEchoReadRSP CEcho response read
-func CEchoReadRSP(pdu network.PDUService) bool {
-	flag := false
-	var DCO media.DcmObj
+func CEchoReadRSP(pdu network.PDUService) error {
+	DCO := media.NewEmptyDCMObj()
 
-	if pdu.Read(&DCO) == false {
-		log.Println("ERROR, CEchoReadRSP, failed pdu.Read(&DCO)")
-		return false
+	if err := pdu.Read(DCO); err != nil {
+		return errors.New("ERROR, CEchoReadRSP, failed pdu.Read(&DCO)")
 	}
 	if DCO.GetUShort(0x00, 0x0100) == 0x8030 {
-		flag = DCO.GetUShort(0x00, 0x0900) == 0x00
+		if DCO.GetUShort(0x00, 0x0900) == 0x00 {
+
+		}
 	}
-	return flag
+	return nil
 }
 
 // CEchoWriteRSP CEcho response write
-func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) bool {
-	var DCOR media.DcmObj
+func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
+	DCOR := media.NewEmptyDCMObj()
 	var size uint32
 	var valor uint16
-	flag := false
 
-	DCOR.TransferSyntax = DCO.TransferSyntax
+	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
 	SOPClassUID := DCO.GetString(0x00, 0x02)
 	valor = uint16(len(SOPClassUID))
 	if valor > 0 {
@@ -75,7 +73,7 @@ func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) bool {
 		valor = DCO.GetUShort(0x00, 0x0800)
 		DCOR.WriteUint16(0x00, 0x0800, "US", valor) //Data Set type
 		DCOR.WriteUint16(0x00, 0x0900, "US", 0x00)  //Data Set type
-		flag = pdu.Write(DCOR, SOPClassUID, 0x01)
+		return pdu.Write(DCOR, SOPClassUID, 0x01)
 	}
-	return flag
+	return errors.New("ERROR, CEchoReadRSP, unknown error")
 }

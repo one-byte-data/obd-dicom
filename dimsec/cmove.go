@@ -1,13 +1,14 @@
 package dimsec
 
 import (
-	"log"
+	"errors"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
 // CMoveReadRQ CMove request read
-func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bool {
+func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj) error {
 	if DCO.TagCount() != 0 {
 		// Is this a C-Move?
 		if DCO.GetUShort(0x00, 0x100) == 0x21 {
@@ -17,12 +18,12 @@ func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bo
 			}
 		}
 	}
-	return false
+	return errors.New("ERROR, CMoveReadRQ, unknown error")
 }
 
 // CMoveWriteRQ CMove request write
-func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, AETDest string) bool {
-	var DCO media.DcmObj
+func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, AETDest string) error {
+	DCO := media.NewEmptyDCMObj()
 	var size uint32
 	var valor, largo uint16
 
@@ -46,46 +47,44 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 	DCO.WriteUint16(0x00, 0x0700, "US", 0x00)                // Priority
 	DCO.WriteUint16(0x00, 0x0800, "US", 0x0102)              //Data Set type
 
-	if pdu.Write(DCO, SOPClassUID, 0x01) {
-		return pdu.Write(DDO, SOPClassUID, 0x00)
+	err := pdu.Write(DCO, SOPClassUID, 0x01)
+	if err != nil {
+		return err
 	}
-	return false
+	return pdu.Write(DDO, SOPClassUID, 0x00)
 }
 
 // CMoveReadRSP CMove response read
-func CMoveReadRSP(pdu network.PDUService, DDO *media.DcmObj, pending *int) int {
-	var DCO media.DcmObj
+func CMoveReadRSP(pdu network.PDUService, DDO media.DcmObj, pending *int) (int, error) {
+	DCO := media.NewEmptyDCMObj()
 	status := -1
 
-	if pdu.Read(&DCO) == false {
-		log.Println("ERROR, CMoveReadRSP, failed pdu.Read(&DCO)")
-		return status
+	if err := pdu.Read(DCO); err != nil {
+		return status, err
 	}
 	// Is this a C-Find RSP?
 	if DCO.GetUShort(0x00, 0x0100) == 0x8021 {
 		if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-			if pdu.Read(DDO) {
-				status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
-				*pending = int(DCO.GetUShort(0x00, 0x1020))
-			} else {
-				log.Println("ERROR, CMoveReadRSP, failed pdu.Read(DDO)")
-				status = -1
+			err := pdu.Read(DDO)
+			if err != nil {
+				return status, err
 			}
+			status = int(DCO.GetUShort(0x00, 0x0900))
+			*pending = int(DCO.GetUShort(0x00, 0x1020))
 		} else {
-			status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
+			status = int(DCO.GetUShort(0x00, 0x0900))
 			*pending = -1
 		}
 	}
-	return status
+	return status, nil
 }
 
 // CMoveWriteRSP CMove response write
-func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pending uint16) bool {
-	var DCOR media.DcmObj
+func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pending uint16) error {
+	DCOR := media.NewEmptyDCMObj()
 	var size uint32
-	flag := false
 
-	DCOR.TransferSyntax = DCO.TransferSyntax
+	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
 
 	SOPClassUID := DCO.GetString(0x00, 0x02)
 	sopclasslength := uint16(len(SOPClassUID))
@@ -105,7 +104,7 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 		DCOR.WriteUint16(0x00, 0x0900, "US", status)  //Status
 		DCOR.WriteUint16(0x00, 0x1020, "US", pending) //Pending
 
-		flag = pdu.Write(DCOR, SOPClassUID, 0x01)
+		return pdu.Write(DCOR, SOPClassUID, 0x01)
 	}
-	return flag
+	return errors.New("ERROR, CMoveWriteRSP, unknown error")
 }

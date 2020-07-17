@@ -42,20 +42,26 @@ func (ms *MemoryStream) Write(buffer []byte, count int) int {
 	return count
 }
 
+// LoadFromBytes - Load from byte array into MemoryStream
+func (ms *MemoryStream) LoadFromBytes(Data []byte) bool {
+	ms.Write(Data, len(Data))
+	return true
+}
+
 // LoadFromFile - Load from File into MemoryStream
 func (ms *MemoryStream) LoadFromFile(FileName string) bool {
 	flag := false
 
 	file, err := os.Open(FileName)
 	if err != nil {
-		log.Println("ERROR, MemoryStream::LoadFromFile, "+err.Error())
+		log.Println("ERROR, MemoryStream::LoadFromFile, " + err.Error())
 		return flag
 	}
 	defer file.Close()
 
 	stat, err := file.Stat()
 	if err != nil {
-		log.Println("ERROR, MemoryStream::LoadFromFile, "+err.Error())
+		log.Println("ERROR, MemoryStream::LoadFromFile, " + err.Error())
 		return flag
 	}
 
@@ -63,7 +69,7 @@ func (ms *MemoryStream) LoadFromFile(FileName string) bool {
 	bs := make([]byte, size)
 	_, err = file.Read(bs)
 	if err != nil {
-		log.Println("ERROR, MemoryStream::LoadFromFile, "+err.Error())
+		log.Println("ERROR, MemoryStream::LoadFromFile, " + err.Error())
 		return flag
 	}
 	ms.Write(bs, size)
@@ -76,7 +82,7 @@ func (ms *MemoryStream) SaveToFile(FileName string) bool {
 
 	file, err := os.Create(FileName)
 	if err != nil {
-		log.Println("ERROR, MemoryStram::SaveToFile, "+err.Error())
+		log.Println("ERROR, MemoryStram::SaveToFile, " + err.Error())
 		return flag
 	}
 	defer file.Close()
@@ -84,7 +90,7 @@ func (ms *MemoryStream) SaveToFile(FileName string) bool {
 	if ms.Read(bs, ms.Size) != -1 {
 		_, err = file.Write(bs)
 		if err != nil {
-			log.Println("ERROR, MemoryStram::SaveToFile, "+err.Error())
+			log.Println("ERROR, MemoryStram::SaveToFile, " + err.Error())
 			return flag
 		}
 		return true

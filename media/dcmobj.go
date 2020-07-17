@@ -10,7 +10,7 @@ import (
 func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
-			log.Println("ERROR, dcmobj::fileExists, "+err.Error())
+			log.Println("ERROR, dcmobj::fileExists, " + err.Error())
 			return false
 		}
 	}
@@ -31,8 +31,9 @@ func (obj *DcmObj) TagCount() int {
 	return len(obj.Tags)
 }
 
+// Clear - clear tags array
 func (obj *DcmObj) Clear() {
-	obj.Tags=nil
+	obj.Tags = nil
 }
 
 // GetTag - return the Tag at position i
@@ -141,6 +142,30 @@ func (obj *DcmObj) Read(FileName string) bool {
 				bufdata.BigEndian = BigEndian
 				flag = bufdata.ReadObj(obj)
 			}
+		}
+	}
+	return flag
+}
+
+// ReadBytes - Read from a DICOM bytes into a DICOM Object
+func (obj *DcmObj) ReadBytes(Data []byte) bool {
+	flag := false
+	BigEndian := false
+	var bufdata BufData
+
+	if bufdata.Ms.LoadFromBytes(Data) {
+		obj.TransferSyntax = bufdata.ReadMeta()
+		if len(obj.TransferSyntax) > 0 {
+			if obj.TransferSyntax == "1.2.840.10008.1.2" {
+				obj.ExplicitVR = false
+			} else {
+				obj.ExplicitVR = true
+			}
+			if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+				BigEndian = true
+			}
+			bufdata.BigEndian = BigEndian
+			flag = bufdata.ReadObj(obj)
 		}
 	}
 	return flag

@@ -63,7 +63,6 @@ func (aarj *aassociationRJ) Read(conn net.Conn) (err error) {
 	return aarj.ReadDynamic(conn)
 }
 
-// ReadDynamic ReadDynamic
 func (aarj *aassociationRJ) ReadDynamic(conn net.Conn) (err error) {
 	aarj.Reserved1, err = ReadByte(conn)
 	if err != nil {

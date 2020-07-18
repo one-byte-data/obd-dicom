@@ -227,6 +227,7 @@ func NewAAssociationAC() AAssociationAC {
 			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
 		},
 		PresContextAccepts: make([]PresentationContextAccept, 0),
+		UserInfo: NewUserInformation(),
 	}
 }
 
@@ -271,11 +272,11 @@ func (aaac *aassociationAC) SetUserInformation(UserInfo UserInformation) {
 }
 
 func (aaac *aassociationAC) GetMaxSubLength() uint32 {
-	return aaac.UserInfo.MaxSubLength.MaximumLength
+	return aaac.UserInfo.GetMaxSubLength().GetMaximumLength()
 }
 
 func (aaac *aassociationAC) SetMaxSubLength(length uint32) {
-	aaac.UserInfo.MaxSubLength.MaximumLength = length
+	aaac.UserInfo.GetMaxSubLength().SetMaximumLength(length)
 }
 
 func (aaac *aassociationAC) Size() uint32 {

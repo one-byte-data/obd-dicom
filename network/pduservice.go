@@ -37,6 +37,7 @@ type pduService struct {
 	ReleaseRP                    AReleaseRP
 	AbortRQ                      AAbortRQ
 	Pdata                        PDataTF
+	IsAcceptedCalledAE           func(port int, calledAE string) bool
 }
 
 // NewPDUService - creates a pointer to PDUService
@@ -83,6 +84,9 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 
 // InterogateAAssociateRQ - InterogateAAssociateRQ
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
+	if !pdu.IsAcceptedCalledAE(0, pdu.AssocAC.GetCalledAE()) {
+		return pdu.AssocRJ.Write(conn)
+	}
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
 	pdu.AssocAC.SetCallingAE(pdu.AssocRQ.GetCallingAE())
 
@@ -118,19 +122,19 @@ func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 	}
 
 	if len(pdu.AcceptedPresentationContexts) > 0 {
-		MaxSubLength := *NewMaximumSubLength()
-		UserInfo := *NewUserInformation()
+		MaxSubLength := NewMaximumSubLength()
+		UserInfo := NewUserInformation()
 
-		MaxSubLength.MaximumLength = 16384
+		MaxSubLength.SetMaximumLength(16384)
 		UserInfo.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 		UserInfo.SetImpVersionName("One-Byte-Data")
-		UserInfo.MaxSubLength = MaxSubLength
+		UserInfo.SetMaxSubLength(MaxSubLength)
 		pdu.AssocAC.SetUserInformation(UserInfo)
 		return pdu.AssocAC.Write(conn)
-
 	}
+
 	log.Println("ERROR, pduservice::InterogateAAssociateRQ, No valid AcceptedPresentationContexts")
-	return pdu.AssocAC.Write(conn)
+	return pdu.AssocRJ.Write(conn)
 }
 
 // ParseDCMIntoRaw - ParseDCMIntoRaw
@@ -159,7 +163,7 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 		}
 	}
 	pdu.Pdata.MsgHeader = ItemType
-	if pdu.AssocAC.GetUserInformation().MaxSubLength.MaximumLength > 16384 {
+	if pdu.AssocAC.GetUserInformation().GetMaxSubLength().GetMaximumLength() > 16384 {
 		pdu.AssocAC.SetMaxSubLength(16384)
 	}
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()

@@ -10,7 +10,16 @@ import (
 )
 
 // MaximumSubLength - MaximumSubLength
-type MaximumSubLength struct {
+type MaximumSubLength interface {
+	GetMaximumLength() uint32
+	SetMaximumLength(length uint32)
+	Size() uint16
+	Write(conn net.Conn) bool
+	Read(conn net.Conn) (bool, error)
+	ReadDynamic(conn net.Conn) (bool, error)
+}
+
+type maximumSubLength struct {
 	ItemType      byte //0x51
 	Reserved1     byte
 	Length        uint16
@@ -18,19 +27,26 @@ type MaximumSubLength struct {
 }
 
 // NewMaximumSubLength - NewMaximumSubLength
-func NewMaximumSubLength() *MaximumSubLength {
-	return &MaximumSubLength{
+func NewMaximumSubLength() MaximumSubLength {
+	return &maximumSubLength{
 		ItemType: 0x51,
 		Length:   4,
 	}
 }
 
-// Size - Size
-func (maxim *MaximumSubLength) Size() uint16 {
+func (maxim *maximumSubLength) GetMaximumLength() uint32 {
+	return maxim.MaximumLength
+}
+
+func (maxim *maximumSubLength) SetMaximumLength(length uint32) {
+	maxim.MaximumLength = length
+}
+
+func (maxim *maximumSubLength) Size() uint16 {
 	return maxim.Length + 4
 }
 
-func (maxim *MaximumSubLength) Write(conn net.Conn) bool {
+func (maxim *maximumSubLength) Write(conn net.Conn) bool {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -45,7 +61,7 @@ func (maxim *MaximumSubLength) Write(conn net.Conn) bool {
 	return true
 }
 
-func (maxim *MaximumSubLength) Read(conn net.Conn) (bool, error) {
+func (maxim *maximumSubLength) Read(conn net.Conn) (bool, error) {
 	var err error
 	maxim.ItemType, err = ReadByte(conn)
 	if err != nil {
@@ -54,8 +70,7 @@ func (maxim *MaximumSubLength) Read(conn net.Conn) (bool, error) {
 	return maxim.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
-func (maxim *MaximumSubLength) ReadDynamic(conn net.Conn) (bool, error) {
+func (maxim *maximumSubLength) ReadDynamic(conn net.Conn) (bool, error) {
 	var err error
 	maxim.Reserved1, err = ReadByte(conn)
 	if err != nil {
@@ -73,7 +88,13 @@ func (maxim *MaximumSubLength) ReadDynamic(conn net.Conn) (bool, error) {
 }
 
 // AsyncOperationWindow - AsyncOperationWindow
-type AsyncOperationWindow struct {
+type AsyncOperationWindow interface {
+	Size() uint16
+	Read(conn net.Conn) (bool, error)
+	ReadDynamic(conn net.Conn) (bool, error)
+}
+
+type asyncOperationWindow struct {
 	ItemType                     byte //0x53
 	Reserved1                    byte
 	Length                       uint16
@@ -82,18 +103,18 @@ type AsyncOperationWindow struct {
 }
 
 // NewAsyncOperationWindow - NewAsyncOperationWindow
-func NewAsyncOperationWindow() *AsyncOperationWindow {
-	return &AsyncOperationWindow{
+func NewAsyncOperationWindow() AsyncOperationWindow {
+	return &asyncOperationWindow{
 		ItemType: 0x53,
 	}
 }
 
 // Size - Size
-func (async *AsyncOperationWindow) Size() uint16 {
+func (async *asyncOperationWindow) Size() uint16 {
 	return async.Length + 4
 }
 
-func (async *AsyncOperationWindow) Read(conn net.Conn) (bool, error) {
+func (async *asyncOperationWindow) Read(conn net.Conn) (bool, error) {
 	var err error
 	async.ItemType, err = ReadByte(conn)
 	if err != nil {
@@ -102,8 +123,7 @@ func (async *AsyncOperationWindow) Read(conn net.Conn) (bool, error) {
 	return async.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
-func (async *AsyncOperationWindow) ReadDynamic(conn net.Conn) (bool, error) {
+func (async *asyncOperationWindow) ReadDynamic(conn net.Conn) (bool, error) {
 	var err error
 	async.Reserved1, err = ReadByte(conn)
 	if err != nil {
@@ -124,8 +144,15 @@ func (async *AsyncOperationWindow) ReadDynamic(conn net.Conn) (bool, error) {
 	return true, nil
 }
 
-// SCPSCURoleSelect - SCPSCURoleSelect
-type SCPSCURoleSelect struct {
+// RoleSelect - RoleSelect
+type RoleSelect interface {
+	Size() uint16
+	Write(conn net.Conn) bool
+	Read(conn net.Conn) (bool, error)
+	ReadDynamic(conn net.Conn) (bool, error)
+}
+
+type roleSelect struct {
 	ItemType  byte //0x54
 	Reserved1 byte
 	Length    uint16
@@ -134,19 +161,18 @@ type SCPSCURoleSelect struct {
 	uid       string
 }
 
-// NewSCPSCURoleSelect - NewSCPSCURoleSelect
-func NewSCPSCURoleSelect() *SCPSCURoleSelect {
-	return &SCPSCURoleSelect{
+// NewRoleSelect - NewRoleSelect
+func NewRoleSelect() RoleSelect {
+	return &roleSelect{
 		ItemType: 0x54,
 	}
 }
 
-// Size - Size
-func (scpscu *SCPSCURoleSelect) Size() uint16 {
+func (scpscu *roleSelect) Size() uint16 {
 	return scpscu.Length + 4
 }
 
-func (scpscu *SCPSCURoleSelect) Write(conn net.Conn) bool {
+func (scpscu *roleSelect) Write(conn net.Conn) bool {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -164,7 +190,7 @@ func (scpscu *SCPSCURoleSelect) Write(conn net.Conn) bool {
 	return true
 }
 
-func (scpscu *SCPSCURoleSelect) Read(conn net.Conn) (bool, error) {
+func (scpscu *roleSelect) Read(conn net.Conn) (bool, error) {
 	var err error
 	scpscu.ItemType, err = ReadByte(conn)
 	if err != nil {
@@ -173,8 +199,7 @@ func (scpscu *SCPSCURoleSelect) Read(conn net.Conn) (bool, error) {
 	return scpscu.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
-func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) (bool, error) {
+func (scpscu *roleSelect) ReadDynamic(conn net.Conn) (bool, error) {
 	var err error
 	scpscu.Reserved1, err = ReadByte(conn)
 	if err != nil {
@@ -208,38 +233,70 @@ func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) (bool, error) {
 }
 
 // UserInformation - UserInformation
-type UserInformation struct {
+type UserInformation interface {
+	GetItemType() byte
+	SetItemType(t byte)
+	GetMaxSubLength() MaximumSubLength
+	SetMaxSubLength(length MaximumSubLength)
+	Size() uint16
+	GetImpClass() UIDitem
+	SetImpClassUID(name string)
+	SetImpVersionName(name string)
+	Write(conn net.Conn) (err error)
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
+}
+
+type userInformation struct {
 	ItemType        byte //0x50
 	Reserved1       byte
 	Length          uint16
 	UserInfoBaggage uint32
 	MaxSubLength    MaximumSubLength
 	AsyncOpWindow   AsyncOperationWindow
-	SCPSCURole      SCPSCURoleSelect
+	SCPSCURole      RoleSelect
 	ImpClass        UIDitem
 	ImpVersion      UIDitem
 }
 
 // NewUserInformation - NewUserInformation
-func NewUserInformation() *UserInformation {
-	return &UserInformation{
+func NewUserInformation() UserInformation {
+	return &userInformation{
 		ItemType:      0x50,
-		MaxSubLength:  *NewMaximumSubLength(),
-		AsyncOpWindow: *NewAsyncOperationWindow(),
-		SCPSCURole:    *NewSCPSCURoleSelect(),
+		MaxSubLength:  NewMaximumSubLength(),
+		AsyncOpWindow: NewAsyncOperationWindow(),
+		SCPSCURole:    NewRoleSelect(),
 	}
 }
 
-// Size - Size
-func (ui *UserInformation) Size() uint16 {
+func (ui *userInformation) GetItemType() byte {
+	return ui.ItemType
+}
+
+func (ui *userInformation) SetItemType(t byte) {
+	ui.ItemType = t
+}
+
+func (ui *userInformation) GetMaxSubLength() MaximumSubLength {
+	return ui.MaxSubLength
+}
+
+func (ui *userInformation) SetMaxSubLength(length MaximumSubLength) {
+	ui.MaxSubLength = length
+}
+
+func (ui *userInformation) Size() uint16 {
 	ui.Length = ui.MaxSubLength.Size()
 	ui.Length += ui.ImpClass.Size()
 	ui.Length += ui.ImpVersion.Size()
 	return ui.Length + 4
 }
 
-// SetImpClassUID - SetImpClassUID
-func (ui *UserInformation) SetImpClassUID(name string) {
+func (ui *userInformation) GetImpClass() UIDitem {
+	return ui.ImpClass
+}
+
+func (ui *userInformation) SetImpClassUID(name string) {
 	ui.ImpClass.ItemType = 0x52
 	ui.ImpClass.Reserved1 = 0x00
 	ui.ImpClass.UIDName = name
@@ -247,14 +304,14 @@ func (ui *UserInformation) SetImpClassUID(name string) {
 }
 
 // SetImpVersionName - SetImpVersionName
-func (ui *UserInformation) SetImpVersionName(name string) {
+func (ui *userInformation) SetImpVersionName(name string) {
 	ui.ImpVersion.ItemType = 0x55
 	ui.ImpVersion.Reserved1 = 0x00
 	ui.ImpVersion.UIDName = name
 	ui.ImpVersion.Length = uint16(len(name))
 }
 
-func (ui *UserInformation) Write(conn net.Conn) (err error) {
+func (ui *userInformation) Write(conn net.Conn) (err error) {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -272,7 +329,7 @@ func (ui *UserInformation) Write(conn net.Conn) (err error) {
 	return
 }
 
-func (ui *UserInformation) Read(conn net.Conn) (err error) {
+func (ui *userInformation) Read(conn net.Conn) (err error) {
 	ui.ItemType, err = ReadByte(conn)
 	if err != nil {
 		return
@@ -280,8 +337,7 @@ func (ui *UserInformation) Read(conn net.Conn) (err error) {
 	return ui.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
-func (ui *UserInformation) ReadDynamic(conn net.Conn) (err error) {
+func (ui *userInformation) ReadDynamic(conn net.Conn) (err error) {
 	ui.Reserved1, err = ReadByte(conn)
 	if err != nil {
 		return

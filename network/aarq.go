@@ -216,7 +216,7 @@ func NewAAssociationRQ() AAssociationRQ {
 			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
 		},
 		PresContexts: make([]PresentationContext, 0),
-		UserInfo:     *NewUserInformation(),
+		UserInfo:     NewUserInformation(),
 	}
 }
 
@@ -257,18 +257,18 @@ func (aarq *aassociationRQ) SetUserInformation(userInfo UserInformation) {
 }
 
 func (aarq *aassociationRQ) GetMaxSubLength() uint32 {
-	return aarq.UserInfo.MaxSubLength.MaximumLength
+	return aarq.UserInfo.GetMaxSubLength().GetMaximumLength()
 }
 
 func (aarq *aassociationRQ) SetMaxSubLength(length uint32) {
-	aarq.UserInfo.MaxSubLength.MaximumLength = length
+	aarq.UserInfo.GetMaxSubLength().SetMaximumLength(length)
 }
 
 func (aarq *aassociationRQ) GetImpClass() UIDitem {
-	return aarq.UserInfo.ImpClass
+	return aarq.UserInfo.GetImpClass()
 }
 
-func (aarq *aassociationRQ)	SetImpClassUID(uid string) {
+func (aarq *aassociationRQ) SetImpClassUID(uid string) {
 	aarq.UserInfo.SetImpClassUID(uid)
 }
 
@@ -369,7 +369,7 @@ func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) error {
 			aarq.PresContexts = append(aarq.PresContexts, PresContext)
 			break
 		case 0x50: // User Information
-			aarq.UserInfo.ItemType = TempByte
+			aarq.UserInfo.SetItemType(TempByte)
 			aarq.UserInfo.ReadDynamic(conn)
 			Count = Count - int(aarq.UserInfo.Size())
 			break

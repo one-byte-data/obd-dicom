@@ -25,11 +25,13 @@ func handleConnection(conn net.Conn) {
 			DDO := media.NewEmptyDCMObj()
 			err := dimsec.CStoreReadRQ(pdu, DCO, DDO)
 			if err != nil {
-
+				log.Println("ERROR, handleConnection, C-Store failed to read request!")
+				break
 			}
 			err = dimsec.CStoreWriteRSP(pdu, DCO, 0)
 			if err != nil {
-
+				log.Println("ERROR, handleConnection, C-Store failed to write response!")
+				break
 			}
 			DDO.WriteToFile("test.dcm")
 			log.Println("INFO, handleConnection, CStore Success")
@@ -38,7 +40,8 @@ func handleConnection(conn net.Conn) {
 			DDO := media.NewEmptyDCMObj()
 			err := dimsec.CFindReadRQ(pdu, DCO, DDO)
 			if err != nil {
-
+				log.Println("ERROR, handleConnection, C-Find failed to read request!")
+				break
 			}
 			QueryLevel := DDO.GetString(0x08, 0x52) // Get Query Level
 			var Out media.DcmObj                    // This is for the result
@@ -51,13 +54,18 @@ func handleConnection(conn net.Conn) {
 			if QueryLevel == "IMAGE" {
 				// Process Image Query
 			}
-			dimsec.CFindWriteRSP(pdu, DCO, Out, 0x00)
+			err = dimsec.CFindWriteRSP(pdu, DCO, Out, 0x00)
+			if err != nil {
+				log.Println("ERROR, handleConnection, C-Find failed to write response!")
+				break
+			}
 			break
 		case 0x21: // C-Move
 			DDO := media.NewEmptyDCMObj()
 			err := dimsec.CMoveReadRQ(pdu, DCO, DDO)
 			if err != nil {
-
+				log.Println("ERROR, handleConnection, C-Move failed to read request!")
+				break
 			}
 			MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
 			if MoveLevel == "STUDY" {
@@ -69,15 +77,20 @@ func handleConnection(conn net.Conn) {
 			if MoveLevel == "IMAGE" {
 				// Process Image Move
 			}
-			dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
+			err = dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
+			if err != nil {
+				log.Println("ERROR, handleConnection, C-Move failed to write response!")
+				break
+			}
 			break
 		case 0x30: // C-Echo
 			if dimsec.CEchoReadRQ(pdu, DCO) {
 				err := dimsec.CEchoWriteRSP(pdu, DCO)
 				if err != nil {
-
+					log.Println("ERROR, handleConnection, C-Echo failed to write response!")
+					break
 				}
-				log.Println("INFO, handleConnection, Echo Success!")
+				log.Println("INFO, handleConnection, C-Echo Success!")
 			}
 			break
 		default:

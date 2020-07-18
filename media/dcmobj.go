@@ -165,14 +165,14 @@ func (obj *dcmObj) GetTags() []DcmTag {
 func (obj *dcmObj) DumpTags() {
 	for _, tag := range obj.Tags {
 		if tag.VR == "SQ" {
-			fmt.Printf("\t(%04X,%04X) - %s\n", tag.Group, tag.Element, tag.VR)
+			fmt.Printf("\t(%04X,%04X) %s - %s\n", tag.Group, tag.Element, tag.VR, TagDescription(tag.Group, tag.Element))
 			continue
 		}
 		if tag.Length > 128 {
-			fmt.Printf("\t(%04X,%04X) - %s : (Not displayed)\n", tag.Group, tag.Element, tag.VR)
+			fmt.Printf("\t(%04X,%04X) %s - %s : (Not displayed)\n", tag.Group, tag.Element, tag.VR, TagDescription(tag.Group, tag.Element))
 			continue
 		}
-		fmt.Printf("\t(%04X,%04X) - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Data)
+		fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, TagDescription(tag.Group, tag.Element), tag.Data)
 	}
 }
 

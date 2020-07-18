@@ -112,8 +112,6 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 		return err
 	}
 
-	DDO.DumpTags()
-
 	SOPClassUID := DDO.GetString(0x08, 0x16)
 	if len(SOPClassUID) > 0 {
 		pdu := network.NewPDUService()
@@ -143,7 +141,6 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 }
 
 func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error {
-	// DICOM Application Context
 	pdu.SetCallingAE(d.destination.CallingAE)
 	pdu.SetCalledAE(d.destination.CalledAE)
 	pdu.SetTimeout(timeout)

@@ -30,6 +30,8 @@ func main() {
 	cmove := flag.Bool("cmove", false, "Send C-Move request to the destination")
 	cstore := flag.Bool("cstore", false, "Sends a C-Store request to the destination")
 
+	dump := flag.Bool("dump", false, "Dump contents of DICOM file to stdout")
+
 	flag.Parse()
 
 	destination = &models.Destination{
@@ -92,5 +94,16 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
+		log.Printf("CStore of %s was successful", *fileName)
+	}
+	if *dump {
+		if *fileName == "" {
+			log.Fatalln("file is required for a dump")
+		}
+		obj, err := media.NewDCMObjFromFile(*fileName)
+		if err != nil {
+			log.Panicln(err)
+		}
+		obj.DumpTags()
 	}
 }

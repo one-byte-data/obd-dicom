@@ -52,10 +52,8 @@ func NewPDUService() PDUService {
 	}
 }
 
-// InterogateAAssociateAC - InterogateAAssociateAC
 func (pdu *pduService) InterogateAAssociateAC() bool {
 	var PresentationContextID byte
-	flag := false
 	TS := ""
 
 	for _, presContextAccept := range pdu.AssocAC.GetPresContextAccepts() {
@@ -77,12 +75,11 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 	}
 	if (len(TS) > 0) && (len(pdu.AcceptedPresentationContexts) > 0) {
 		pdu.Pdata.PresentationContextID = PresentationContextID
-		flag = true
+		return true
 	}
-	return flag
+	return false
 }
 
-// InterogateAAssociateRQ - InterogateAAssociateRQ
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 	if !pdu.IsAcceptedCalledAE(0, pdu.AssocAC.GetCalledAE()) {
 		return pdu.AssocRJ.Write(conn)
@@ -137,7 +134,6 @@ func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 	return pdu.AssocRJ.Write(conn)
 }
 
-// ParseDCMIntoRaw - ParseDCMIntoRaw
 func (pdu *pduService) ParseDCMIntoRaw(DCO media.DcmObj) bool {
 	pdu.Pdata.Buffer.WriteObj(DCO)
 	return true
@@ -170,7 +166,6 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	return pdu.Pdata.Write(pdu.conn)
 }
 
-// GetTransferSyntaxUID - Gets transfer syntax UID
 func (pdu *pduService) GetTransferSyntaxUID(pcid byte) string {
 	for i := 0; i < len(pdu.AcceptedPresentationContexts); i++ {
 		pca := pdu.AcceptedPresentationContexts[i]
@@ -181,7 +176,6 @@ func (pdu *pduService) GetTransferSyntaxUID(pcid byte) string {
 	return ""
 }
 
-// ParseRawVRIntoDCM - ParseRawVRIntoDCM
 func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 	TrnSyntax := pdu.GetTransferSyntaxUID(pdu.Pdata.PresentationContextID)
 	if len(TrnSyntax) == 0 {
@@ -274,7 +268,6 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 func (pdu *pduService) SetTimeout(timeout int) {
 }
 
-// Connect - Connect
 func (pdu *pduService) Connect(IP string, Port string) error {
 	conn, err := net.Dial("tcp", IP+":"+Port)
 	if err != nil {

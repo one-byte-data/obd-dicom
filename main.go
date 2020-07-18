@@ -51,11 +51,11 @@ func main() {
 		})
 
 		scp.SetOnCFindRequest(func(queryLevel string, query media.DcmObj, result media.DcmObj) {
-
+			query.DumpTags()
 		})
 
 		scp.SetOnCMoveRequest(func(moveLevel string, query media.DcmObj) {
-
+			query.DumpTags()
 		})
 
 		scp.SetOnCStoreRequest(func(request media.DcmObj) {

@@ -76,14 +76,14 @@ func ParseOBX(line string) {
 
 // SaveDICOMSR - Save ORU to DICOM format
 func SaveDICOMSR(fileName string) {
-	var srobj media.DcmObj
+	srobj := media.NewEmptyDCMObj()
 
-	srobj.ExplicitVR = true
-	srobj.BigEndian = false
-	srobj.TransferSyntax = "1.2.840.10008.1.2.1"
+	srobj.SetExplicitVR(true)
+	srobj.SetBigEndian(false)
+	srobj.SetTransferSyntax("1.2.840.10008.1.2.1")
 	study.StudyInstanceUID = uuids.CreateStudyUID(study.PatientName, study.PatientID, study.AccessionNumber, study.ReportDate)
 	SeriesUID := uuids.CreateSeriesUID(study.StudyInstanceUID, "SR", "100")
 	InstanceUID := uuids.CreateInstanceUID(SeriesUID, "1")
 	srobj.CreateSR(study, SeriesUID, InstanceUID)
-	srobj.Write(fileName)
+	srobj.WriteToFile(fileName)
 }

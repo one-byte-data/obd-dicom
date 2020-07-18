@@ -25,26 +25,26 @@ func GetFolderFiles() []os.FileInfo {
 
 // ConvertPDF convert a DICOM to PDF file
 func ConvertPDF(DCMFile string, PDFFile string) bool {
-	flag := false
-	var obj media.DcmObj
-
-	if obj.Read(DCMFile) {
-		var study media.DCMStudy
-		var pdfobj media.DcmObj
-
-		study.GetInfo(obj)
-		pdfobj.ExplicitVR = true
-		pdfobj.BigEndian = false
-		pdfobj.TransferSyntax = "1.2.840.10008.1.2.1"
-		RootUID := uuids.CreateStudyUID(study.PatientName, study.PatientID, study.AccessionNumber, study.StudyDate)
-		SeriesUID := uuids.CreateSeriesUID(RootUID, study.Modality, "300")
-		InstanceUID := uuids.CreateInstanceUID(RootUID, "1")
-		pdfobj.CreatePDF(study, SeriesUID, InstanceUID, PDFFile)
-		pdfobj.Write("samplepdf.dcm")
-
-		flag = true
+	obj, err := media.NewDCMObjFromFile(DCMFile)
+	if err != nil {
+		return false
 	}
-	return flag
+
+	var study media.DCMStudy
+
+	pdfobj := media.NewEmptyDCMObj()
+
+	study.GetInfo(obj)
+	pdfobj.SetExplicitVR(true)
+	pdfobj.SetBigEndian(false)
+	pdfobj.SetTransferSyntax("1.2.840.10008.1.2.1")
+	RootUID := uuids.CreateStudyUID(study.PatientName, study.PatientID, study.AccessionNumber, study.StudyDate)
+	SeriesUID := uuids.CreateSeriesUID(RootUID, study.Modality, "300")
+	InstanceUID := uuids.CreateInstanceUID(RootUID, "1")
+	pdfobj.CreatePDF(study, SeriesUID, InstanceUID, PDFFile)
+	pdfobj.WriteToFile("samplepdf.dcm")
+
+	return true
 }
 
 func main() {

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/services"
@@ -17,7 +18,7 @@ func main() {
 	hostName := flag.String("host", "localhost", "Destination host name or IP")
 	calledAE := flag.String("calledae", "DICOM_SCP", "AE of the destination")
 	callingAE := flag.String("callingae", "DICOM_SCU", "AE of the client")
-	port := flag.Int("port", 104, "Port of the destination system")
+	port := flag.Int("port", 1040, "Port of the destination system")
 
 	studyUID := flag.String("studyuid", "", "Study UID to be added to request")
 
@@ -32,7 +33,21 @@ func main() {
 
 	dump := flag.Bool("dump", false, "Dump contents of DICOM file to stdout")
 
+	startSCP := flag.Bool("scp", false, "Start a SCP")
+
 	flag.Parse()
+
+	if *startSCP {
+		if *calledAE == "" {
+			log.Fatalln("calledae is required for scp")
+		}
+		scp := services.NewSCP([]string{*calledAE}, *port)
+		err := scp.StartServer()
+		if err != nil {
+			log.Fatal(err)
+		}
+		os.Exit(0)
+	}
 
 	destination = &models.Destination{
 		Name:      *hostName,
@@ -69,6 +84,7 @@ func main() {
 			log.Printf("Found study %s\n", result.GetString(0x0020, 0x000D))
 			result.DumpTags()
 		}
+		os.Exit(0)
 	}
 	if *cmove {
 		if *destinationAE == "" {
@@ -84,6 +100,7 @@ func main() {
 			log.Fatalln(err)
 		}
 		log.Println("CMove was successful")
+		os.Exit(0)
 	}
 	if *cstore {
 		if *fileName == "" {
@@ -95,6 +112,7 @@ func main() {
 			log.Fatalln(err)
 		}
 		log.Printf("CStore of %s was successful", *fileName)
+		os.Exit(0)
 	}
 	if *dump {
 		if *fileName == "" {
@@ -105,5 +123,6 @@ func main() {
 			log.Panicln(err)
 		}
 		obj.DumpTags()
+		os.Exit(0)
 	}
 }

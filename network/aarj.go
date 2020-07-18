@@ -1,6 +1,7 @@
 package network
 
 import (
+	"log"
 	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -44,6 +45,8 @@ func (aarj *aassociationRJ) Size() uint32 {
 
 func (aarj *aassociationRJ) Write(conn net.Conn) error {
 	bd := media.NewEmptyBufData()
+
+	log.Printf("ASSOC-RJ: Reason %x\n", aarj.Reason)
 
 	bd.SetBigEndian(true)
 	aarj.Size()
@@ -124,6 +127,8 @@ func (arrq *areleaseRQ) Size() uint32 {
 func (arrq *areleaseRQ) Write(conn net.Conn) error {
 	bd := media.NewEmptyBufData()
 
+	log.Printf("ASSOC-R-RQ: <-- %x\n", arrq.Reserved1)
+
 	bd.SetBigEndian(true)
 	arrq.Size()
 	bd.WriteByte(arrq.ItemType)
@@ -188,6 +193,8 @@ func (arrp *areleaseRP) Size() uint32 {
 
 func (arrp *areleaseRP) Write(conn net.Conn) error {
 	bd := media.NewEmptyBufData()
+
+	log.Printf("ASSOC-R-RP: %x -->\n", arrp.Reserved1)
 
 	bd.SetBigEndian(true)
 	arrp.Size()

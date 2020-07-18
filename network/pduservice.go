@@ -81,9 +81,10 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 }
 
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
-	if !pdu.IsAcceptedCalledAE(0, pdu.AssocAC.GetCalledAE()) {
-		return pdu.AssocRJ.Write(conn)
-	}
+	log.Printf("ASSOC-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
+	log.Printf("ASSOC-RQ: \tImpClass %s\n", pdu.AssocRQ.GetUserInformation().GetImpClass().UIDName)
+	log.Printf("ASSOC-RQ: \tImpVersion %s\n\n", pdu.AssocRQ.GetUserInformation().GetImpVersion().UIDName)
+
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
 	pdu.AssocAC.SetCallingAE(pdu.AssocRQ.GetCallingAE())
 
@@ -92,6 +93,11 @@ func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 	pdu.AssocAC.SetUserInformation(pdu.AssocRQ.GetUserInformation())
 
 	for _, PresContext := range pdu.AssocRQ.GetPresContexts() {
+		log.Printf("ASSOC-RQ: \tPresentation Context %s\n", PresContext.GetAbstractSyntax().UIDName)
+		for _, TransferSyn := range PresContext.GetTransferSyntaxes() {
+			log.Printf("ASSOC-RQ: \t\tTransfer Synxtax %s\n", TransferSyn.UIDName)
+		}
+
 		PresContextAccept := NewPresentationContextAccept()
 		PresContextAccept.SetResult(4)
 		PresContextAccept.SetTransferSyntax("")
@@ -213,6 +219,7 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 			return nil
 		}
 	}
+
 	for true {
 		ItemType, err := ReadByte(pdu.conn)
 		if err != nil {
@@ -309,14 +316,12 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 	}
 }
 
-// Close - close connection
 func (pdu *pduService) Close() {
 	pdu.ReleaseRQ.Write(pdu.conn)
 	pdu.ReleaseRP.Read(pdu.conn)
 	pdu.conn.Close()
 }
 
-// Multiplex - Multiplex
 func (pdu *pduService) Multiplex(conn net.Conn) error {
 	pdu.conn = conn
 	err := pdu.AssocRQ.Read(pdu.conn)
@@ -326,10 +331,9 @@ func (pdu *pduService) Multiplex(conn net.Conn) error {
 
 	err = pdu.InterogateAAssociateRQ(pdu.conn)
 	if err != nil {
+		conn.Close()
 		return err
 	}
-
-	conn.Close()
 	return nil
 }
 

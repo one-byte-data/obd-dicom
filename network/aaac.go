@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"strconv"
 
@@ -136,6 +137,9 @@ func (pc *presentationContextAccept) Write(conn net.Conn) (err error) {
 	bd.WriteByte(pc.Result)
 	bd.WriteByte(pc.Reserved4)
 
+	log.Printf("ASSOC-AC: \tAccepted Presentation Context %s\n", pc.GetAbstractSyntax().UIDName)
+	log.Printf("ASSOC-AC: \tAccepted Transfer Synxtax %s\n", pc.GetTrnSyntax().UIDName)
+
 	if err = bd.Send(conn); err == nil {
 		return pc.TrnSyntax.Write(conn)
 	}
@@ -227,7 +231,7 @@ func NewAAssociationAC() AAssociationAC {
 			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
 		},
 		PresContextAccepts: make([]PresentationContextAccept, 0),
-		UserInfo: NewUserInformation(),
+		UserInfo:           NewUserInformation(),
 	}
 }
 
@@ -294,6 +298,12 @@ func (aaac *aassociationAC) Size() uint32 {
 func (aaac *aassociationAC) Write(conn net.Conn) error {
 	bd := media.NewEmptyBufData()
 
+	fmt.Println()
+
+	log.Printf("ASSOC-AC: %s <-- %s\n", aaac.CallingAE, aaac.CalledAE)
+	log.Printf("ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().UIDName)
+	log.Printf("ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().UIDName)
+
 	bd.SetBigEndian(true)
 	aaac.Size()
 	bd.WriteByte(aaac.ItemType)
@@ -313,8 +323,7 @@ func (aaac *aassociationAC) Write(conn net.Conn) error {
 	if err != nil {
 		return err
 	}
-	for i := 0; i < len(aaac.PresContextAccepts); i++ {
-		PresContextAccept := aaac.PresContextAccepts[i]
+	for _, PresContextAccept := range aaac.PresContextAccepts {
 		PresContextAccept.Write(conn)
 	}
 	return aaac.UserInfo.Write(conn)

@@ -241,6 +241,7 @@ type UserInformation interface {
 	Size() uint16
 	GetImpClass() UIDitem
 	SetImpClassUID(name string)
+	GetImpVersion() UIDitem
 	SetImpVersionName(name string)
 	Write(conn net.Conn) (err error)
 	Read(conn net.Conn) (err error)
@@ -303,7 +304,10 @@ func (ui *userInformation) SetImpClassUID(name string) {
 	ui.ImpClass.Length = uint16(len(name))
 }
 
-// SetImpVersionName - SetImpVersionName
+func (ui *userInformation) GetImpVersion() UIDitem {
+	return ui.ImpVersion
+}
+
 func (ui *userInformation) SetImpVersionName(name string) {
 	ui.ImpVersion.ItemType = 0x55
 	ui.ImpVersion.Reserved1 = 0x00

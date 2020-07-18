@@ -10,9 +10,7 @@ import (
 // CStoreReadRQ CStore request read
 func CStoreReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj) error {
 	if DCO.TagCount() != 0 {
-		// Is this a C-Store?
 		if DCO.GetUShort(0x00, 0x100) == 0x01 {
-			// Does it have data?
 			if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
 				return pdu.Read(DDO)
 			}

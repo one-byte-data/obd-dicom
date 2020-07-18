@@ -13,12 +13,20 @@ import (
 // SCP - Interface to scp
 type SCP interface {
 	StartServer() error
+	SetOnAssociationRequest(f func(calledAE string) bool)
+	SetOnCFindRequest(f func(findLevel string, data media.DcmObj, Result media.DcmObj))
+	SetOnCMoveRequest(f func(moveLevel string, data media.DcmObj))
+	SetOnCStoreRequest(f func(data media.DcmObj))
 	handleConnection(conn net.Conn)
 }
 
 type scp struct {
-	CalledAEs []string
-	Port      int
+	CalledAEs            []string
+	Port                 int
+	OnAssociationRequest func(calledAE string) bool
+	OnCFindRequest       func(findLevel string, data media.DcmObj, Result media.DcmObj)
+	OnCMoveRequest       func(moveLevel string, data media.DcmObj)
+	OnCStoreRequest      func(data media.DcmObj)
 }
 
 // NewSCP - Creates an interface to scu
@@ -50,6 +58,11 @@ func (s *scp) StartServer() error {
 
 func (s *scp) handleConnection(conn net.Conn) {
 	pdu := network.NewPDUService()
+
+	if s.OnAssociationRequest != nil {
+		pdu.SetOnAssociationRequest(s.OnAssociationRequest)
+	}
+
 	log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
 	err := pdu.Multiplex(conn)
 	if err != nil {
@@ -69,15 +82,19 @@ func (s *scp) handleConnection(conn net.Conn) {
 			DDO := media.NewEmptyDCMObj()
 			err := dimsec.CStoreReadRQ(pdu, DCO, DDO)
 			if err != nil {
-				log.Println("ERROR, handleConnection, C-Store failed to read request!")
+				log.Printf("ERROR, handleConnection, C-Store failed to read request : %s", err.Error())
 				return
 			}
+
+			if s.OnCStoreRequest != nil {
+				s.OnCStoreRequest(DDO)
+			}
+
 			err = dimsec.CStoreWriteRSP(pdu, DCO, 0)
 			if err != nil {
-				log.Println("ERROR, handleConnection, C-Store failed to write response!")
+				log.Printf("ERROR, handleConnection, C-Store failed to write response: %s", err.Error())
 				return
 			}
-			DDO.WriteToFile("test.dcm")
 			log.Println("INFO, handleConnection, CStore Success")
 			break
 		case 0x20: // C-Find
@@ -88,17 +105,14 @@ func (s *scp) handleConnection(conn net.Conn) {
 				break
 			}
 			QueryLevel := DDO.GetString(0x08, 0x52) // Get Query Level
-			var Out media.DcmObj                    // This is for the result
-			if QueryLevel == "STUDY" {
-				// Process Study Query
+
+			Result := media.NewEmptyDCMObj()
+
+			if s.OnCFindRequest != nil {
+				s.OnCFindRequest(QueryLevel, DDO, Result)
 			}
-			if QueryLevel == "SERIES" {
-				// Process Series Query
-			}
-			if QueryLevel == "IMAGE" {
-				// Process Image Query
-			}
-			err = dimsec.CFindWriteRSP(pdu, DCO, Out, 0x00)
+
+			err = dimsec.CFindWriteRSP(pdu, DCO, Result, 0x00)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Find failed to write response!")
 				return
@@ -112,15 +126,11 @@ func (s *scp) handleConnection(conn net.Conn) {
 				return
 			}
 			MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
-			if MoveLevel == "STUDY" {
-				// Process Study Move
+
+			if s.OnCMoveRequest != nil {
+				s.OnCMoveRequest(MoveLevel, DDO)
 			}
-			if MoveLevel == "SERIES" {
-				// Process Series Move
-			}
-			if MoveLevel == "IMAGE" {
-				// Process Image Move
-			}
+
 			err = dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Move failed to write response!")
@@ -142,4 +152,20 @@ func (s *scp) handleConnection(conn net.Conn) {
 			return
 		}
 	}
+}
+
+func (s *scp) SetOnAssociationRequest(f func(calledAE string) bool) {
+	s.OnAssociationRequest = f
+}
+
+func (s *scp) SetOnCFindRequest(f func(findLevel string, data media.DcmObj, Result media.DcmObj)) {
+	s.OnCFindRequest = f
+}
+
+func (s *scp) SetOnCMoveRequest(f func(moveLevel string, data media.DcmObj)) {
+	s.OnCMoveRequest = f
+}
+
+func (s *scp) SetOnCStoreRequest(f func(data media.DcmObj)) {
+	s.OnCStoreRequest = f
 }

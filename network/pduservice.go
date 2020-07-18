@@ -27,6 +27,7 @@ type PDUService interface {
 	SetCallingAE(callingAE string)
 	AddPresContexts(presentationContext PresentationContext)
 	GetPresentationContextID() byte
+	SetOnAssociationRequest(f func(calledAE string) bool)
 }
 
 type pduService struct {
@@ -39,7 +40,7 @@ type pduService struct {
 	ReleaseRP                    AReleaseRP
 	AbortRQ                      AAbortRQ
 	Pdata                        PDataTF
-	IsAcceptedCalledAE           func(port int, calledAE string) bool
+	OnAssociationRequest         func(calledAE string) bool
 }
 
 // NewPDUService - creates a pointer to PDUService
@@ -83,6 +84,10 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 }
 
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
+	if pdu.OnAssociationRequest == nil || !pdu.OnAssociationRequest(pdu.AssocRQ.GetCalledAE()) {
+		return pdu.AssocRJ.Write(conn)
+	}
+
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
 	pdu.AssocAC.SetCallingAE(pdu.AssocRQ.GetCallingAE())
 
@@ -201,7 +206,6 @@ func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 }
 
 func (pdu *pduService) Read(DCO media.DcmObj) error {
-	// Ver donde tendria que limpiar el buffer.
 	if pdu.Pdata.Buffer != nil {
 		pdu.Pdata.Buffer.ClearMemoryStream()
 	} else {
@@ -246,7 +250,10 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Read, A-Associate-RJ")
 		case 0x04: // P-Data-TF
-			pdu.Pdata.ReadDynamic(pdu.conn)
+			err := pdu.Pdata.ReadDynamic(pdu.conn)
+			if err != nil {
+				return err
+			}
 			if pdu.Pdata.MsgStatus > 0 {
 				if !pdu.ParseRawVRIntoDCM(DCO) {
 					pdu.AbortRQ.Write(pdu.conn)
@@ -366,4 +373,8 @@ func (pdu *pduService) AddPresContexts(presentationContext PresentationContext) 
 
 func (pdu *pduService) GetPresentationContextID() byte {
 	return pdu.Pdata.PresentationContextID
+}
+
+func (pdu *pduService) SetOnAssociationRequest(f func(calledAE string) bool) {
+	pdu.OnAssociationRequest = f
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -42,6 +43,25 @@ func main() {
 			log.Fatalln("calledae is required for scp")
 		}
 		scp := services.NewSCP([]string{*calledAE}, *port)
+
+		scp.SetOnAssociationRequest(func(called string) bool {
+			var c [16]byte
+			copy(c[:], *calledAE)
+			return fmt.Sprintf("%s", c) == called
+		})
+
+		scp.SetOnCFindRequest(func(queryLevel string, query media.DcmObj, result media.DcmObj) {
+
+		})
+
+		scp.SetOnCMoveRequest(func(moveLevel string, query media.DcmObj) {
+
+		})
+
+		scp.SetOnCStoreRequest(func(request media.DcmObj) {
+			log.Printf("INFO, C-Store recieved %s", request.GetString(0x0008, 0x0018))
+		})
+
 		err := scp.StartServer()
 		if err != nil {
 			log.Fatal(err)

@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"log"
 	"net"
 	"strconv"
@@ -30,29 +31,45 @@ func (maxim *MaximumSubLength) Size() uint16 {
 }
 
 func (maxim *MaximumSubLength) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	bd.WriteByte(maxim.ItemType)
 	bd.WriteByte(maxim.Reserved1)
 	bd.WriteUint16(maxim.Length)
 	bd.WriteUint32(maxim.MaximumLength)
-	flag = bd.Send(conn)
-	return flag
+
+	if err := bd.Send(conn); err != nil {
+		return false
+	}
+	return true
 }
 
-func (maxim *MaximumSubLength) Read(conn net.Conn) bool {
-	maxim.ItemType = ReadByte(conn)
+func (maxim *MaximumSubLength) Read(conn net.Conn) (bool, error) {
+	var err error
+	maxim.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
 	return maxim.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (maxim *MaximumSubLength) ReadDynamic(conn net.Conn) bool {
-	maxim.Reserved1 = ReadByte(conn)
-	maxim.Length = ReadUint16(conn)
-	maxim.MaximumLength = ReadUint32(conn)
-	return true
+func (maxim *MaximumSubLength) ReadDynamic(conn net.Conn) (bool, error) {
+	var err error
+	maxim.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	maxim.Length, err = ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+	maxim.MaximumLength, err = ReadUint32(conn)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // AsyncOperationWindow - AsyncOperationWindow
@@ -76,18 +93,35 @@ func (async *AsyncOperationWindow) Size() uint16 {
 	return async.Length + 4
 }
 
-func (async *AsyncOperationWindow) Read(conn net.Conn) bool {
-	async.ItemType = ReadByte(conn)
+func (async *AsyncOperationWindow) Read(conn net.Conn) (bool, error) {
+	var err error
+	async.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
 	return async.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (async *AsyncOperationWindow) ReadDynamic(conn net.Conn) bool {
-	async.Reserved1 = ReadByte(conn)
-	async.Length = ReadUint16(conn)
-	async.MaxNumberOperationsInvoked = ReadUint16(conn)
-	async.MaxNumberOperationsPerformed = ReadUint16(conn)
-	return true
+func (async *AsyncOperationWindow) ReadDynamic(conn net.Conn) (bool, error) {
+	var err error
+	async.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	async.Length, err = ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+	async.MaxNumberOperationsInvoked, err = ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+	async.MaxNumberOperationsPerformed, err = ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // SCPSCURoleSelect - SCPSCURoleSelect
@@ -113,37 +147,64 @@ func (scpscu *SCPSCURoleSelect) Size() uint16 {
 }
 
 func (scpscu *SCPSCURoleSelect) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	bd.WriteByte(scpscu.ItemType)
 	bd.WriteByte(scpscu.Reserved1)
 	bd.WriteUint16(scpscu.Length)
 	bd.WriteUint16(uint16(len(scpscu.uid)))
-	bd.Ms.Write([]byte(scpscu.uid), len(scpscu.uid))
+	bd.Write([]byte(scpscu.uid), len(scpscu.uid))
 	bd.WriteByte(scpscu.SCURole)
 	bd.WriteByte(scpscu.SCPRole)
-	flag = bd.Send(conn)
-	return flag
+
+	if err := bd.Send(conn); err != nil {
+		return false
+	}
+	return true
 }
 
-func (scpscu *SCPSCURoleSelect) Read(conn net.Conn) bool {
-	scpscu.ItemType = ReadByte(conn)
+func (scpscu *SCPSCURoleSelect) Read(conn net.Conn) (bool, error) {
+	var err error
+	scpscu.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
 	return scpscu.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) bool {
-	scpscu.Reserved1 = ReadByte(conn)
-	scpscu.Length = ReadUint16(conn)
-	tl := ReadUint16(conn)
+func (scpscu *SCPSCURoleSelect) ReadDynamic(conn net.Conn) (bool, error) {
+	var err error
+	scpscu.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	scpscu.Length, err = ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+	tl, err := ReadUint16(conn)
+	if err != nil {
+		return false, err
+	}
+
 	tuid := make([]byte, tl)
-	conn.Read(tuid)
+	_, err = conn.Read(tuid)
+	if err != nil {
+		return false, err
+	}
+
 	scpscu.uid = string(tuid)
-	scpscu.SCURole = ReadByte(conn)
-	scpscu.SCPRole = ReadByte(conn)
-	return true
+	scpscu.SCURole, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	scpscu.SCPRole, err = ReadByte(conn)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // UserInformation - UserInformation
@@ -193,37 +254,51 @@ func (ui *UserInformation) SetImpVersionName(name string) {
 	ui.ImpVersion.Length = uint16(len(name))
 }
 
-func (ui *UserInformation) Write(conn net.Conn) bool {
-	flag := false
-	var bd media.BufData
+func (ui *UserInformation) Write(conn net.Conn) (err error) {
+	bd := media.NewEmptyBufData()
 
-	bd.BigEndian = true
+	bd.SetBigEndian(true)
 	ui.Size()
 	bd.WriteByte(ui.ItemType)
 	bd.WriteByte(ui.Reserved1)
 	bd.WriteUint16(ui.Length)
-	if bd.Send(conn) {
+
+	if err = bd.Send(conn); err == nil {
 		ui.MaxSubLength.Write(conn)
 		ui.ImpClass.Write(conn)
 		ui.ImpVersion.Write(conn)
-		flag = true
 	}
-	return flag
+
+	return
 }
 
-func (ui *UserInformation) Read(conn net.Conn) bool {
-	ui.ItemType = ReadByte(conn)
+func (ui *UserInformation) Read(conn net.Conn) (err error) {
+	ui.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
 	return ui.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (ui *UserInformation) ReadDynamic(conn net.Conn) bool {
-	ui.Reserved1 = ReadByte(conn)
-	ui.Length = ReadUint16(conn)
+func (ui *UserInformation) ReadDynamic(conn net.Conn) (err error) {
+	ui.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	ui.Length, err = ReadUint16(conn)
+	if err != nil {
+		return
+	}
+
 	var Count int
 	Count = int(ui.Length)
 	for Count > 0 {
-		TempByte := ReadByte(conn)
+		TempByte, err := ReadByte(conn)
+		if err != nil {
+			return err
+		}
+
 		switch TempByte {
 		case 0x51:
 			ui.MaxSubLength.ReadDynamic(conn)
@@ -250,13 +325,14 @@ func (ui *UserInformation) ReadDynamic(conn net.Conn) bool {
 			conn.Close()
 			ui.UserInfoBaggage = uint32(Count)
 			Count = -1
-			log.Println("ERROR, user::ReadDynamic, unknown TempByte: "+strconv.Itoa(int(TempByte)))
+			log.Println("ERROR, user::ReadDynamic, unknown TempByte: " + strconv.Itoa(int(TempByte)))
 			break
 		}
 	}
+
 	if Count == 0 {
-		return true
+		return nil
 	}
-	log.Println("ERROR, user::ReadDynamic, Count is not zero")
-	return (false)
+
+	return errors.New("ERROR, user::ReadDynamic, Count is not zero")
 }

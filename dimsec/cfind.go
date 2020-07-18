@@ -1,13 +1,14 @@
 package dimsec
 
 import (
-	"log"
+	"errors"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 )
 
 // CFindReadRQ CFind request read
-func CFindReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bool {
+func CFindReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj) error {
 	if DCO.TagCount() != 0 {
 		// Is this a C-Find?
 		if DCO.GetUShort(0x00, 0x100) == 0x20 {
@@ -17,12 +18,12 @@ func CFindReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO *media.DcmObj) bo
 			}
 		}
 	}
-	return false
+	return errors.New("ERROR, CFindReadRSP, unknown error")
 }
 
 // CFindWriteRQ CFind request write
-func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) bool {
-	var DCO media.DcmObj
+func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) error {
+	DCO := media.NewEmptyDCMObj()
 	var size uint32
 	var valor uint16
 
@@ -40,45 +41,44 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 	DCO.WriteUint16(0x00, 0x0700, "US", 0x00)                //Data Set type
 	DCO.WriteUint16(0x00, 0x0800, "US", 0x0102)              //Data Set type
 
-	if pdu.Write(DCO, SOPClassUID, 0x01) {
-		return pdu.Write(DDO, SOPClassUID, 0x00)
+	err := pdu.Write(DCO, SOPClassUID, 0x01)
+	if err != nil {
+		return err
 	}
-	return false
+	return pdu.Write(DDO, SOPClassUID, 0x00)
 }
 
 // CFindReadRSP CFind response read
-func CFindReadRSP(pdu network.PDUService, DDO *media.DcmObj) int {
-	var DCO media.DcmObj
+func CFindReadRSP(pdu network.PDUService, DDO media.DcmObj) (int, error) {
+	DCO := media.NewEmptyDCMObj()
 	status := -1
 
-	if pdu.Read(&DCO) == false {
-		log.Println("ERROR, CFindReadRSP, failed pdu.Read(&DCO)")
-		return status
+	err := pdu.Read(DCO)
+	if err != nil {
+		return status, err
 	}
+
 	// Is this a C-Find RSP?
 	if DCO.GetUShort(0x00, 0x0100) == 0x8020 {
 		if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-			if pdu.Read(DDO) {
-				status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
-			} else {
-				log.Println("ERROR, CEchoReadRSP, failed pdu.Read(DDO)")
-				status = -1
+			err = pdu.Read(DDO)
+			if err != nil {
+				return status, err
 			}
-		} else {
-			status = int(DCO.GetUShort(0x00, 0x0900)) // Return Status
+			return int(DCO.GetUShort(0x00, 0x0900)), nil
 		}
+		return int(DCO.GetUShort(0x00, 0x0900)), nil
 	}
-	return status
+	return status, errors.New("ERROR, CFindReadRSP, unknown error")
 }
 
 // CFindWriteRSP CFind response write
-func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, status uint16) bool {
-	var DCOR media.DcmObj
+func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, status uint16) error {
+	DCOR := media.NewEmptyDCMObj()
 	var size uint32
 	var sopclasslength, leDSType uint16
-	flag := false
 
-	DCOR.TransferSyntax = DCO.TransferSyntax
+	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
 
 	if DDO.TagCount() > 0 {
 		leDSType = 0x0102
@@ -101,10 +101,13 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 		DCOR.WriteUint16(0x00, 0x0120, "US", valor)    //Message ID
 		DCOR.WriteUint16(0x00, 0x0800, "US", leDSType) //Data Set type
 		DCOR.WriteUint16(0x00, 0x0900, "US", status)   // Status
-		flag = pdu.Write(DCOR, SOPClassUID, 0x01)
-		if flag && (DDO.TagCount() > 0) {
-			flag = pdu.Write(DDO, SOPClassUID, 0x00)
+		err := pdu.Write(DCOR, SOPClassUID, 0x01)
+		if err != nil {
+			return err
+		}
+		if DDO.TagCount() > 0 {
+			return pdu.Write(DDO, SOPClassUID, 0x00)
 		}
 	}
-	return flag
+	return errors.New("ERROR, CFindReadRSP, unknown error")
 }

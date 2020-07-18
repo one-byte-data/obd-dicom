@@ -2,23 +2,42 @@ package media
 
 import (
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
 )
 
-func fileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			log.Println("ERROR, dcmobj::fileExists, " + err.Error())
-			return false
-		}
-	}
-	return true
+// DcmObj - DICOM Object structure
+type DcmObj interface {
+	Add(tag DcmTag)
+	AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string)
+	AddSRText(text string)
+	DumpTags()
+	Clear()
+	IsExplicitVR() bool
+	SetExplicitVR(explicit bool)
+	IsBigEndian() bool
+	SetBigEndian(bigEndian bool)
+	GetTag(i int) DcmTag
+	SetTag(i int, tag DcmTag)
+	GetTags() []DcmTag
+	GetUShort(group uint16, element uint16) uint16
+	GetUInt(group uint16, element uint16) uint32
+	GetString(group uint16, element uint16) string
+	WriteUint16(group uint16, element uint16, vr string, val uint16)
+	WriteUint32(group uint16, element uint16, vr string, val uint32)
+	WriteString(group uint16, element uint16, vr string, content string)
+	GetTransferSynxtax() string
+	SetTransferSyntax(ts string)
+	TagCount() int
+	CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string)
+	CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string)
+	WriteToFile(fileName string) error
 }
 
-// DcmObj - DICOM Object structure
-type DcmObj struct {
+type dcmObj struct {
 	Tags           []DcmTag
 	TransferSyntax string
 	ExplicitVR     bool
@@ -26,23 +45,139 @@ type DcmObj struct {
 	SQtag          DcmTag
 }
 
+// NewEmptyDCMObj - Create as an interface to a new empty dcmObj
+func NewEmptyDCMObj() DcmObj {
+	return &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+}
+
+// NewDCMObjFromFile - Read from a DICOM file into a DICOM Object
+func NewDCMObjFromFile(fileName string) (DcmObj, error) {
+	BigEndian := false
+
+	if !fileExists(fileName) {
+		return nil, errors.New("ERROR, DcmObj::Read, file does not exist")
+	}
+
+	bufdata, err := NewBufDataFromFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	obj := &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+
+	obj.TransferSyntax = bufdata.ReadMeta()
+	if len(obj.TransferSyntax) > 0 {
+		if obj.TransferSyntax != "1.2.840.10008.1.2" {
+			obj.ExplicitVR = true
+		}
+		if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+			BigEndian = true
+		}
+		bufdata.SetBigEndian(BigEndian)
+
+		bufdata.ReadObj(obj)
+	}
+
+	return obj, nil
+}
+
+// NewDCMObjFromBytes - Read from a DICOM bytes into a DICOM Object
+func NewDCMObjFromBytes(data []byte) DcmObj {
+	BigEndian := false
+	bufdata := NewBufDataFromBytes(data)
+
+	obj := &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+
+	obj.TransferSyntax = bufdata.ReadMeta()
+	if len(obj.TransferSyntax) > 0 {
+		if obj.TransferSyntax == "1.2.840.10008.1.2" {
+			obj.ExplicitVR = false
+		} else {
+			obj.ExplicitVR = true
+		}
+		if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+			BigEndian = true
+		}
+		bufdata.SetBigEndian(BigEndian)
+		bufdata.ReadObj(obj)
+	}
+
+	return obj
+}
+
+func (obj *dcmObj) IsExplicitVR() bool {
+	return obj.ExplicitVR
+}
+
+func (obj *dcmObj) SetExplicitVR(explicit bool) {
+	obj.ExplicitVR = explicit
+}
+
+func (obj *dcmObj) IsBigEndian() bool {
+	return obj.BigEndian
+}
+
+func (obj *dcmObj) SetBigEndian(bigEndian bool) {
+	obj.BigEndian = bigEndian
+}
+
 // TagCount - return the Tags number
-func (obj *DcmObj) TagCount() int {
+func (obj *dcmObj) TagCount() int {
 	return len(obj.Tags)
 }
 
 // Clear - clear tags array
-func (obj *DcmObj) Clear() {
+func (obj *dcmObj) Clear() {
 	obj.Tags = nil
 }
 
 // GetTag - return the Tag at position i
-func (obj *DcmObj) GetTag(i int) DcmTag {
+func (obj *dcmObj) GetTag(i int) DcmTag {
 	return obj.Tags[i]
 }
 
+func (obj *dcmObj) SetTag(i int, tag DcmTag) {
+	obj.Tags[i] = tag
+}
+
+func (obj *dcmObj) GetTags() []DcmTag {
+	return obj.Tags
+}
+
+func (obj *dcmObj) DumpTags() {
+	for _, tag := range obj.Tags {
+		if tag.VR == "SQ" {
+			fmt.Printf("\t(%04X,%04X) - %s\n", tag.Group, tag.Element, tag.VR)
+			continue
+		}
+		if tag.Length > 128 {
+			fmt.Printf("\t(%04X,%04X) - %s : (Not displayed)\n", tag.Group, tag.Element, tag.VR)
+			continue
+		}
+		fmt.Printf("\t(%04X,%04X) - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Data)
+	}
+}
+
 // GetUShort - return the Uint16 for this group & element
-func (obj *DcmObj) GetUShort(group uint16, element uint16) uint16 {
+func (obj *dcmObj) GetUShort(group uint16, element uint16) uint16 {
 	var i int
 	var tag DcmTag
 	sq := 0
@@ -67,7 +202,7 @@ func (obj *DcmObj) GetUShort(group uint16, element uint16) uint16 {
 }
 
 // GetUInt - return the Uint32 for this group & element
-func (obj *DcmObj) GetUInt(group uint16, element uint16) uint32 {
+func (obj *dcmObj) GetUInt(group uint16, element uint16) uint32 {
 	var i int
 	var tag DcmTag
 	sq := 0
@@ -92,7 +227,7 @@ func (obj *DcmObj) GetUInt(group uint16, element uint16) uint32 {
 }
 
 // GetString - return the String for this group & element
-func (obj *DcmObj) GetString(group uint16, element uint16) string {
+func (obj *dcmObj) GetString(group uint16, element uint16) string {
 	var i int
 	var tag DcmTag
 	sq := 0
@@ -117,77 +252,27 @@ func (obj *DcmObj) GetString(group uint16, element uint16) string {
 }
 
 // Add - add a new DICOM Tag to a DICOM Object
-func (obj *DcmObj) Add(tag DcmTag) {
+func (obj *dcmObj) Add(tag DcmTag) {
 	obj.Tags = append(obj.Tags, tag)
 }
 
-// Read - Read from a DICOM file into a DICOM Object
-func (obj *DcmObj) Read(FileName string) bool {
-	flag := false
-	BigEndian := false
-	var bufdata BufData
-
-	if fileExists(FileName) {
-		if bufdata.Ms.LoadFromFile(FileName) {
-			obj.TransferSyntax = bufdata.ReadMeta()
-			if len(obj.TransferSyntax) > 0 {
-				if obj.TransferSyntax == "1.2.840.10008.1.2" {
-					obj.ExplicitVR = false
-				} else {
-					obj.ExplicitVR = true
-				}
-				if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
-					BigEndian = true
-				}
-				bufdata.BigEndian = BigEndian
-				flag = bufdata.ReadObj(obj)
-			}
-		}
-	}
-	return flag
-}
-
-// ReadBytes - Read from a DICOM bytes into a DICOM Object
-func (obj *DcmObj) ReadBytes(Data []byte) bool {
-	flag := false
-	BigEndian := false
-	var bufdata BufData
-
-	if bufdata.Ms.LoadFromBytes(Data) {
-		obj.TransferSyntax = bufdata.ReadMeta()
-		if len(obj.TransferSyntax) > 0 {
-			if obj.TransferSyntax == "1.2.840.10008.1.2" {
-				obj.ExplicitVR = false
-			} else {
-				obj.ExplicitVR = true
-			}
-			if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
-				BigEndian = true
-			}
-			bufdata.BigEndian = BigEndian
-			flag = bufdata.ReadObj(obj)
-		}
-	}
-	return flag
-}
-
 // Wrote - Write a DICOM Object to a DICOM File
-func (obj *DcmObj) Write(FileName string) bool {
-	var bufdata BufData
-	bufdata.BigEndian = false
+func (obj *dcmObj) WriteToFile(fileName string) error {
+	bufdata := NewEmptyBufData()
+
 	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
-		bufdata.BigEndian = true
+		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetString(0x08, 0x16)
 	SOPInstanceUID := obj.GetString(0x08, 0x18)
 	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax)
 	bufdata.WriteObj(obj)
-	bufdata.Ms.Position = 0
-	return (bufdata.Ms.SaveToFile(FileName))
+	bufdata.SetPosition(0)
+	return bufdata.SaveToFile(fileName)
 }
 
 // WriteUint16 - Writes a Uint16 to a DICOM tag
-func (obj *DcmObj) WriteUint16(group uint16, element uint16, vr string, val uint16) {
+func (obj *dcmObj) WriteUint16(group uint16, element uint16, vr string, val uint16) {
 	c := make([]byte, 2)
 	if obj.BigEndian {
 		binary.BigEndian.PutUint16(c, val)
@@ -200,7 +285,7 @@ func (obj *DcmObj) WriteUint16(group uint16, element uint16, vr string, val uint
 }
 
 // WriteUint32 - Writes a Uint32 to a DICOM tag
-func (obj *DcmObj) WriteUint32(group uint16, element uint16, vr string, val uint32) {
+func (obj *dcmObj) WriteUint32(group uint16, element uint16, vr string, val uint32) {
 	c := make([]byte, 4)
 	if obj.BigEndian {
 		binary.BigEndian.PutUint32(c, val)
@@ -213,7 +298,7 @@ func (obj *DcmObj) WriteUint32(group uint16, element uint16, vr string, val uint
 }
 
 // WriteString - Writes a String to a DICOM tag
-func (obj *DcmObj) WriteString(group uint16, element uint16, vr string, content string) {
+func (obj *dcmObj) WriteString(group uint16, element uint16, vr string, content string) {
 	var length uint32
 
 	length = uint32(len(content))
@@ -229,11 +314,31 @@ func (obj *DcmObj) WriteString(group uint16, element uint16, vr string, content 
 	obj.Tags = append(obj.Tags, tag)
 }
 
+func (obj *dcmObj) GetTransferSynxtax() string {
+	return obj.TransferSyntax
+}
+
+func (obj *dcmObj) SetTransferSyntax(ts string) {
+	obj.TransferSyntax = ts
+}
+
 // AddConceptNameSeq - Concept Name Sequence for DICOM SR
-func (obj *DcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string) {
-	var item DcmObj
-	var seq DcmObj
-	var tag DcmTag
+func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string) {
+	item := &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+	seq := &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+	tag := DcmTag{}
 
 	item.BigEndian = obj.BigEndian
 	item.ExplicitVR = obj.ExplicitVR
@@ -253,10 +358,22 @@ func (obj *DcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue str
 }
 
 // AddSRText - add Text to SR
-func (obj *DcmObj) AddSRText(text string) {
-	var item DcmObj
-	var seq DcmObj
-	var tag DcmTag
+func (obj *dcmObj) AddSRText(text string) {
+	item := &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+	seq := &dcmObj{
+		Tags:           make([]DcmTag, 0),
+		TransferSyntax: "",
+		ExplicitVR:     false,
+		BigEndian:      false,
+		SQtag:          DcmTag{},
+	}
+	tag := DcmTag{}
 
 	item.BigEndian = obj.BigEndian
 	item.ExplicitVR = obj.ExplicitVR
@@ -276,7 +393,7 @@ func (obj *DcmObj) AddSRText(text string) {
 }
 
 // CreateSR - Create a DICOM SR object
-func (obj *DcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string) {
+func (obj *dcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string) {
 	// Instance Creation Date
 	obj.WriteString(0x08, 0x12, "DA", time.Now().Format("20060102"))
 	// Instance Creation Time
@@ -308,7 +425,7 @@ func (obj *DcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanc
 }
 
 // CreatePDF - Create a DICOM SR object
-func (obj *DcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, FileName string) {
+func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string) {
 	// Instance Creation Date
 	obj.WriteString(0x08, 0x12, "DA", time.Now().Format("20060102"))
 	// Instance Creation Time
@@ -330,15 +447,25 @@ func (obj *DcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 	obj.WriteString(0x0020, 0x0011, "IS", "300")
 	obj.WriteString(0x0020, 0x0013, "IS", "1")
 
-	var mstream MemoryStream
-	mstream.LoadFromFile(FileName)
-	mstream.Position = 0
-	size := uint32(mstream.Size)
+	mstream, _ := NewMemoryStreamFromFile(fileName)
+
+	mstream.SetPosition(0)
+	size := uint32(mstream.GetSize())
 	if size%2 == 1 {
 		size++
-		mstream.data = append(mstream.data, 0)
+		mstream.Append([]byte{0})
 	}
-	obj.WriteString(0x42, 0x10, "ST", FileName)
-	obj.Add(DcmTag{0x42, 0x11, size, "OB", mstream.data, obj.BigEndian})
+	obj.WriteString(0x42, 0x10, "ST", fileName)
+	obj.Add(DcmTag{0x42, 0x11, size, "OB", mstream.GetData(), obj.BigEndian})
 	obj.WriteString(0x42, 0x12, "LO", "application/pdf")
+}
+
+func fileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			log.Println("ERROR, dcmobj::fileExists, " + err.Error())
+			return false
+		}
+	}
+	return true
 }

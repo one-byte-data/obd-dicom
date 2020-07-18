@@ -19,17 +19,13 @@ type DcmTag struct {
 
 // GetUShort convert tag.Data to uint16
 func (tag *DcmTag) GetUShort() uint16 {
-	var val uint16
 	if tag.Length == 2 {
 		if tag.BigEndian {
-			val = binary.BigEndian.Uint16(tag.Data)
-		} else {
-			val = binary.LittleEndian.Uint16(tag.Data)
+			return binary.BigEndian.Uint16(tag.Data)
 		}
-	} else {
-		val = 0
+		return binary.LittleEndian.Uint16(tag.Data)
 	}
-	return val
+	return 0
 }
 
 // GetUInt convert tag.Data to uint32
@@ -53,8 +49,7 @@ func (tag *DcmTag) GetString() string {
 	if n == -1 {
 		n = int(tag.Length)
 	}
-	val := strings.TrimSpace(string(tag.Data[:n]))
-	return val
+	return strings.TrimSpace(string(tag.Data[:n]))
 }
 
 // GetFloat convert tag.Data to float32
@@ -68,10 +63,13 @@ func (tag *DcmTag) GetFloat() float32 {
 
 // WriteSeq - Create an SQ tag from a DICOM Object
 func (tag *DcmTag) WriteSeq(group uint16, element uint16, seq DcmObj) {
-	var bufdata BufData
+	bufdata := &bufData{
+		BigEndian: false,
+		MS:        NewEmptyMemoryStream(),
+	}
 
-	bufdata.BigEndian = seq.BigEndian
-	tag.BigEndian = seq.BigEndian
+	bufdata.BigEndian = seq.IsBigEndian()
+	tag.BigEndian = seq.IsBigEndian()
 	tag.Group = group
 	tag.Element = element
 	if tag.Group == 0xFFFE {
@@ -81,16 +79,16 @@ func (tag *DcmTag) WriteSeq(group uint16, element uint16, seq DcmObj) {
 	}
 	for i := 0; i < seq.TagCount(); i++ {
 		temptag := seq.GetTag(i)
-		bufdata.WriteTag(temptag, seq.ExplicitVR)
+		bufdata.WriteTag(temptag, seq.IsExplicitVR())
 	}
-	tag.Length = uint32(bufdata.Ms.Size)
+	tag.Length = uint32(bufdata.GetSize())
 	if tag.Length%2 == 1 {
 		tag.Length++
-		bufdata.Ms.Write([]byte(nil), 1)
+		bufdata.MS.Write([]byte(nil), 1)
 	}
 	if tag.Length > 0 {
-		tag.Data = make([]byte, tag.Length)
-		bufdata.setPosition(0)
-		bufdata.Ms.Read(tag.Data, int(tag.Length))
+		bufdata.SetPosition(0)
+		data, _ := bufdata.MS.Read(int(tag.Length))
+		tag.Data = data
 	}
 }

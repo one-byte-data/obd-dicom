@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -52,6 +53,7 @@ func SaveToFile(FileName string, buffer []byte) bool {
 	return true
 }
 
+// GetPixelData - Gets pixel data from DcmObj
 func GetPixelData(obj media.DcmObj, index *int) []uint8 {
 	var i int
 	var tag media.DcmTag
@@ -85,72 +87,87 @@ func insert(a []media.DcmTag, index int, value media.DcmTag) []media.DcmTag {
 }
 
 func test16() {
-	var obj media.DcmObj
+	obj, err := media.NewDCMObjFromFile("test.dcm")
+	if err != nil {
+		log.Panic(err)
+	}
 
-	if obj.Read("test.dcm") {
-		// Need an uncompressed image
-		if obj.TransferSyntax == "1.2.840.10008.1.2.1" {
-			var index int
-			width := int(obj.GetUShort(0x28, 0x10))
-			height := int(obj.GetUShort(0x28, 0x11))
-			pixelData := GetPixelData(obj, &index)
-			if len(pixelData) > 0 {
-				var out_data []byte
-				// Encode image
-				if Encode16(pixelData, width, height, 1, &out_data) == true {
-					tag := obj.GetTag(index)
-					tag.Length = 0xFFFFFFFF
-					tag.VR = "OB"
-					tag.Data = nil
-					obj.Tags[index] = tag
-					obj.TransferSyntax = "1.2.840.10008.1.2.4.70"
-					index++
-					tag = media.DcmTag{0xFFFE, 0xE000, 0, "DL", nil, false}
-					obj.Tags = insert(obj.Tags, index, tag)
-					index++
-					tag = media.DcmTag{0xFFFE, 0xE000, uint32(len(out_data)), "DL", out_data, false}
-					obj.Tags = insert(obj.Tags, index, tag)
-					index++
-					tag = media.DcmTag{0xFFFE, 0xE0DD, 0, "DL", nil, false}
-					obj.Tags = insert(obj.Tags, index, tag)
-					obj.Write("out.dcm")
-				}
+	// Need an uncompressed image
+	if obj.GetTransferSynxtax() == "1.2.840.10008.1.2.1" {
+		var index int
+		width := int(obj.GetUShort(0x28, 0x10))
+		height := int(obj.GetUShort(0x28, 0x11))
+		pixelData := GetPixelData(obj, &index)
+		if len(pixelData) > 0 {
+			var outData []byte
+			// Encode image
+			err := Encode16(pixelData, width, height, 1, &outData)
+			if err != nil {
+				log.Panic(err)
+			}
+
+			tag := obj.GetTag(index)
+			tag.Length = 0xFFFFFFFF
+			tag.VR = "OB"
+			tag.Data = nil
+			obj.SetTag(index, tag)
+			obj.SetTransferSyntax("1.2.840.10008.1.2.4.70")
+			index++
+			tag = media.DcmTag{0xFFFE, 0xE000, 0, "DL", nil, false}
+			obj.SetTag(index, tag)
+			index++
+			tag = media.DcmTag{0xFFFE, 0xE000, uint32(len(outData)), "DL", outData, false}
+			obj.SetTag(index, tag)
+			index++
+			tag = media.DcmTag{0xFFFE, 0xE0DD, 0, "DL", nil, false}
+			obj.SetTag(index, tag)
+
+			err = obj.WriteToFile("out.dcm")
+			if err != nil {
+				log.Panic(err)
 			}
 		}
 	}
 }
 
 func test8() {
-	var jpeg_data []byte
-	var out_data []byte
+	var jpegData []byte
+	var outData []byte
 
-	if LoadFromFile("test.jpg", &jpeg_data) {
-		out_size := 1576 * 1134 * 3 // Image Size, have to know in advance.
-		out_data = make([]byte, out_size)
+	if LoadFromFile("test.jpg", &jpegData) {
+		outSize := 1576 * 1134 * 3 // Image Size, have to know in advance.
+		outData = make([]byte, outSize)
 
-		if Decode8(jpeg_data, len(jpeg_data), out_data, out_size) {
-			fmt.Println("Decode Success!")
-			if SaveToFile("out.raw", out_data) {
-				fmt.Println("Saved out.raw")
-			} else {
-				fmt.Println("ERROR, Saving out.raw")
-			}
-		} else {
-			fmt.Println("ERROR, Decode Failed!")
+		err := Decode8(jpegData, len(jpegData), outData, outSize)
+		if err != nil {
+			log.Panic(err)
 		}
+
+		fmt.Println("Decode Success!")
+		if SaveToFile("out.raw", outData) {
+			fmt.Println("Saved out.raw")
+		} else {
+			fmt.Println("ERROR, Saving out.raw")
+		}
+	} else {
+		fmt.Println("ERROR, Decode Failed!")
 	}
-	jpeg_data = nil
-	out_data = nil
-	if LoadFromFile("test.raw", &out_data) {
-		if Encode8(out_data, 1576, 1134, 3, &jpeg_data) {
-			fmt.Println("Encode Success!")
-			if SaveToFile("out.jpg", jpeg_data) {
-				fmt.Println("Saved out.jpg")
-			} else {
-				fmt.Println("ERROR, Saving out.jpg")
-			}
-		} else {
-			fmt.Println("ERROR, Encode Failed!")
+
+	jpegData = nil
+	outData = nil
+	if LoadFromFile("test.raw", &outData) {
+		err := Encode8(outData, 1576, 1134, 3, &jpegData)
+		if err != nil {
+			log.Panic(err)
 		}
+
+		fmt.Println("Encode Success!")
+		if SaveToFile("out.jpg", jpegData) {
+			fmt.Println("Saved out.jpg")
+		} else {
+			fmt.Println("ERROR, Saving out.jpg")
+		}
+	} else {
+		fmt.Println("ERROR, Encode Failed!")
 	}
 }

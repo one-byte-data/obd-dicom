@@ -23,3 +23,59 @@ test:
   stage: test
   script:
     - echo $SSH_SETUP | base64 --decode | bash
+
+build:
+  stage: build
+  variables:
+    CGO_ENABLED: "0"
+    GOOS: linux
+    GOARCH: amd64
+  script:
+    - echo $SSH_SETUP | base64 --decode | bash
+    - go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/docker/obd-dicom
+  cache:
+    key: ${CI_PIPELINE_ID}
+    paths:
+      - build
+
+publish-build:
+  image: docker:dind
+  stage: publish
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  only:
+    - master
+  cache:
+    key: ${CI_PIPELINE_ID}
+    paths:
+      - build
+  script:
+    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker build -t $LATEST_IMAGE -t $TAG_BUILD .
+    - docker push $LATEST_IMAGE
+    - docker push $TAG_BUILD
+
+publish-release:
+  image: docker:dind
+  stage: publish
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://localhost:2375
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  only:
+    - tags
+  cache:
+    key: ${CI_PIPELINE_ID}
+    paths:
+      - build
+  script:
+    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker build -t $LATEST_IMAGE -t $TAG_RELEASE .
+    - docker push $LATEST_IMAGE
+    - docker push $TAG_RELEASE

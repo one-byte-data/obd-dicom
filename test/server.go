@@ -10,74 +10,78 @@ import (
 )
 
 func handleConnection(conn net.Conn) {
-	pdu := *network.NewPDUService()
+	pdu := network.NewPDUService()
 	log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
-	if pdu.Multiplex(conn) {
-		var DCO media.DcmObj
-		flag := true
-		for flag && pdu.Read(&DCO) {
-			command := DCO.GetUShort(0x00, 0x0100)
-			switch command {
-			case 0x01: // C-Store
-				var DDO media.DcmObj
-				if dimsec.CStoreReadRQ(pdu, DCO, &DDO) {
-					if dimsec.CStoreWriteRSP(pdu, DCO, 0) {
-						DDO.Write("test.dcm")
-						log.Println("INFO, handleConnection, CStore Success")
-						flag = true
-					} else {
-						log.Println("ERROR, handleConnection, CStore failed")
-						flag = false
-					}
-				}
-				break
-			case 0x20: // C-Find
-				var DDO media.DcmObj
-				if dimsec.CFindReadRQ(pdu, DCO, &DDO) {
-					QueryLevel := DDO.GetString(0x08, 0x52) // Get Query Level
-					var Out media.DcmObj                    // This is for the result
-					if QueryLevel == "STUDY" {
-						// Process Study Query
-					}
-					if QueryLevel == "SERIES" {
-						// Process Series Query
-					}
-					if QueryLevel == "IMAGE" {
-						// Process Image Query
-					}
-					dimsec.CFindWriteRSP(pdu, DCO, Out, 0x00)
-				}
-				break
-			case 0x21: // C-Move
-				var DDO media.DcmObj
-				if dimsec.CMoveReadRQ(pdu, DCO, &DDO) {
-					MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
-					if MoveLevel == "STUDY" {
-						// Process Study Move
-					}
-					if MoveLevel == "SERIES" {
-						// Process Series Move
-					}
-					if MoveLevel == "IMAGE" {
-						// Process Image Move
-					}
-					dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
-				}
-				break
-			case 0x30: // C-Echo
-				if dimsec.CEchoReadRQ(pdu, DCO) {
-					if dimsec.CEchoWriteRSP(pdu, DCO) {
-						log.Println("INFO, handleConnection, Echo Success!")
-					} else {
-						log.Println("ERROR, handleConnection, Echo failed!")
-						flag = false
-					}
-				}
-				break
-			default:
-				log.Println("ERROR, handleConnection, service not implemented: " + string(command))
-				flag = false
+	err := pdu.Multiplex(conn)
+	if err != nil {
+		log.Panic(err)
+	}
+	DCO := media.NewEmptyDCMObj()
+
+	for err := pdu.Read(DCO); err == nil; {
+		command := DCO.GetUShort(0x00, 0x0100)
+		switch command {
+		case 0x01: // C-Store
+			DDO := media.NewEmptyDCMObj()
+			err := dimsec.CStoreReadRQ(pdu, DCO, DDO)
+			if err != nil {
+
 			}
+			err = dimsec.CStoreWriteRSP(pdu, DCO, 0)
+			if err != nil {
+
+			}
+			DDO.WriteToFile("test.dcm")
+			log.Println("INFO, handleConnection, CStore Success")
+			break
+		case 0x20: // C-Find
+			DDO := media.NewEmptyDCMObj()
+			err := dimsec.CFindReadRQ(pdu, DCO, DDO)
+			if err != nil {
+
+			}
+			QueryLevel := DDO.GetString(0x08, 0x52) // Get Query Level
+			var Out media.DcmObj                    // This is for the result
+			if QueryLevel == "STUDY" {
+				// Process Study Query
+			}
+			if QueryLevel == "SERIES" {
+				// Process Series Query
+			}
+			if QueryLevel == "IMAGE" {
+				// Process Image Query
+			}
+			dimsec.CFindWriteRSP(pdu, DCO, Out, 0x00)
+			break
+		case 0x21: // C-Move
+			DDO := media.NewEmptyDCMObj()
+			err := dimsec.CMoveReadRQ(pdu, DCO, DDO)
+			if err != nil {
+
+			}
+			MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
+			if MoveLevel == "STUDY" {
+				// Process Study Move
+			}
+			if MoveLevel == "SERIES" {
+				// Process Series Move
+			}
+			if MoveLevel == "IMAGE" {
+				// Process Image Move
+			}
+			dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
+			break
+		case 0x30: // C-Echo
+			if dimsec.CEchoReadRQ(pdu, DCO) {
+				err := dimsec.CEchoWriteRSP(pdu, DCO)
+				if err != nil {
+
+				}
+				log.Println("INFO, handleConnection, Echo Success!")
+			}
+			break
+		default:
+			log.Println("ERROR, handleConnection, service not implemented: " + string(command))
 		}
 	}
 }

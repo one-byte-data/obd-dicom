@@ -28,27 +28,43 @@ func NewUIDitem(UIDName string, ItemType byte) *UIDitem {
 	}
 }
 
-func (uid *UIDitem) Write(conn net.Conn) bool {
-	var bd media.BufData
-	bd.BigEndian = true
+func (uid *UIDitem) Write(conn net.Conn) error {
+	bd := media.NewEmptyBufData()
+
+	bd.SetBigEndian(true)
 	bd.WriteByte(uid.ItemType)
 	bd.WriteByte(uid.Reserved1)
 	bd.WriteUint16(uid.Length)
 	bd.WriteString(uid.UIDName)
+
 	return bd.Send(conn)
 }
 
-func (uid *UIDitem) Read(conn net.Conn) bool {
-	uid.ItemType = ReadByte(conn)
+func (uid *UIDitem) Read(conn net.Conn) (err error) {
+	uid.ItemType, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
 	return uid.ReadDynamic(conn)
 }
 
 // ReadDynamic - ReadDynamic
-func (uid *UIDitem) ReadDynamic(conn net.Conn) bool {
-	uid.Reserved1 = ReadByte(conn)
-	uid.Length = ReadUint16(conn)
+func (uid *UIDitem) ReadDynamic(conn net.Conn) (err error) {
+	uid.Reserved1, err = ReadByte(conn)
+	if err != nil {
+		return
+	}
+	uid.Length, err = ReadUint16(conn)
+	if err != nil {
+		return
+	}
+
 	buffer := make([]byte, uid.Length)
-	conn.Read(buffer)
+	_, err = conn.Read(buffer)
+	if err != nil {
+		return
+	}
+
 	uid.UIDName = string(buffer)
-	return true
+	return
 }

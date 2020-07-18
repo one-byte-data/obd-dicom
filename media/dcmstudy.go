@@ -23,8 +23,8 @@ type DCMStudy struct {
 // GetInfo gets information
 func (study *DCMStudy) GetInfo(obj DcmObj) {
 	var tag DcmTag
-	for i := 0; i < len(obj.Tags); i++ {
-		tag = obj.Tags[i]
+	for i := 0; i < len(obj.GetTags()); i++ {
+		tag = obj.GetTag(i)
 		switch tag.Group {
 		case 0x08:
 			switch tag.Element {

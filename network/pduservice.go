@@ -21,7 +21,9 @@ type PDUService interface {
 	Connect(IP string, Port string) error
 	Close()
 	Multiplex(conn net.Conn) error
+	GetCalledAE() string
 	SetCalledAE(calledAE string)
+	GetCallingAE() string
 	SetCallingAE(callingAE string)
 	AddPresContexts(presentationContext PresentationContext)
 	GetPresentationContextID() byte
@@ -81,9 +83,9 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 }
 
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
-	log.Printf("ASSOC-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-	log.Printf("ASSOC-RQ: \tImpClass %s\n", pdu.AssocRQ.GetUserInformation().GetImpClass().UIDName)
-	log.Printf("ASSOC-RQ: \tImpVersion %s\n\n", pdu.AssocRQ.GetUserInformation().GetImpVersion().UIDName)
+	log.Printf("INFO, ASSOC-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
+	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", pdu.AssocRQ.GetUserInformation().GetImpClass().UIDName)
+	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", pdu.AssocRQ.GetUserInformation().GetImpVersion().UIDName)
 
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
 	pdu.AssocAC.SetCallingAE(pdu.AssocRQ.GetCallingAE())
@@ -93,9 +95,9 @@ func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 	pdu.AssocAC.SetUserInformation(pdu.AssocRQ.GetUserInformation())
 
 	for _, PresContext := range pdu.AssocRQ.GetPresContexts() {
-		log.Printf("ASSOC-RQ: \tPresentation Context %s\n", PresContext.GetAbstractSyntax().UIDName)
+		log.Printf("INFO, ASSOC-RQ: \tPresentation Context %s\n", PresContext.GetAbstractSyntax().UIDName)
 		for _, TransferSyn := range PresContext.GetTransferSyntaxes() {
-			log.Printf("ASSOC-RQ: \t\tTransfer Synxtax %s\n", TransferSyn.UIDName)
+			log.Printf("INFO, ASSOC-RQ: \t\tTransfer Synxtax %s\n", TransferSyn.UIDName)
 		}
 
 		PresContextAccept := NewPresentationContextAccept()
@@ -169,6 +171,9 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 		pdu.AssocAC.SetMaxSubLength(16384)
 	}
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
+
+	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
+
 	return pdu.Pdata.Write(pdu.conn)
 }
 
@@ -337,8 +342,16 @@ func (pdu *pduService) Multiplex(conn net.Conn) error {
 	return nil
 }
 
+func (pdu *pduService) GetCalledAE() string {
+	return pdu.AssocAC.GetCalledAE()
+}
+
 func (pdu *pduService) SetCalledAE(calledAE string) {
 	pdu.AssocRQ.SetCalledAE(calledAE)
+}
+
+func (pdu *pduService) GetCallingAE() string {
+	return pdu.AssocAC.GetCallingAE()
 }
 
 func (pdu *pduService) SetCallingAE(callingAE string) {

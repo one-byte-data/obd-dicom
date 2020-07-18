@@ -137,8 +137,8 @@ func (pc *presentationContextAccept) Write(conn net.Conn) (err error) {
 	bd.WriteByte(pc.Result)
 	bd.WriteByte(pc.Reserved4)
 
-	log.Printf("ASSOC-AC: \tAccepted Presentation Context %s\n", pc.GetAbstractSyntax().UIDName)
-	log.Printf("ASSOC-AC: \tAccepted Transfer Synxtax %s\n", pc.GetTrnSyntax().UIDName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s\n", pc.GetAbstractSyntax().UIDName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s\n", pc.GetTrnSyntax().UIDName)
 
 	if err = bd.Send(conn); err == nil {
 		return pc.TrnSyntax.Write(conn)
@@ -300,9 +300,9 @@ func (aaac *aassociationAC) Write(conn net.Conn) error {
 
 	fmt.Println()
 
-	log.Printf("ASSOC-AC: %s <-- %s\n", aaac.CallingAE, aaac.CalledAE)
-	log.Printf("ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().UIDName)
-	log.Printf("ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().UIDName)
+	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.CallingAE, aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().UIDName)
+	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().UIDName)
 
 	bd.SetBigEndian(true)
 	aaac.Size()

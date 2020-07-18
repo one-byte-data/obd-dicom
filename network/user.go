@@ -109,7 +109,6 @@ func NewAsyncOperationWindow() AsyncOperationWindow {
 	}
 }
 
-// Size - Size
 func (async *asyncOperationWindow) Size() uint16 {
 	return async.Length + 4
 }

@@ -83,10 +83,6 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 }
 
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
-	log.Printf("INFO, ASSOC-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", pdu.AssocRQ.GetUserInformation().GetImpClass().UIDName)
-	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", pdu.AssocRQ.GetUserInformation().GetImpVersion().UIDName)
-
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
 	pdu.AssocAC.SetCallingAE(pdu.AssocRQ.GetCallingAE())
 
@@ -216,7 +212,7 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 	if pdu.Pdata.Length != 0 {
 		pdu.Pdata.ReadDynamic(pdu.conn)
 		if pdu.Pdata.MsgStatus > 0 {
-			if pdu.ParseRawVRIntoDCM(DCO) == false {
+			if !pdu.ParseRawVRIntoDCM(DCO) {
 				pdu.AbortRQ.Write(pdu.conn)
 				pdu.conn.Close()
 				return errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
@@ -233,23 +229,26 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 
 		switch ItemType {
 		case 0x01: // A-Associate-RQ, should not get here
+			log.Printf("INFO, ASSOC-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.AssocRQ.Read(pdu.conn)
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Read, A-Associate-RQ")
 		case 0x02: // A-Associate-AC, should not get here
+			log.Printf("INFO, ASSOC-AC: %s <-- %s\n", pdu.AssocAC.GetCallingAE(), pdu.AssocAC.GetCalledAE())
 			pdu.AssocAC.Read(pdu.conn)
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Read, A-Associate-AC")
 		case 0x03: // A-Associate-RJ, should not get here
+			log.Printf("INFO, ASSOC-RJ: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.AbortRQ.Write(pdu.conn)
 			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Read, A-Associate-RJ")
 		case 0x04: // P-Data-TF
 			pdu.Pdata.ReadDynamic(pdu.conn)
 			if pdu.Pdata.MsgStatus > 0 {
-				if pdu.ParseRawVRIntoDCM(DCO) == false {
+				if !pdu.ParseRawVRIntoDCM(DCO) {
 					pdu.AbortRQ.Write(pdu.conn)
 					pdu.conn.Close()
 					return errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
@@ -258,13 +257,16 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 			}
 			break
 		case 0x05: // A-Release-RQ
+			log.Printf("INFO, ASSOC-R-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.ReleaseRQ.ReadDynamic(pdu.conn)
 			pdu.ReleaseRP.Write(pdu.conn)
 			return errors.New("ERROR, pduservice::Read, A-Release-RQ")
 		case 0x06: // A-Release-RP
+			log.Printf("INFO, ASSOC-R-RP: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Read, A-Release-RP")
 		case 0x07: //A-Abort-RQ
+			log.Printf("INFO, ASSOC-ABORT-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Read, A-Abort-RQ")
 		default:

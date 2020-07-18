@@ -337,7 +337,6 @@ func (aaac *aassociationAC) Read(conn net.Conn) (err error) {
 	return aaac.ReadDynamic(conn)
 }
 
-// ReadDynamic ReadDynamic
 func (aaac *aassociationAC) ReadDynamic(conn net.Conn) (err error) {
 	aaac.Reserved1, err = ReadByte(conn)
 	if err != nil {
@@ -389,5 +388,12 @@ func (aaac *aassociationAC) ReadDynamic(conn net.Conn) (err error) {
 		}
 	}
 
-	return
+	log.Printf("INFO, ASSOC-AC: %s --> %s\n", aaac.GetCallingAE(), aaac.GetCalledAE())
+	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.GetUserInformation().GetImpClass().UIDName)
+	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.GetUserInformation().GetImpVersion().UIDName)
+
+	if Count == 0 {
+		return nil
+	}
+	return errors.New("ERROR, aarq::ReadDynamic, Count is not zero")
 }

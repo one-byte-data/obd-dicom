@@ -121,7 +121,6 @@ func (pc *presentationContext) Read(conn net.Conn) (bool, error) {
 	return pc.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
 func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
 	var err error
 	pc.Reserved1, err = ReadByte(conn)
@@ -291,6 +290,10 @@ func (aarq *aassociationRQ) Size() uint32 {
 func (aarq *aassociationRQ) Write(conn net.Conn) error {
 	bd := media.NewEmptyBufData()
 
+	log.Printf("INFO, ASSOC-RQ: %s <-- %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
+	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().UIDName)
+	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().UIDName)
+
 	bd.SetBigEndian(true)
 	aarq.Size()
 	bd.WriteByte(aarq.ItemType)
@@ -316,32 +319,30 @@ func (aarq *aassociationRQ) Write(conn net.Conn) error {
 	return nil
 }
 
-func (aarq *aassociationRQ) Read(conn net.Conn) error {
-	var err error
+func (aarq *aassociationRQ) Read(conn net.Conn) (err error) {
 	aarq.ItemType, err = ReadByte(conn)
 	if err != nil {
-		return err
+		return
 	}
 	return aarq.ReadDynamic(conn)
 }
 
-func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) error {
-	var err error
+func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
 	aarq.Reserved1, err = ReadByte(conn)
 	if err != nil {
-		return err
+		return
 	}
 	aarq.Length, err = ReadUint32(conn)
 	if err != nil {
-		return err
+		return
 	}
 	aarq.ProtocolVersion, err = ReadUint16(conn)
 	if err != nil {
-		return err
+		return
 	}
 	aarq.Reserved2, err = ReadUint16(conn)
 	if err != nil {
-		return err
+		return
 	}
 
 	conn.Read(aarq.CalledAE[:])
@@ -378,6 +379,11 @@ func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) error {
 			Count = -1
 		}
 	}
+
+	log.Printf("INFO, ASSOC-RQ: %s --> %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
+	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().UIDName)
+	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().UIDName)
+
 	if Count == 0 {
 		return nil
 	}

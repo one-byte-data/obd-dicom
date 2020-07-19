@@ -225,7 +225,7 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 		}
 	}
 
-	for true {
+	for {
 		ItemType, err := ReadByte(pdu.conn)
 		if err != nil {
 			return err
@@ -282,10 +282,8 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 			return errors.New("ERROR, pduservice::Read, unknown ItemType")
 		}
 	}
-	return errors.New("ERROR, pduservice::Read, unknown error")
 }
 
-// SetTimeout - SetTimeout
 func (pdu *pduService) SetTimeout(timeout int) {
 }
 

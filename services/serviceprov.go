@@ -71,7 +71,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 	}
 
 	DCO := media.NewEmptyDCMObj()
-	for true {
+	for {
 		err := pdu.Read(DCO)
 		if err != nil {
 			break

@@ -65,18 +65,22 @@ func (pd *PDataTF) ReadDynamic(conn net.Conn) (err error) {
 		if err != nil {
 			return errors.New("ERROR, pdata::ReadDynamic, " + err.Error())
 		}
+
 		pd.Buffer.Write(buff, int(pd.pdv.Length-2))
 		Count = Count - pd.pdv.Length - 4
 		pd.Length = pd.Length - pd.pdv.Length - 4
+
 		if pd.pdv.MsgHeader&0x02 > 0 {
 			pd.MsgStatus = 1
 			pd.PresentationContextID = pd.pdv.PresentationContextID
 			return nil
 		}
 	}
+
 	if pd.pdv.MsgHeader&0x02 > 0 {
 		pd.MsgStatus = 1
 	}
+
 	pd.PresentationContextID = pd.pdv.PresentationContextID
 	return nil
 }
@@ -87,8 +91,10 @@ func (pd *PDataTF) Write(conn net.Conn) error {
 	if pd.BlockSize == 0 {
 		pd.BlockSize = 4096
 	}
+
 	SentSize := uint32(0)
 	TLength := pd.Length
+
 	for SentSize < TotalSize {
 		if (TotalSize - SentSize) < pd.BlockSize {
 			pd.BlockSize = TotalSize - SentSize
@@ -98,6 +104,7 @@ func (pd *PDataTF) Write(conn net.Conn) error {
 		} else {
 			pd.MsgHeader = pd.MsgHeader & 0x01
 		}
+
 		pd.pdv.PresentationContextID = pd.PresentationContextID
 		pd.pdv.MsgHeader = pd.MsgHeader
 		pd.pdv.Length = pd.BlockSize + 2
@@ -115,10 +122,15 @@ func (pd *PDataTF) Write(conn net.Conn) error {
 		bd.WriteByte(pd.MsgHeader)
 		if err := bd.Send(conn); err == nil {
 			buff, err := pd.Buffer.Read(int(pd.BlockSize))
+			if err != nil {
+				return errors.New("ERROR, pdata::Write, " + err.Error())
+			}
+
 			n, err := conn.Write(buff)
 			if err != nil {
 				return errors.New("ERROR, pdata::Write, " + err.Error())
 			}
+
 			if n != int(pd.BlockSize) {
 				return errors.New("ERROR, pdata::Write, n!=int(pd.BlockSize)")
 			}

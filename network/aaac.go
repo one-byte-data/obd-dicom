@@ -116,7 +116,6 @@ func (pc *presentationContextAccept) SetAbstractSyntax(Abst string) {
 	pc.AbsSyntax.Length = uint16(len(Abst))
 }
 
-// SetTransferSyntax sets the transfer syntax
 func (pc *presentationContextAccept) SetTransferSyntax(Tran string) {
 	pc.TrnSyntax.ItemType = 0x40
 	pc.TrnSyntax.Reserved1 = 0
@@ -287,10 +286,10 @@ func (aaac *aassociationAC) Size() uint32 {
 	aaac.Length = 4 + 16 + 16 + 32
 	aaac.Length += uint32(aaac.AppContext.Size())
 
-	for i := 0; i < len(aaac.PresContextAccepts); i++ {
-		PresContextAccept := aaac.PresContextAccepts[i]
+	for _, PresContextAccept := range aaac.PresContextAccepts {
 		aaac.Length += uint32(PresContextAccept.Size())
 	}
+
 	aaac.Length += uint32(aaac.UserInfo.Size())
 	return aaac.Length + 6
 }
@@ -395,5 +394,6 @@ func (aaac *aassociationAC) ReadDynamic(conn net.Conn) (err error) {
 	if Count == 0 {
 		return nil
 	}
+
 	return errors.New("ERROR, aarq::ReadDynamic, Count is not zero")
 }

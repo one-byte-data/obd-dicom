@@ -37,7 +37,6 @@ func NewAAssociationRJ() AAssociationRJ {
 	}
 }
 
-// Size gets the size
 func (aarj *aassociationRJ) Size() uint32 {
 	aarj.Length = 4
 	return aarj.Length + 6
@@ -118,7 +117,6 @@ func NewAReleaseRQ() AReleaseRQ {
 	}
 }
 
-// Size gets the size
 func (arrq *areleaseRQ) Size() uint32 {
 	arrq.Length = 4
 	return arrq.Length + 6
@@ -147,7 +145,6 @@ func (arrq *areleaseRQ) Read(conn net.Conn) (err error) {
 	return arrq.ReadDynamic(conn)
 }
 
-// ReadDynamic ReadDynamic
 func (arrq *areleaseRQ) ReadDynamic(conn net.Conn) (err error) {
 	arrq.Reserved1, err = ReadByte(conn)
 	if err != nil {
@@ -185,7 +182,6 @@ func NewAReleaseRP() AReleaseRP {
 	}
 }
 
-// Size gets the size
 func (arrp *areleaseRP) Size() uint32 {
 	arrp.Length = 4
 	return arrp.Length + 6
@@ -214,7 +210,6 @@ func (arrp *areleaseRP) Read(conn net.Conn) (err error) {
 	return arrp.ReadDynamic(conn)
 }
 
-// ReadDynamic ReadDynamic
 func (arrp *areleaseRP) ReadDynamic(conn net.Conn) (err error) {
 	arrp.Reserved1, err = ReadByte(conn)
 	if err != nil {
@@ -258,7 +253,6 @@ func NewAAbortRQ() AAbortRQ {
 	}
 }
 
-// Size gets the size
 func (aarq *aabortRQ) Size() uint32 {
 	aarq.Length = 4
 	return aarq.Length + 6
@@ -288,7 +282,6 @@ func (aarq *aabortRQ) Read(conn net.Conn) (err error) {
 	return aarq.ReadDynamic(conn)
 }
 
-// ReadDynamic - ReadDynamic
 func (aarq *aabortRQ) ReadDynamic(conn net.Conn) (err error) {
 	aarq.Reserved1, err = ReadByte(conn)
 	if err != nil {

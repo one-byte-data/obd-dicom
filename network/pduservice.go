@@ -167,10 +167,12 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 			return errors.New("ERROR, pduservice::Write, ParseDCMIntoRaw failed")
 		}
 	}
+
 	pdu.Pdata.MsgHeader = ItemType
 	if pdu.AssocAC.GetUserInformation().GetMaxSubLength().GetMaximumLength() > 16384 {
 		pdu.AssocAC.SetMaxSubLength(16384)
 	}
+
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
 
 	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
@@ -179,8 +181,7 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 }
 
 func (pdu *pduService) GetTransferSyntaxUID(pcid byte) string {
-	for i := 0; i < len(pdu.AcceptedPresentationContexts); i++ {
-		pca := pdu.AcceptedPresentationContexts[i]
+	for _, pca := range pdu.AcceptedPresentationContexts {
 		if pca.GetPresentationContextID() == pcid {
 			return pca.GetTrnSyntax().UIDName
 		}
@@ -297,13 +298,13 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 	pdu.AssocRQ.SetMaxSubLength(16384)
 	pdu.AssocRQ.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 	pdu.AssocRQ.SetImpVersionName("One-Byte-Data")
+
 	err = pdu.AssocRQ.Write(pdu.conn)
 	if err != nil {
 		return err
 	}
 
-	var ItemType byte
-	ItemType, err = ReadByte(pdu.conn)
+	ItemType, err := ReadByte(pdu.conn)
 	if err != nil {
 		return err
 	}

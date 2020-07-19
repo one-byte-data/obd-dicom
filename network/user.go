@@ -2,7 +2,6 @@ package network
 
 import (
 	"errors"
-	"log"
 	"net"
 	"strconv"
 
@@ -15,8 +14,8 @@ type MaximumSubLength interface {
 	SetMaximumLength(length uint32)
 	Size() uint16
 	Write(conn net.Conn) bool
-	Read(conn net.Conn) (bool, error)
-	ReadDynamic(conn net.Conn) (bool, error)
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
 }
 
 type maximumSubLength struct {
@@ -61,37 +60,32 @@ func (maxim *maximumSubLength) Write(conn net.Conn) bool {
 	return true
 }
 
-func (maxim *maximumSubLength) Read(conn net.Conn) (bool, error) {
-	var err error
+func (maxim *maximumSubLength) Read(conn net.Conn) (err error) {
 	maxim.ItemType, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return err
 	}
 	return maxim.ReadDynamic(conn)
 }
 
-func (maxim *maximumSubLength) ReadDynamic(conn net.Conn) (bool, error) {
-	var err error
+func (maxim *maximumSubLength) ReadDynamic(conn net.Conn) (err error) {
 	maxim.Reserved1, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	maxim.Length, err = ReadUint16(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	maxim.MaximumLength, err = ReadUint32(conn)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	return
 }
 
 // AsyncOperationWindow - AsyncOperationWindow
 type AsyncOperationWindow interface {
 	Size() uint16
-	Read(conn net.Conn) (bool, error)
-	ReadDynamic(conn net.Conn) (bool, error)
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
 }
 
 type asyncOperationWindow struct {
@@ -113,42 +107,37 @@ func (async *asyncOperationWindow) Size() uint16 {
 	return async.Length + 4
 }
 
-func (async *asyncOperationWindow) Read(conn net.Conn) (bool, error) {
-	var err error
+func (async *asyncOperationWindow) Read(conn net.Conn) (err error) {
 	async.ItemType, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	return async.ReadDynamic(conn)
 }
 
-func (async *asyncOperationWindow) ReadDynamic(conn net.Conn) (bool, error) {
-	var err error
+func (async *asyncOperationWindow) ReadDynamic(conn net.Conn) (err error) {
 	async.Reserved1, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	async.Length, err = ReadUint16(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	async.MaxNumberOperationsInvoked, err = ReadUint16(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	async.MaxNumberOperationsPerformed, err = ReadUint16(conn)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	return
 }
 
 // RoleSelect - RoleSelect
 type RoleSelect interface {
 	Size() uint16
 	Write(conn net.Conn) bool
-	Read(conn net.Conn) (bool, error)
-	ReadDynamic(conn net.Conn) (bool, error)
+	Read(conn net.Conn) (err error)
+	ReadDynamic(conn net.Conn) (err error)
 }
 
 type roleSelect struct {
@@ -189,46 +178,41 @@ func (scpscu *roleSelect) Write(conn net.Conn) bool {
 	return true
 }
 
-func (scpscu *roleSelect) Read(conn net.Conn) (bool, error) {
-	var err error
+func (scpscu *roleSelect) Read(conn net.Conn) (err error) {
 	scpscu.ItemType, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	return scpscu.ReadDynamic(conn)
 }
 
-func (scpscu *roleSelect) ReadDynamic(conn net.Conn) (bool, error) {
-	var err error
+func (scpscu *roleSelect) ReadDynamic(conn net.Conn) (err error) {
 	scpscu.Reserved1, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	scpscu.Length, err = ReadUint16(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	tl, err := ReadUint16(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 
 	tuid := make([]byte, tl)
 	_, err = conn.Read(tuid)
 	if err != nil {
-		return false, err
+		return
 	}
 
 	scpscu.uid = string(tuid)
 	scpscu.SCURole, err = ReadByte(conn)
 	if err != nil {
-		return false, err
+		return
 	}
 	scpscu.SCPRole, err = ReadByte(conn)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	return
 }
 
 // UserInformation - UserInformation
@@ -350,8 +334,7 @@ func (ui *userInformation) ReadDynamic(conn net.Conn) (err error) {
 		return
 	}
 
-	var Count int
-	Count = int(ui.Length)
+	Count := int(ui.Length)
 	for Count > 0 {
 		TempByte, err := ReadByte(conn)
 		if err != nil {
@@ -384,8 +367,7 @@ func (ui *userInformation) ReadDynamic(conn net.Conn) (err error) {
 			conn.Close()
 			ui.UserInfoBaggage = uint32(Count)
 			Count = -1
-			log.Println("ERROR, user::ReadDynamic, unknown TempByte: " + strconv.Itoa(int(TempByte)))
-			break
+			return errors.New("ERROR, user::ReadDynamic, unknown TempByte: " + strconv.Itoa(int(TempByte)))
 		}
 	}
 

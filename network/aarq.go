@@ -75,8 +75,7 @@ func (pc *presentationContext) GetTransferSyntaxes() []UIDitem {
 func (pc *presentationContext) Size() uint16 {
 	pc.Length = 4
 	pc.Length += pc.AbsSyntax.Size()
-	for i := 0; i < len(pc.TrnSyntaxs); i++ {
-		TrnSyntax := pc.TrnSyntaxs[i]
+	for _, TrnSyntax := range pc.TrnSyntaxs {
 		pc.Length += TrnSyntax.Size()
 	}
 	return pc.Length + 4
@@ -102,8 +101,7 @@ func (pc *presentationContext) Write(conn net.Conn) error {
 	if err != nil {
 		return err
 	}
-	for i := 0; i < len(pc.TrnSyntaxs); i++ {
-		TrnSyntax := pc.TrnSyntaxs[i]
+	for _, TrnSyntax := range pc.TrnSyntaxs {
 		err := TrnSyntax.Write(conn)
 		if err != nil {
 			return err
@@ -149,6 +147,7 @@ func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
 	}
 
 	pc.AbsSyntax.Read(conn)
+
 	Count := pc.Length - 4 - pc.AbsSyntax.Size()
 	for Count > 0 {
 		var TrnSyntax UIDitem
@@ -158,9 +157,11 @@ func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
 			pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
 		}
 	}
+
 	if Count == 0 {
 		return true, nil
 	}
+
 	return false, errors.New("ERROR, pc::ReadDynamic, Count is not zero")
 }
 
@@ -279,10 +280,10 @@ func (aarq *aassociationRQ) Size() uint32 {
 	aarq.Length = 4 + 16 + 16 + 32
 	aarq.Length += uint32(aarq.AppContext.Size())
 
-	for i := 0; i < len(aarq.PresContexts); i++ {
-		PresContext := aarq.PresContexts[i]
+	for _, PresContext := range aarq.PresContexts {
 		aarq.Length += uint32(PresContext.Size())
 	}
+
 	aarq.Length += uint32(aarq.UserInfo.Size())
 	return aarq.Length + 6
 }
@@ -310,8 +311,7 @@ func (aarq *aassociationRQ) Write(conn net.Conn) error {
 		if err != nil {
 			return err
 		}
-		for i := 0; i < len(aarq.PresContexts); i++ {
-			PresContext := aarq.PresContexts[i]
+		for _, PresContext := range aarq.PresContexts {
 			PresContext.Write(conn)
 		}
 		aarq.UserInfo.Write(conn)
@@ -349,8 +349,7 @@ func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
 	conn.Read(aarq.CallingAE[:])
 	conn.Read(aarq.Reserved3[:])
 
-	var Count int
-	Count = int(aarq.Length - 4 - 16 - 16 - 32)
+	Count := int(aarq.Length - 4 - 16 - 16 - 32)
 	for Count > 0 {
 		TempByte, err := ReadByte(conn)
 		if err != nil {
@@ -387,6 +386,7 @@ func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
 	if Count == 0 {
 		return nil
 	}
+
 	return errors.New("ERROR, aarq::ReadDynamic, Count is not zero")
 }
 

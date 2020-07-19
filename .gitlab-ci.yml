@@ -28,7 +28,7 @@ build:
   stage: build
   script:
     - echo $SSH_SETUP | base64 --decode | bash
-    - CGO_ENABLED="0" GOOS=linux GOARCH=amd64go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/docker/obd-dicom
+    - CGO_ENABLED="0" GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/docker/obd-dicom
     - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/obd-dicom
     - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/obd-dicom
     - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/obd-dicom.exe

@@ -141,8 +141,8 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 }
 
 func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error {
-	pdu.SetCallingAE(d.destination.CallingAE)
-	pdu.SetCalledAE(d.destination.CalledAE)
+	pdu.SetRQCallingAE(d.destination.CallingAE)
+	pdu.SetRQCalledAE(d.destination.CalledAE)
 	pdu.SetTimeout(timeout)
 
 	network.Resetuniq()

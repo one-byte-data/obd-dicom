@@ -21,10 +21,14 @@ type PDUService interface {
 	Connect(IP string, Port string) error
 	Close()
 	Multiplex(conn net.Conn) error
-	GetCalledAE() string
-	SetCalledAE(calledAE string)
-	GetCallingAE() string
-	SetCallingAE(callingAE string)
+	GetACCalledAE() string
+	SetACCalledAE(calledAE string)
+	GetACCallingAE() string
+	SetACCallingAE(callingAE string)
+	GetRQCalledAE() string
+	SetRQCalledAE(calledAE string)
+	GetRQCallingAE() string
+	SetRQCallingAE(callingAE string)
 	AddPresContexts(presentationContext PresentationContext)
 	GetPresentationContextID() byte
 	SetOnAssociationRequest(f func(calledAE string) bool)
@@ -175,7 +179,7 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
 
-	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
+	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetACCallingAE())
 
 	return pdu.Pdata.Write(pdu.conn)
 }
@@ -350,19 +354,35 @@ func (pdu *pduService) Multiplex(conn net.Conn) error {
 	return nil
 }
 
-func (pdu *pduService) GetCalledAE() string {
+func (pdu *pduService) GetACCalledAE() string {
 	return pdu.AssocAC.GetCalledAE()
 }
 
-func (pdu *pduService) SetCalledAE(calledAE string) {
-	pdu.AssocRQ.SetCalledAE(calledAE)
+func (pdu *pduService) SetACCalledAE(calledAE string) {
+	pdu.AssocAC.SetCalledAE(calledAE)
 }
 
-func (pdu *pduService) GetCallingAE() string {
+func (pdu *pduService) GetACCallingAE() string {
 	return pdu.AssocAC.GetCallingAE()
 }
 
-func (pdu *pduService) SetCallingAE(callingAE string) {
+func (pdu *pduService) SetACCallingAE(callingAE string) {
+	pdu.AssocAC.SetCallingAE(callingAE)
+}
+
+func (pdu *pduService) GetRQCalledAE() string {
+	return pdu.AssocRQ.GetCalledAE()
+}
+
+func (pdu *pduService) SetRQCalledAE(calledAE string) {
+	pdu.AssocRQ.SetCalledAE(calledAE)
+}
+
+func (pdu *pduService) GetRQCallingAE() string {
+	return pdu.AssocRQ.GetCallingAE()
+}
+
+func (pdu *pduService) SetRQCallingAE(callingAE string) {
 	pdu.AssocRQ.SetCallingAE(callingAE)
 }
 

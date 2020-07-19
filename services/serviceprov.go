@@ -112,11 +112,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 				s.OnCFindRequest(QueryLevel, DDO, Result)
 			}
 
-			err = dimsec.CFindWriteRSP(pdu, DCO, Result, 0x00)
-			if err != nil {
-				log.Println("ERROR, handleConnection, C-Find failed to write response!")
-				return
-			}
+			dimsec.CFindWriteRSP(pdu, DCO, Result, 0x00)
 			break
 		case 0x21: // C-Move
 			DDO := media.NewEmptyDCMObj()
@@ -131,11 +127,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 				s.OnCMoveRequest(MoveLevel, DDO)
 			}
 
-			err = dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
-			if err != nil {
-				log.Println("ERROR, handleConnection, C-Move failed to write response!")
-				return
-			}
+			dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
 			break
 		case 0x30: // C-Echo
 			if dimsec.CEchoReadRQ(pdu, DCO) {

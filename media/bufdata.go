@@ -16,8 +16,8 @@ type BufData interface {
 	GetSize() int
 	Read(count int) ([]byte, error)
 	ReadByte() (byte, error)
-	ReadUint16() uint16
-	ReadUint32() uint32
+	ReadUint16() (uint16, error)
+	ReadUint32() (uint32, error)
 	Write(data []byte, count int) (int, error)
 	WriteByte(value byte) error
 	WriteUint16(value uint16)
@@ -95,7 +95,6 @@ func (bd *bufData) Read(count int) ([]byte, error) {
 	return bd.MS.Read(count)
 }
 
-// ReadByte reads a byte
 func (bd *bufData) ReadByte() (byte, error) {
 	c, err := bd.MS.Read(1)
 	if err != nil {
@@ -104,22 +103,26 @@ func (bd *bufData) ReadByte() (byte, error) {
 	return c[0], nil
 }
 
-// ReadUint16 reads an unsigned int
-func (bd *bufData) ReadUint16() uint16 {
-	c, _ := bd.MS.Read(2)
-	if bd.BigEndian {
-		return binary.BigEndian.Uint16(c)
+func (bd *bufData) ReadUint16() (uint16, error) {
+	c, err := bd.MS.Read(2)
+	if err != nil {
+		return 0, err
 	}
-	return binary.LittleEndian.Uint16(c)
+	if bd.BigEndian {
+		return binary.BigEndian.Uint16(c), nil
+	}
+	return binary.LittleEndian.Uint16(c), nil
 }
 
-// ReadUint32 reads an unsigned int
-func (bd *bufData) ReadUint32() uint32 {
-	c, _ := bd.MS.Read(4)
-	if bd.BigEndian {
-		return binary.BigEndian.Uint32(c)
+func (bd *bufData) ReadUint32() (uint32, error) {
+	c, err := bd.MS.Read(4)
+	if err != nil {
+		return 0, err
 	}
-	return binary.LittleEndian.Uint32(c)
+	if bd.BigEndian {
+		return binary.BigEndian.Uint32(c), nil
+	}
+	return binary.LittleEndian.Uint32(c), nil
 }
 
 func (bd *bufData) Write(data []byte, count int) (int, error) {
@@ -160,9 +163,17 @@ func (bd *bufData) WriteString(value string) {
 
 // ReadTag - read a single tag from the Stream
 func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
+	group, err := bd.ReadUint16()
+	if err != nil {
+		return nil, err
+	}
+	element, err := bd.ReadUint16()
+	if err != nil {
+		return nil, err
+	}
 	tag := &DcmTag{
-		Group:   bd.ReadUint16(),
-		Element: bd.ReadUint16(),
+		Group:   group,
+		Element: element,
 	}
 
 	internalVR := explicitVR
@@ -174,16 +185,33 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 	if (tag.Group != 0x0000) && (tag.Group != 0xfffe) && (internalVR) {
 		tag.VR = bd.readString(2)
 		if (tag.VR == "OB") || (tag.VR == "OW") || (tag.VR == "SQ") || (tag.VR == "UN") || (tag.VR == "UT") {
-			bd.ReadUint16()
-			tag.Length = bd.ReadUint32()
+			_, err := bd.ReadUint16()
+			if err != nil {
+				return nil, err
+			}
+
+			length, err := bd.ReadUint32()
+			if err != nil {
+				return nil, err
+			}
+
+			tag.Length = length
 		} else {
-			tag.Length = uint32(bd.ReadUint16())
+			length, err := bd.ReadUint16()
+			if err != nil {
+				return nil, err
+			}
+			tag.Length = uint32(length)
 		}
 	} else {
 		if internalVR == false {
 			tag.VR = AddVRData(tag.Group, tag.Element)
 		}
-		tag.Length = bd.ReadUint32()
+		length, err := bd.ReadUint32()
+		if err != nil {
+			return nil, err
+		}
+		tag.Length = length
 	}
 
 	if (tag.Length != 0) && (tag.Length != 0xFFFFFFFF) {

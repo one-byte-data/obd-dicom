@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/services"
-	"git.onebytedata.com/OneByteDataPlatform/one-byte-module/models"
 )
 
-var destination *models.Destination
+var destination *network.Destination
 
 func main() {
 	media.InitDict()
@@ -31,6 +32,8 @@ func main() {
 	cfind := flag.Bool("cfind", false, "Send C-Find request to the destination")
 	cmove := flag.Bool("cmove", false, "Send C-Move request to the destination")
 	cstore := flag.Bool("cstore", false, "Sends a C-Store request to the destination")
+
+	query := flag.String("query", "", "Comma seperated query to be sent with request ex: 00080020=test")
 
 	dump := flag.Bool("dump", false, "Dump contents of DICOM file to stdout")
 
@@ -69,7 +72,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	destination = &models.Destination{
+	destination = &network.Destination{
 		Name:      *hostName,
 		HostName:  *hostName,
 		CalledAE:  *calledAE,
@@ -90,14 +93,26 @@ func main() {
 		log.Println("CEcho was successful")
 	}
 	if *cfind {
-		query := media.DefaultCFindRequest()
+		request := media.DefaultCFindRequest()
 		scu := services.NewSCU(destination)
 
 		results := make([]media.DcmObj, 0)
-		_, err := scu.FindSCU(query, &results, 30)
+		_, err := scu.FindSCU(request, &results, 30)
 		if err != nil {
 			log.Fatalln(err)
 		}
+
+		if *query != "" {
+			parts := strings.Split(*query, ",")
+			for _, part := range parts {
+				log.Println(part)
+				// p := strings.Split(part, "=")
+				// tag := media.DcmTag{
+					
+				// }
+			}
+		}
+
 		log.Println("CFind was successful")
 		log.Printf("Found %d results\n\n", len(results))
 		for _, result := range results {
@@ -113,9 +128,11 @@ func main() {
 		if *studyUID == "" {
 			log.Fatalln("studyuid is required for a C-Move")
 		}
-		query := media.DefaultCMoveRequest(*studyUID)
+
+		request := media.DefaultCMoveRequest(*studyUID)
+
 		scu := services.NewSCU(destination)
-		_, err := scu.MoveSCU(*destinationAE, query, 30)
+		_, err := scu.MoveSCU(*destinationAE, request, 30)
 		if err != nil {
 			log.Fatalln(err)
 		}

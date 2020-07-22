@@ -7,8 +7,6 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-
-	"git.onebytedata.com/OneByteDataPlatform/one-byte-module/models"
 )
 
 // SCU - inteface to a scu
@@ -22,11 +20,11 @@ type SCU interface {
 }
 
 type scu struct {
-	destination *models.Destination
+	destination *network.Destination
 }
 
 // NewSCU - Creates an interface to scu
-func NewSCU(destination *models.Destination) SCU {
+func NewSCU(destination *network.Destination) SCU {
 	return &scu{
 		destination: destination,
 	}

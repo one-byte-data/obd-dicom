@@ -13,8 +13,11 @@ import (
 )
 
 var destination *network.Destination
+var version string
 
 func main() {
+	log.Printf("Starting odb-dicom %s\n\n", version)
+
 	media.InitDict()
 
 	hostName := flag.String("host", "localhost", "Destination host name or IP")

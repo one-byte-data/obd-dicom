@@ -30,12 +30,11 @@ type scp struct {
 }
 
 // NewSCP - Creates an interface to scu
-func NewSCP(calledAEs []string, port int) SCP {
+func NewSCP(port int) SCP {
 	media.InitDict()
 
 	return &scp{
-		CalledAEs: calledAEs,
-		Port:      port,
+		Port: port,
 	}
 }
 

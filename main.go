@@ -48,7 +48,7 @@ func main() {
 		if *calledAE == "" {
 			log.Fatalln("calledae is required for scp")
 		}
-		scp := services.NewSCP([]string{*calledAE}, *port)
+		scp := services.NewSCP(*port)
 
 		scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
 			called := request.GetCalledAE()

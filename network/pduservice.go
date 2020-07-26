@@ -21,6 +21,7 @@ type PDUService interface {
 	Connect(IP string, Port string) error
 	Close()
 	Multiplex(conn net.Conn) error
+	GetAAssociationRQ() AAssociationRQ
 	GetACCalledAE() string
 	SetACCalledAE(calledAE string)
 	GetACCallingAE() string
@@ -31,7 +32,7 @@ type PDUService interface {
 	SetRQCallingAE(callingAE string)
 	AddPresContexts(presentationContext PresentationContext)
 	GetPresentationContextID() byte
-	SetOnAssociationRequest(f func(calledAE string) bool)
+	SetOnAssociationRequest(f func(request AAssociationRQ) bool)
 }
 
 type pduService struct {
@@ -44,7 +45,7 @@ type pduService struct {
 	ReleaseRP                    AReleaseRP
 	AbortRQ                      AAbortRQ
 	Pdata                        PDataTF
-	OnAssociationRequest         func(calledAE string) bool
+	OnAssociationRequest         func(request AAssociationRQ) bool
 }
 
 // NewPDUService - creates a pointer to PDUService
@@ -88,7 +89,7 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 }
 
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
-	if pdu.OnAssociationRequest == nil || !pdu.OnAssociationRequest(pdu.AssocRQ.GetCalledAE()) {
+	if pdu.OnAssociationRequest == nil || !pdu.OnAssociationRequest(pdu.AssocRQ) {
 		return pdu.AssocRJ.Write(conn)
 	}
 
@@ -354,6 +355,10 @@ func (pdu *pduService) Multiplex(conn net.Conn) error {
 	return nil
 }
 
+func (pdu *pduService) GetAAssociationRQ() AAssociationRQ {
+	return pdu.AssocRQ
+}
+
 func (pdu *pduService) GetACCalledAE() string {
 	return pdu.AssocAC.GetCalledAE()
 }
@@ -394,6 +399,6 @@ func (pdu *pduService) GetPresentationContextID() byte {
 	return pdu.Pdata.PresentationContextID
 }
 
-func (pdu *pduService) SetOnAssociationRequest(f func(calledAE string) bool) {
+func (pdu *pduService) SetOnAssociationRequest(f func(request AAssociationRQ) bool) {
 	pdu.OnAssociationRequest = f
 }

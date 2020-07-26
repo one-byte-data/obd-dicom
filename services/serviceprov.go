@@ -13,20 +13,20 @@ import (
 // SCP - Interface to scp
 type SCP interface {
 	StartServer() error
-	SetOnAssociationRequest(f func(calledAE string) bool)
-	SetOnCFindRequest(f func(findLevel string, data media.DcmObj, Result media.DcmObj))
-	SetOnCMoveRequest(f func(moveLevel string, data media.DcmObj))
-	SetOnCStoreRequest(f func(data media.DcmObj))
+	SetOnAssociationRequest(f func(request network.AAssociationRQ) bool)
+	SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj))
+	SetOnCMoveRequest(f func(request network.AAssociationRQ, moveLevel string, data media.DcmObj))
+	SetOnCStoreRequest(f func(request network.AAssociationRQ, data media.DcmObj))
 	handleConnection(conn net.Conn)
 }
 
 type scp struct {
 	CalledAEs            []string
 	Port                 int
-	OnAssociationRequest func(calledAE string) bool
-	OnCFindRequest       func(findLevel string, data media.DcmObj, Result media.DcmObj)
-	OnCMoveRequest       func(moveLevel string, data media.DcmObj)
-	OnCStoreRequest      func(data media.DcmObj)
+	OnAssociationRequest func(request network.AAssociationRQ) bool
+	OnCFindRequest       func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj)
+	OnCMoveRequest       func(request network.AAssociationRQ, moveLevel string, data media.DcmObj)
+	OnCStoreRequest      func(request network.AAssociationRQ, data media.DcmObj)
 }
 
 // NewSCP - Creates an interface to scu
@@ -87,7 +87,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 
 			if s.OnCStoreRequest != nil {
-				s.OnCStoreRequest(DDO)
+				s.OnCStoreRequest(pdu.GetAAssociationRQ(), DDO)
 			}
 
 			err = dimsec.CStoreWriteRSP(pdu, DCO, 0)
@@ -109,7 +109,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			Result := media.NewEmptyDCMObj()
 
 			if s.OnCFindRequest != nil {
-				s.OnCFindRequest(QueryLevel, DDO, Result)
+				s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, DDO, Result)
 			}
 
 			dimsec.CFindWriteRSP(pdu, DCO, Result, 0x00)
@@ -124,7 +124,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
 
 			if s.OnCMoveRequest != nil {
-				s.OnCMoveRequest(MoveLevel, DDO)
+				s.OnCMoveRequest(pdu.GetAAssociationRQ(), MoveLevel, DDO)
 			}
 
 			dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
@@ -146,18 +146,18 @@ func (s *scp) handleConnection(conn net.Conn) {
 	}
 }
 
-func (s *scp) SetOnAssociationRequest(f func(calledAE string) bool) {
+func (s *scp) SetOnAssociationRequest(f func(request network.AAssociationRQ) bool) {
 	s.OnAssociationRequest = f
 }
 
-func (s *scp) SetOnCFindRequest(f func(findLevel string, data media.DcmObj, Result media.DcmObj)) {
+func (s *scp) SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj)) {
 	s.OnCFindRequest = f
 }
 
-func (s *scp) SetOnCMoveRequest(f func(moveLevel string, data media.DcmObj)) {
+func (s *scp) SetOnCMoveRequest(f func(request network.AAssociationRQ, moveLevel string, data media.DcmObj)) {
 	s.OnCMoveRequest = f
 }
 
-func (s *scp) SetOnCStoreRequest(f func(data media.DcmObj)) {
+func (s *scp) SetOnCStoreRequest(f func(request network.AAssociationRQ, data media.DcmObj)) {
 	s.OnCStoreRequest = f
 }

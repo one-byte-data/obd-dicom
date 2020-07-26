@@ -50,22 +50,24 @@ func main() {
 		}
 		scp := services.NewSCP([]string{*calledAE}, *port)
 
-		scp.SetOnAssociationRequest(func(called string) bool {
+		scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
+			called := request.GetCalledAE()
+
 			var c [16]byte
 			copy(c[:], *calledAE)
 			return fmt.Sprintf("%s", c) == called
 		})
 
-		scp.SetOnCFindRequest(func(queryLevel string, query media.DcmObj, result media.DcmObj) {
+		scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj, result media.DcmObj) {
 			query.DumpTags()
 		})
 
-		scp.SetOnCMoveRequest(func(moveLevel string, query media.DcmObj) {
+		scp.SetOnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
 			query.DumpTags()
 		})
 
-		scp.SetOnCStoreRequest(func(request media.DcmObj) {
-			log.Printf("INFO, C-Store recieved %s", request.GetString(0x0008, 0x0018))
+		scp.SetOnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
+			log.Printf("INFO, C-Store recieved %s", data.GetString(0x0008, 0x0018))
 		})
 
 		err := scp.StartServer()
@@ -111,7 +113,7 @@ func main() {
 				log.Println(part)
 				// p := strings.Split(part, "=")
 				// tag := media.DcmTag{
-					
+
 				// }
 			}
 		}

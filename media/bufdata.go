@@ -31,6 +31,7 @@ type BufData interface {
 	ReadObj(obj DcmObj) bool
 	WriteObj(obj DcmObj)
 	Send(conn net.Conn) error
+	GetAllBytes() []byte
 	SaveToFile(FileName string) error
 }
 
@@ -354,6 +355,10 @@ func (bd *bufData) Send(conn net.Conn) error {
 		return errors.New("ERROR, bufdata::Send, " + err.Error())
 	}
 	return nil
+}
+
+func (bd *bufData) GetAllBytes() []byte {
+	return bd.MS.GetData()
 }
 
 func (bd *bufData) SaveToFile(fileName string) error {

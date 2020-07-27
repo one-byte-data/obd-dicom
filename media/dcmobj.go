@@ -34,6 +34,7 @@ type DcmObj interface {
 	TagCount() int
 	CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string)
 	CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string)
+	WriteToBytes() []byte
 	WriteToFile(fileName string) error
 }
 
@@ -254,6 +255,20 @@ func (obj *dcmObj) GetString(group uint16, element uint16) string {
 // Add - add a new DICOM Tag to a DICOM Object
 func (obj *dcmObj) Add(tag DcmTag) {
 	obj.Tags = append(obj.Tags, tag)
+}
+
+func (obj *dcmObj) WriteToBytes() []byte {
+	bufdata := NewEmptyBufData()
+
+	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+		bufdata.SetBigEndian(true)
+	}
+	SOPClassUID := obj.GetString(0x08, 0x16)
+	SOPInstanceUID := obj.GetString(0x08, 0x18)
+	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax)
+	bufdata.WriteObj(obj)
+	bufdata.SetPosition(0)
+	return bufdata.GetAllBytes()
 }
 
 // Wrote - Write a DICOM Object to a DICOM File

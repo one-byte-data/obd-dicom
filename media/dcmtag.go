@@ -92,3 +92,31 @@ func (tag *DcmTag) WriteSeq(group uint16, element uint16, seq DcmObj) {
 		tag.Data = data
 	}
 }
+
+func (tag *DcmTag) ReadSeq(ExplicitVR bool) DcmObj {
+	seq := NewEmptyDCMObj()
+	bufdata := &bufData{
+		BigEndian: false,
+		MS:        NewEmptyMemoryStream(),
+	}
+
+	bufdata.Write(tag.Data, int(tag.Length))
+	bufdata.MS.SetPosition(0);
+
+	for(bufdata.MS.GetPosition()<bufdata.MS.GetSize()){
+		 temptag, err:=bufdata.ReadTag(ExplicitVR)
+		 if err!=nil{
+			 return nil
+		 }
+		 
+		if !ExplicitVR {
+		   temptag.VR=AddVRData(tag.Group, tag.Element)
+		   }
+		seq.Add(*temptag)
+        }
+	return seq
+	}
+
+
+
+

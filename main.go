@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -40,11 +41,17 @@ func main() {
 
 	dump := flag.Bool("dump", false, "Dump contents of DICOM file to stdout")
 
+	datastore := flag.String("datastore", "", "Directory to use as SCP storage")
+
 	startSCP := flag.Bool("scp", false, "Start a SCP")
 
 	flag.Parse()
 
 	if *startSCP {
+		if *datastore == "" {
+			log.Fatalln("datastore is required for scp")
+		}
+
 		if *calledAE == "" {
 			log.Fatalln("calledae is required for scp")
 		}
@@ -68,6 +75,11 @@ func main() {
 
 		scp.SetOnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
 			log.Printf("INFO, C-Store recieved %s", data.GetString(0x0008, 0x0018))
+			path := filepath.Join(*datastore, data.GetString(0x0010, 0x0020), data.GetString(0x0020, 0x000d), data.GetString(0x0020, 0x000e), data.GetString(0x0008, 0x0018)+".dcm")
+			err := data.WriteToFile(path)
+			if err != nil {
+				log.Printf("ERROR: There was an error saving %s", path)
+			}
 		})
 
 		err := scp.StartServer()

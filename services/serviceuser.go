@@ -171,7 +171,7 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		if err != nil {
 			return status, err
 		}
-		status=0
+		status = 0
 	} else {
 		DDO.SetTransferSyntax(TrnSyntOUT)
 		DDO.SetExplicitVR(true)

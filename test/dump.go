@@ -45,6 +45,7 @@ func DumpDcm(obj media.DcmObj) {
 	}
 }
 
+/*
 func main() {
 	media.InitDict()
 	obj, err := media.NewDCMObjFromFile("test.dcm")
@@ -53,3 +54,4 @@ func main() {
 	}
 	DumpDcm(obj)
 }
+*/

@@ -1,23 +1,22 @@
 package main
 
 import (
-	"log"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
 func SupportedTS(TransferSyntax string) bool {
-	return true;
+	return true
 }
 
 func ConvertTS(obj media.DcmObj, outTS string) bool {
-	if len(outTS)==0 {
+	if len(outTS) == 0 {
 		return true
 	}
-	if obj.GetTransferSynxtax()==outTS {
+	if obj.GetTransferSynxtax() == outTS {
 		return true
 	}
 	// We don't process MPEG2 or MPEG4
-	if (obj.GetTransferSynxtax()=="1.2.840.10008.1.2.4.100")||(obj.GetTransferSynxtax()=="1.2.840.10008.1.2.4.102") {
+	if (obj.GetTransferSynxtax() == "1.2.840.10008.1.2.4.100") || (obj.GetTransferSynxtax() == "1.2.840.10008.1.2.4.102") {
 		return true
 	}
 	if !SupportedTS(obj.GetTransferSynxtax()) {
@@ -26,7 +25,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	if !SupportedTS(outTS) {
 		return false
 	}
-	if(outTS=="1.2.840.10008.1.2.5") {
+	if outTS == "1.2.840.10008.1.2.5" {
 		return false
 	}
 
@@ -38,7 +37,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
 			sq++
 		}
-		if (sq == 0){
+		if sq == 0 {
 		}
 		if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {
 			sq--

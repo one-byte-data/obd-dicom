@@ -90,6 +90,7 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 
 func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 	if pdu.OnAssociationRequest == nil || !pdu.OnAssociationRequest(pdu.AssocRQ) {
+		pdu.AssocRJ.Set(1, 7)
 		return pdu.AssocRJ.Write(conn)
 	}
 

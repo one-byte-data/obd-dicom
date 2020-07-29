@@ -9,6 +9,7 @@ import (
 
 // AAssociationRJ association reject struct
 type AAssociationRJ interface {
+	Set(result byte, reason byte)
 	Size() uint32
 	Write(conn net.Conn) error
 	Read(conn net.Conn) (err error)
@@ -58,6 +59,11 @@ func (aarj *aassociationRJ) Write(conn net.Conn) error {
 	bd.WriteByte(aarj.Reason)
 
 	return bd.Send(conn)
+}
+
+func (aarj *aassociationRJ) Set(result byte, reason byte) {
+	aarj.Result = result
+	aarj.Reason = reason
 }
 
 func (aarj *aassociationRJ) Read(conn net.Conn) (err error) {

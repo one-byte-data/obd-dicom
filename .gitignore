@@ -8,3 +8,4 @@ Gopkg.toml
 .dll
 .dll.a
 .exe
+datastore

@@ -75,10 +75,14 @@ func main() {
 
 		scp.SetOnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
 			log.Printf("INFO, C-Store recieved %s", data.GetString(0x0008, 0x0018))
-			path := filepath.Join(*datastore, data.GetString(0x0010, 0x0020), data.GetString(0x0020, 0x000d), data.GetString(0x0020, 0x000e), data.GetString(0x0008, 0x0018)+".dcm")
+			directory := filepath.Join(*datastore, data.GetString(0x0010, 0x0020), data.GetString(0x0020, 0x000d), data.GetString(0x0020, 0x000e))
+			os.MkdirAll(directory, 0755)
+
+			path := filepath.Join(directory, data.GetString(0x0008, 0x0018)+".dcm")
+
 			err := data.WriteToFile(path)
 			if err != nil {
-				log.Printf("ERROR: There was an error saving %s", path)
+				log.Printf("ERROR: There was an error saving %s : %s", path, err.Error())
 			}
 		})
 

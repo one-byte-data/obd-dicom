@@ -22,6 +22,7 @@ type DcmObj interface {
 	SetBigEndian(bigEndian bool)
 	GetTag(i int) DcmTag
 	SetTag(i int, tag DcmTag)
+	DelTag(i int)
 	GetTags() []DcmTag
 	GetUShort(group uint16, element uint16) uint16
 	GetUInt(group uint16, element uint16) uint32
@@ -29,7 +30,7 @@ type DcmObj interface {
 	WriteUint16(group uint16, element uint16, vr string, val uint16)
 	WriteUint32(group uint16, element uint16, vr string, val uint32)
 	WriteString(group uint16, element uint16, vr string, content string)
-	GetTransferSynxtax() string
+	GetTransferSyntax() string
 	SetTransferSyntax(ts string)
 	TagCount() int
 	CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string)
@@ -161,6 +162,10 @@ func (obj *dcmObj) SetTag(i int, tag DcmTag) {
 
 func (obj *dcmObj) GetTags() []DcmTag {
 	return obj.Tags
+}
+
+func (obj *dcmObj) DelTag(i int) {
+	obj.Tags=append(obj.Tags[:i], obj.Tags[i+1:]...)
 }
 
 func (obj *dcmObj) DumpTags() {
@@ -329,7 +334,7 @@ func (obj *dcmObj) WriteString(group uint16, element uint16, vr string, content 
 	obj.Tags = append(obj.Tags, tag)
 }
 
-func (obj *dcmObj) GetTransferSynxtax() string {
+func (obj *dcmObj) GetTransferSyntax() string {
 	return obj.TransferSyntax
 }
 

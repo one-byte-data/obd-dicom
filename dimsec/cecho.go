@@ -55,7 +55,7 @@ func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
 	var size uint32
 	var valor uint16
 
-	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
+	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 	SOPClassUID := DCO.GetString(0x00, 0x02)
 	valor = uint16(len(SOPClassUID))
 	if valor > 0 {

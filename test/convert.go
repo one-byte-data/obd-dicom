@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"strconv"
 )
@@ -9,6 +10,251 @@ func SupportedTS(TransferSyntax string) bool {
 	return true
 }
 
+func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bitsa uint16) bool {
+	var tag media.DcmTag
+	var j, offset, single uint32
+	
+	single = size/frames
+	// DE-Compression
+	obj.DelTag(i+1); // Delete offset table.
+	if obj.GetTransferSyntax()=="1.2.840.10008.1.2.5" {
+		for j=0; j<frames; j++ {
+			offset = j*single
+			tag = obj.GetTag(i+1)
+			RLEdecode(tag.Data, img[offset:], tag.Length, single, bitsa)
+			obj.DelTag(i+1)
+			}
+		obj.DelTag(i+1);
+	} else if (obj.GetTransferSyntax()=="1.2.840.10008.1.2.4.70")||(obj.GetTransferSyntax()=="1.2.840.10008.1.2.4.57") {
+		for j=0; j<frames; j++ {
+			offset = j*single
+			tag = obj.GetTag(i+1)
+			if bitsa==8 {
+				DIJG8decode(tag.Data, img[offset:], tag.Length)
+			} else {
+				DIJG16decode(tag.Data, img[offset:], tag.Length)
+			}
+		obj.DelTag(i+1)
+		}
+	obj.DelTag(i+1)
+	} else if obj.GetTransferSyntax()=="1.2.840.10008.1.2.4.50" {
+		for j=0; j<frames; j++ {
+			offset = j*single
+			tag = obj.GetTag(i+1)
+			if bitsa==8 {
+				DIJG8decode(tag.Data, img[offset:], tag.Length)
+			} else {
+				DIJG12decode(tag.Data, img[offset:], tag.Length)
+			}
+			obj.DelTag(i+1)
+		}
+		obj.DelTag(i+1);
+	} else if obj.GetTransferSyntax()=="1.2.840.10008.1.2.4.51" {
+		 for j=0; j<frames; j++ {
+			offset = j*single
+			tag = obj.GetTag(i+1)
+			DIJG12decode(tag.Data, img[offset:], tag.Length)
+			obj.DelTag(i+1)
+		}
+		obj.DelTag(i+1)
+	} else if obj.GetTransferSyntax()=="1.2.840.10008.1.2.4.90" {
+		for j=0; j< frames; j++ {
+			offset = j*single
+			tag = obj.GetTag(i+1)
+			J2Kdecode(tag.Data, img[offset:], tag.Length)
+			obj.DelTag(i+1)
+		}
+		obj.DelTag(i+1)
+	} else if obj.GetTransferSyntax()=="1.2.840.10008.1.2.4.91" {
+		for j=0; j<frames; j++ {
+			offset = j*single
+			tag = obj.GetTag(i+1)
+			J2Kdecode(tag.Data, img[offset:], tag.Length)
+			obj.DelTag(i+1)
+		}
+	obj.DelTag(i+1)
+	}
+}
+	
+func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint16, bitss uint16, bitsa uint16, pixelrep uint16, planar uint16, frames uint32, outTS string) bool {
+	var tag media.DcmTag
+	var offset, size, jpeg_size, j uint32
+	var JPEGData []byte
+	var JPEGBytes, index int
+		
+	single := uint32(cols)*uint32(rows)*uint32(bitsa)/8
+	size = single*frames
+	if RGB {
+		size = 3*size
+	}
+	
+	index = *i
+	tag = obj.GetTag(index)
+	if outTS=="1.2.840.10008.1.2.4.70" {
+		tag.VR="OB"
+		tag.Length=0xFFFFFFFF
+		if tag.Data!= nil {
+			tag.Data=nil
+		}
+		index++
+		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		for j=0; j<frames; j++ {
+			index++
+			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
+			if RGB {
+				offset=3*offset
+			}
+			// Bug de MRI Neusoft. 08/05/2015
+			if bitsa==8 {
+				if RGB {
+					encode8(cols, rows, 3, img[offset:], JPEGData, &JPEGBytes, 4)
+				} else {
+					encode8(cols, rows, 1, img[offset:], JPEGData, &JPEGBytes, 4)
+				}
+			} else {
+				encode16(cols, rows, 1, img[offset/2:], JPEGData, &JPEGBytes)
+			}
+			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.SetTag(index, newtag)
+			JPEGData=nil
+		}
+		index++
+		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		*i=index
+	} else if outTS=="1.2.840.10008.1.2.4.50" {
+		tag.VR="OB"
+		tag.Length=0xFFFFFFFF
+		if tag.Data!= nil {
+			tag.Data=nil
+		}
+		index++
+		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		jpeg_size=0
+		for j=0; j<frames; j++ {
+			index++;
+			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
+			if(RGB) {
+				offset=3*offset
+				encode8(cols, rows, 3, img[offset:], JPEGData, &JPEGBytes, 0)
+			} else {
+				if(bitsa==8) {
+					encode8(cols, rows, 1, img[offset:], JPEGData, &JPEGBytes, 0)
+				} else { // ERROR...
+					// Can't use this transfer Syntax with bitsa!=8
+					return false
+				}
+			}
+			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.SetTag(index, newtag)
+			JPEGData=nil
+			jpeg_size = jpeg_size + uint32(JPEGBytes)
+		}
+		index++
+		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		*i=index
+	} else if outTS=="1.2.840.10008.1.2.4.51" {
+		if (bitss==8)&&(bitsa!=16) {
+			return false
+			}
+		tag.VR="OB"
+		tag.Length=0xFFFFFFFF
+		if tag.Data!= nil {
+			tag.Data=nil
+			}
+		index++
+		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		jpeg_size=0;
+		for j=0; j<frames; j++ {
+			index++
+			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
+			if(bitss>12) {
+				return false
+			}
+			encode12(cols, rows, 1, img[offset/2:], JPEGData, &JPEGBytes)
+			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.SetTag(index, newtag)
+			JPEGData=nil
+			jpeg_size = jpeg_size + uint32(JPEGBytes)
+		}
+		index++
+		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		*i=index
+	} else if outTS=="1.2.840.10008.1.2.4.90" {
+		tag.VR="OB"
+		tag.Length=0xFFFFFFFF
+		if tag.Data!= nil {
+			tag.Data=nil
+			}
+		index++
+		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		for j=0; j<frames; j++ {
+			index++
+			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
+			if(RGB) {
+				offset=3*offset
+				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 3, bitsa, 0)
+			} else {
+				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 1, bitsa, 0)
+			}
+			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.SetTag(index, newtag)
+			JPEGData=nil
+			}
+		index++
+		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		*i=index
+	} else if outTS=="1.2.840.10008.1.2.4.91" {
+		tag.VR="OB"
+		tag.Length=0xFFFFFFFF
+		if tag.Data!= nil {
+			tag.Data=nil
+			}
+		index++
+		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		jpeg_size=0;
+		for j=0; j<frames; j++ {
+			index++
+			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
+			if RGB {
+				offset=3*offset;
+				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 3, bitsa, 10)
+			} else {
+				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 1, bitsa, 10);
+			}
+			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.SetTag(index, newtag)
+			JPEGData=nil
+			jpeg_size = jpeg_size + uint32(JPEGBytes)
+		}
+		index++
+		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.SetTag(index, newtag)
+		*i=index
+	} else {
+		if bitss==8 {
+			tag.VR="OB"
+		} else {
+			tag.VR="OW"
+		}
+		tag.Length=size
+		if tag.Data!=nil {
+			tag.Data=nil
+		}
+		tag.Data = make([]byte, tag.Length)
+		copy(tag.Data, img)
+	}
+	return true
+}
+		
 func ConvertTS(obj media.DcmObj, outTS string) bool {
 	flag:=false
 	ExplicitVROUT:=true
@@ -17,7 +263,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	var rows, cols, bitss, bitsa, planar, pixelrep uint16
 	var PhotometricInterpretation string
 	sq := 0
-	frames:=0
+	frames:=uint32(0)
 	RGB :=false
 	icon:=false
 
@@ -97,11 +343,27 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 						log.Println("ERROR, DcmObj::ConvertTransferSyntax, size=0")
 						return false
 					}
-					
-					if tag.Length==0xFFFFFFFF { // Compressed
-
-					} else { // Uncompressed
-
+					img := make([]byte, size)
+					if tag.Length==0xFFFFFFFF { // 
+						if Decomp(i, img, size, frames, bitsa) {
+							flag = Comp(i, img, RGB, cols, rows, bitss, bitsa, pixelrep, planar, frames, outTS)
+                        }
+ 					} else { // Uncompressed
+						if RGB&&(planar==1) { // change from planar=1 to planar=0
+							var img_offset, img_size uint32
+							img_size = size/frames
+							for f:=uint32(0); f<frames; f++ {
+								img_offset = img_size*f
+								 for j:=uint32(0); j<img_size/3; j++ {
+									  img[3*j+img_offset] = tag.Data[j+img_offset]
+									  img[3*j+1+img_offset] = tag.Data[j+img_size/3+img_offset]
+				 					  img[3*j+2+img_offset] = tag.Data[j+2*img_size/3+img_offset]
+									  }
+								 }
+							 planar=0
+						} else {
+							copy(img, tag.Data)
+						}
 					}
 				}
 			} 

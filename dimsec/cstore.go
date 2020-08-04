@@ -77,7 +77,7 @@ func CStoreWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16) err
 	var size uint32
 	var sopclasslength, sopinstancelength uint16
 
-	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
+	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 	SOPClassUID := DCO.GetString(0x00, 0x02)
 	sopclasslength = uint16(len(SOPClassUID))
 	if sopclasslength > 0 {

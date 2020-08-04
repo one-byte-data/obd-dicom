@@ -84,7 +84,7 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 	DCOR := media.NewEmptyDCMObj()
 	var size uint32
 
-	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
+	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 
 	SOPClassUID := DCO.GetString(0x00, 0x02)
 	sopclasslength := uint16(len(SOPClassUID))

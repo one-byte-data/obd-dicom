@@ -78,7 +78,7 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 	var size uint32
 	var sopclasslength, leDSType uint16
 
-	DCOR.SetTransferSyntax(DCO.GetTransferSynxtax())
+	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 
 	if DDO.TagCount() > 0 {
 		leDSType = 0x0102

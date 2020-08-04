@@ -3,6 +3,7 @@ package network
 import (
 	"errors"
 	"log"
+	"math/rand"
 	"net"
 	"time"
 
@@ -46,6 +47,7 @@ type pduService struct {
 	ReleaseRP                    AReleaseRP
 	AbortRQ                      AAbortRQ
 	Pdata                        PDataTF
+	Timeout                      int
 	OnAssociationRequest         func(request AAssociationRQ) bool
 }
 
@@ -295,6 +297,7 @@ func (pdu *pduService) Read(DCO media.DcmObj) error {
 }
 
 func (pdu *pduService) SetTimeout(timeout int) {
+	pdu.Timeout = timeout
 }
 
 func (pdu *pduService) Connect(IP string, Port string) error {
@@ -304,6 +307,8 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 	}
 
 	pdu.conn = conn
+
+	pdu.conn.SetDeadline(time.Now().Add(time.Duration(rand.Int31n(int32(pdu.Timeout))) * time.Second))
 	pdu.AssocRQ.SetMaxSubLength(16384)
 	pdu.AssocRQ.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 	pdu.AssocRQ.SetImpVersionName("One-Byte-Data")

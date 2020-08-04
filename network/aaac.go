@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -243,7 +244,8 @@ func (aaac *aassociationAC) SetAppContext(context UIDitem) {
 }
 
 func (aaac *aassociationAC) GetCallingAE() string {
-	return fmt.Sprintf("%s", aaac.CallingAE)
+	temp := strings.ReplaceAll(fmt.Sprintf("%s", aaac.CallingAE), "\x20", "\x00")
+	return strings.ReplaceAll(temp, "\x00", "")
 }
 
 func (aaac *aassociationAC) SetCallingAE(AET string) {
@@ -251,7 +253,8 @@ func (aaac *aassociationAC) SetCallingAE(AET string) {
 }
 
 func (aaac *aassociationAC) GetCalledAE() string {
-	return fmt.Sprintf("%s", aaac.CalledAE)
+	temp := strings.ReplaceAll(fmt.Sprintf("%s", aaac.CalledAE), "\x20", "\x00")
+	return strings.ReplaceAll(temp, "\x00", "")
 }
 
 func (aaac *aassociationAC) SetCalledAE(AET string) {

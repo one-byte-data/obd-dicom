@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -60,9 +59,11 @@ func main() {
 		scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
 			called := request.GetCalledAE()
 
-			var c [16]byte
-			copy(c[:], *calledAE)
-			return fmt.Sprintf("%s", c) == called
+			log.Printf("%x", []byte(called))
+
+			log.Printf("%x", []byte(*calledAE))
+
+			return *calledAE == called
 		})
 
 		scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj, result media.DcmObj) {

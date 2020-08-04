@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"time"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -213,6 +214,8 @@ func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 }
 
 func (pdu *pduService) Read(DCO media.DcmObj) error {
+	time.Sleep(50 * time.Millisecond)
+
 	if pdu.Pdata.Buffer != nil {
 		pdu.Pdata.Buffer.ClearMemoryStream()
 	} else {

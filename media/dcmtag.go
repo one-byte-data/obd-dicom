@@ -101,22 +101,18 @@ func (tag *DcmTag) ReadSeq(ExplicitVR bool) DcmObj {
 	}
 
 	bufdata.Write(tag.Data, int(tag.Length))
-	bufdata.MS.SetPosition(0);
+	bufdata.MS.SetPosition(0)
 
-	for(bufdata.MS.GetPosition()<bufdata.MS.GetSize()){
-		 temptag, err:=bufdata.ReadTag(ExplicitVR)
-		 if err!=nil{
-			 return nil
-		 }
-		 
+	for bufdata.MS.GetPosition() < bufdata.MS.GetSize() {
+		temptag, err := bufdata.ReadTag(ExplicitVR)
+		if err != nil {
+			return nil
+		}
+
 		if !ExplicitVR {
-		   temptag.VR=AddVRData(tag.Group, tag.Element)
-		   }
+			temptag.VR = AddVRData(tag.Group, tag.Element)
+		}
 		seq.Add(*temptag)
-        }
-	return seq
 	}
-
-
-
-
+	return seq
+}

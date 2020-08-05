@@ -215,7 +215,7 @@ func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 }
 
 func (pdu *pduService) Read(DCO media.DcmObj) error {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	if pdu.Pdata.Buffer != nil {
 		pdu.Pdata.Buffer.ClearMemoryStream()

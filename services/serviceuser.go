@@ -166,7 +166,7 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		return -1, errors.New("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
 	}
 
-	if TrnSyntOUT == DDO.GetTransferSynxtax() {
+	if TrnSyntOUT == DDO.GetTransferSyntax() {
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
 		if err != nil {
 			return status, err

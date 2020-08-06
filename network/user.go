@@ -1,8 +1,8 @@
 package network
 
 import (
+	"bufio"
 	"errors"
-	"net"
 	"strconv"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
@@ -13,9 +13,9 @@ type MaximumSubLength interface {
 	GetMaximumLength() uint32
 	SetMaximumLength(length uint32)
 	Size() uint16
-	Write(conn net.Conn) bool
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) bool
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type maximumSubLength struct {
@@ -45,7 +45,7 @@ func (maxim *maximumSubLength) Size() uint16 {
 	return maxim.Length + 4
 }
 
-func (maxim *maximumSubLength) Write(conn net.Conn) bool {
+func (maxim *maximumSubLength) Write(rw *bufio.ReadWriter) bool {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -54,38 +54,38 @@ func (maxim *maximumSubLength) Write(conn net.Conn) bool {
 	bd.WriteUint16(maxim.Length)
 	bd.WriteUint32(maxim.MaximumLength)
 
-	if err := bd.Send(conn); err != nil {
+	if err := bd.Send(rw); err != nil {
 		return false
 	}
 	return true
 }
 
-func (maxim *maximumSubLength) Read(conn net.Conn) (err error) {
-	maxim.ItemType, err = ReadByte(conn)
+func (maxim *maximumSubLength) Read(ms media.MemoryStream) (err error) {
+	maxim.ItemType, err = ms.GetByte()
 	if err != nil {
 		return err
 	}
-	return maxim.ReadDynamic(conn)
+	return maxim.ReadDynamic(ms)
 }
 
-func (maxim *maximumSubLength) ReadDynamic(conn net.Conn) (err error) {
-	maxim.Reserved1, err = ReadByte(conn)
+func (maxim *maximumSubLength) ReadDynamic(ms media.MemoryStream) (err error) {
+	maxim.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	maxim.Length, err = ReadUint16(conn)
+	maxim.Length, err = ms.GetUint16()
 	if err != nil {
-		return
+		return err
 	}
-	maxim.MaximumLength, err = ReadUint32(conn)
+	maxim.MaximumLength, err = ms.GetUint32()
 	return
 }
 
 // AsyncOperationWindow - AsyncOperationWindow
 type AsyncOperationWindow interface {
 	Size() uint16
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type asyncOperationWindow struct {
@@ -107,37 +107,37 @@ func (async *asyncOperationWindow) Size() uint16 {
 	return async.Length + 4
 }
 
-func (async *asyncOperationWindow) Read(conn net.Conn) (err error) {
-	async.ItemType, err = ReadByte(conn)
+func (async *asyncOperationWindow) Read(ms media.MemoryStream) (err error) {
+	async.ItemType, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	return async.ReadDynamic(conn)
+	return async.ReadDynamic(ms)
 }
 
-func (async *asyncOperationWindow) ReadDynamic(conn net.Conn) (err error) {
-	async.Reserved1, err = ReadByte(conn)
+func (async *asyncOperationWindow) ReadDynamic(ms media.MemoryStream) (err error) {
+	async.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	async.Length, err = ReadUint16(conn)
+	async.Length, err = ms.GetUint16()
 	if err != nil {
-		return
+		return err
 	}
-	async.MaxNumberOperationsInvoked, err = ReadUint16(conn)
+	async.MaxNumberOperationsInvoked, err = ms.GetUint16()
 	if err != nil {
-		return
+		return err
 	}
-	async.MaxNumberOperationsPerformed, err = ReadUint16(conn)
+	async.MaxNumberOperationsPerformed, err = ms.GetUint16()
 	return
 }
 
 // RoleSelect - RoleSelect
 type RoleSelect interface {
 	Size() uint16
-	Write(conn net.Conn) bool
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) bool
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type roleSelect struct {
@@ -160,7 +160,7 @@ func (scpscu *roleSelect) Size() uint16 {
 	return scpscu.Length + 4
 }
 
-func (scpscu *roleSelect) Write(conn net.Conn) bool {
+func (scpscu *roleSelect) Write(rw *bufio.ReadWriter) bool {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -172,46 +172,43 @@ func (scpscu *roleSelect) Write(conn net.Conn) bool {
 	bd.WriteByte(scpscu.SCURole)
 	bd.WriteByte(scpscu.SCPRole)
 
-	if err := bd.Send(conn); err != nil {
+	if err := bd.Send(rw); err != nil {
 		return false
 	}
 	return true
 }
 
-func (scpscu *roleSelect) Read(conn net.Conn) (err error) {
-	scpscu.ItemType, err = ReadByte(conn)
+func (scpscu *roleSelect) Read(ms media.MemoryStream) (err error) {
+	scpscu.ItemType, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	return scpscu.ReadDynamic(conn)
+	return scpscu.ReadDynamic(ms)
 }
 
-func (scpscu *roleSelect) ReadDynamic(conn net.Conn) (err error) {
-	scpscu.Reserved1, err = ReadByte(conn)
+func (scpscu *roleSelect) ReadDynamic(ms media.MemoryStream) (err error) {
+	scpscu.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	scpscu.Length, err = ReadUint16(conn)
+	scpscu.Length, err = ms.GetUint16()
 	if err != nil {
-		return
+		return err
 	}
-	tl, err := ReadUint16(conn)
+	tl, err := ms.GetUint16()
 	if err != nil {
-		return
+		return err
 	}
 
 	tuid := make([]byte, tl)
-	_, err = conn.Read(tuid)
-	if err != nil {
-		return
-	}
+	ms.ReadData(tuid)
 
 	scpscu.uid = string(tuid)
-	scpscu.SCURole, err = ReadByte(conn)
+	scpscu.SCURole, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	scpscu.SCPRole, err = ReadByte(conn)
+	scpscu.SCPRole, err = ms.GetByte()
 	return
 }
 
@@ -226,9 +223,9 @@ type UserInformation interface {
 	SetImpClassUID(name string)
 	GetImpVersion() UIDitem
 	SetImpVersionName(name string)
-	Write(conn net.Conn) (err error)
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) (err error)
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type userInformation struct {
@@ -298,7 +295,7 @@ func (ui *userInformation) SetImpVersionName(name string) {
 	ui.ImpVersion.Length = uint16(len(name))
 }
 
-func (ui *userInformation) Write(conn net.Conn) (err error) {
+func (ui *userInformation) Write(rw *bufio.ReadWriter) (err error) {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -307,64 +304,63 @@ func (ui *userInformation) Write(conn net.Conn) (err error) {
 	bd.WriteByte(ui.Reserved1)
 	bd.WriteUint16(ui.Length)
 
-	if err = bd.Send(conn); err == nil {
-		ui.MaxSubLength.Write(conn)
-		ui.ImpClass.Write(conn)
-		ui.ImpVersion.Write(conn)
+	if err = bd.Send(rw); err == nil {
+		ui.MaxSubLength.Write(rw)
+		ui.ImpClass.Write(rw)
+		ui.ImpVersion.Write(rw)
 	}
 
 	return
 }
 
-func (ui *userInformation) Read(conn net.Conn) (err error) {
-	ui.ItemType, err = ReadByte(conn)
+func (ui *userInformation) Read(ms media.MemoryStream) (err error) {
+	ui.ItemType, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	return ui.ReadDynamic(conn)
+	return ui.ReadDynamic(ms)
 }
 
-func (ui *userInformation) ReadDynamic(conn net.Conn) (err error) {
-	ui.Reserved1, err = ReadByte(conn)
+func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
+	ui.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	ui.Length, err = ReadUint16(conn)
+	ui.Length, err = ms.GetUint16()
 	if err != nil {
-		return
+		return err
 	}
 
 	Count := int(ui.Length)
 	for Count > 0 {
-		TempByte, err := ReadByte(conn)
+		TempByte, err := ms.GetByte()
 		if err != nil {
 			return err
 		}
 
 		switch TempByte {
 		case 0x51:
-			ui.MaxSubLength.ReadDynamic(conn)
+			ui.MaxSubLength.ReadDynamic(ms)
 			Count = Count - int(ui.MaxSubLength.Size())
 			break
 		case 0x52:
-			ui.ImpClass.ReadDynamic(conn)
+			ui.ImpClass.ReadDynamic(ms)
 			Count = Count - int(ui.ImpClass.Size())
 			break
 		case 0x53:
-			ui.AsyncOpWindow.ReadDynamic(conn)
+			ui.AsyncOpWindow.ReadDynamic(ms)
 			Count = Count - int(ui.AsyncOpWindow.Size())
 			break
 		case 0x54:
-			ui.SCPSCURole.ReadDynamic(conn)
+			ui.SCPSCURole.ReadDynamic(ms)
 			Count = Count - int(ui.SCPSCURole.Size())
 			ui.UserInfoBaggage += uint32(ui.SCPSCURole.Size())
 			break
 		case 0x55:
-			ui.ImpVersion.ReadDynamic(conn)
+			ui.ImpVersion.ReadDynamic(ms)
 			Count = Count - int(ui.ImpVersion.Size())
 			break
 		default:
-			conn.Close()
 			ui.UserInfoBaggage = uint32(Count)
 			Count = -1
 			return errors.New("ERROR, user::ReadDynamic, unknown TempByte: " + strconv.Itoa(int(TempByte)))

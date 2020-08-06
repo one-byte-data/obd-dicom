@@ -8,17 +8,8 @@ import (
 )
 
 // CMoveReadRQ CMove request read
-func CMoveReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj) error {
-	if DCO.TagCount() != 0 {
-		// Is this a C-Move?
-		if DCO.GetUShort(0x00, 0x100) == 0x21 {
-			// Does it have data?
-			if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-				return pdu.Read(DDO)
-			}
-		}
-	}
-	return errors.New("ERROR, CMoveReadRQ, unknown error")
+func CMoveReadRQ(pdu network.PDUService) (media.DcmObj, error) {
+	return pdu.NextPDU()
 }
 
 // CMoveWriteRQ CMove request write
@@ -55,28 +46,29 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 }
 
 // CMoveReadRSP CMove response read
-func CMoveReadRSP(pdu network.PDUService, DDO media.DcmObj, pending *int) (int, error) {
-	DCO := media.NewEmptyDCMObj()
+func CMoveReadRSP(pdu network.PDUService, pending *int) (media.DcmObj, int, error) {
 	status := -1
 
-	if err := pdu.Read(DCO); err != nil {
-		return status, err
+	dco, err := pdu.NextPDU()
+	if err != nil {
+		return nil, status, err
 	}
 	// Is this a C-Find RSP?
-	if DCO.GetUShort(0x00, 0x0100) == 0x8021 {
-		if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-			err := pdu.Read(DDO)
+	if dco.GetUShort(0x00, 0x0100) == 0x8021 {
+		if dco.GetUShort(0x00, 0x0800) != 0x0101 {
+			ddo, err := pdu.NextPDU()
 			if err != nil {
-				return status, err
+				return nil, status, err
 			}
-			status = int(DCO.GetUShort(0x00, 0x0900))
-			*pending = int(DCO.GetUShort(0x00, 0x1020))
+			status = int(dco.GetUShort(0x00, 0x0900))
+			*pending = int(dco.GetUShort(0x00, 0x1020))
+			return ddo, status, nil
 		} else {
-			status = int(DCO.GetUShort(0x00, 0x0900))
+			status = int(dco.GetUShort(0x00, 0x0900))
 			*pending = -1
 		}
 	}
-	return status, nil
+	return nil, status, nil
 }
 
 // CMoveWriteRSP CMove response write

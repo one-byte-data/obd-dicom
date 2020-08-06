@@ -8,15 +8,8 @@ import (
 )
 
 // CStoreReadRQ CStore request read
-func CStoreReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj) error {
-	if DCO.TagCount() != 0 {
-		if DCO.GetUShort(0x00, 0x100) == 0x01 {
-			if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-				return pdu.Read(DDO)
-			}
-		}
-	}
-	return errors.New("ERROR, CStoreReadRQ, unknown error")
+func CStoreReadRQ(pdu network.PDUService, command media.DcmObj) (media.DcmObj, error) {
+	return pdu.NextPDU()
 }
 
 // CStoreWriteRQ CStore request write
@@ -59,14 +52,13 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 
 // CStoreReadRSP CStore response read
 func CStoreReadRSP(pdu network.PDUService) (int, error) {
-	DCO := media.NewEmptyDCMObj()
-
-	if err := pdu.Read(DCO); err != nil {
+	dco, err := pdu.NextPDU()
+	if err != nil {
 		return -1, err
 	}
 	// Is this a C-Store RSP?
-	if DCO.GetUShort(0x00, 0x0100) == 0x8001 {
-		return int(DCO.GetUShort(0x00, 0x0900)), nil
+	if dco.GetUShort(0x00, 0x0100) == 0x8001 {
+		return int(dco.GetUShort(0x00, 0x0900)), nil
 	}
 	return -1, errors.New("ERROR, CStoreReadRSP, unknown error")
 }

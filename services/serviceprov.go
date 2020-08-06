@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -51,88 +52,100 @@ func (s *scp) StartServer() error {
 			log.Print(err)
 			continue
 		}
+		log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
 		go s.handleConnection(conn)
 	}
 }
 
 func (s *scp) handleConnection(conn net.Conn) {
+	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+
 	pdu := network.NewPDUService()
+	pdu.SetConn(rw)
 
 	if s.OnAssociationRequest != nil {
 		pdu.SetOnAssociationRequest(s.OnAssociationRequest)
 	}
 
-	log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
-	err := pdu.Multiplex(conn)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-
-	DCO := media.NewEmptyDCMObj()
-	for {
-		err := pdu.Read(DCO)
-		if err != nil {
-			break
+	var err error
+	var dco media.DcmObj
+	for err == nil {
+		dco, err = pdu.NextPDU()
+		if dco == nil {
+			continue
 		}
-		command := DCO.GetUShort(0x00, 0x0100)
+		command := dco.GetUShort(0x00, 0x0100)
 		switch command {
 		case 0x01: // C-Store
-			DDO := media.NewEmptyDCMObj()
-			err := dimsec.CStoreReadRQ(pdu, DCO, DDO)
+			ddo, err := dimsec.CStoreReadRQ(pdu, dco)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Store failed to read request : %s", err.Error())
+				conn.Close()
 				return
 			}
 
 			if s.OnCStoreRequest != nil {
-				s.OnCStoreRequest(pdu.GetAAssociationRQ(), DDO)
+				s.OnCStoreRequest(pdu.GetAAssociationRQ(), ddo)
 			}
 
-			err = dimsec.CStoreWriteRSP(pdu, DCO, 0)
+			err = dimsec.CStoreWriteRSP(pdu, dco, 0)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Store failed to write response: %s", err.Error())
+				conn.Close()
 				return
 			}
-			log.Println("INFO, handleConnection, CStore Success")
+			log.Println("INFO, handleConnection, C-Store Success")
 			break
 		case 0x20: // C-Find
-			DDO := media.NewEmptyDCMObj()
-			err := dimsec.CFindReadRQ(pdu, DCO, DDO)
+			ddo, err := dimsec.CFindReadRQ(pdu)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Find failed to read request!")
-				break
+				conn.Close()
+				return
 			}
-			QueryLevel := DDO.GetString(0x08, 0x52) // Get Query Level
+			QueryLevel := ddo.GetString(0x08, 0x52) // Get Query Level
 
 			Result := media.NewEmptyDCMObj()
 
 			if s.OnCFindRequest != nil {
-				s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, DDO, Result)
+				s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, ddo, Result)
 			}
 
-			dimsec.CFindWriteRSP(pdu, DCO, Result, 0x00)
-			break
-		case 0x21: // C-Move
-			DDO := media.NewEmptyDCMObj()
-			err := dimsec.CMoveReadRQ(pdu, DCO, DDO)
+			err = dimsec.CFindWriteRSP(pdu, dco, Result, 0x00)
 			if err != nil {
-				log.Println("ERROR, handleConnection, C-Move failed to read request!")
+				log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
+				conn.Close()
 				return
 			}
-			MoveLevel := DDO.GetString(0x08, 0x52) // Get Move Level
+			log.Println("INFO, handleConnection, C-Find Success")
+			break
+		case 0x21: // C-Move
+			ddo, err := dimsec.CMoveReadRQ(pdu)
+			if err != nil {
+				log.Println("ERROR, handleConnection, C-Move failed to read request!")
+				conn.Close()
+				return
+			}
+			MoveLevel := ddo.GetString(0x08, 0x52) // Get Move Level
 
 			if s.OnCMoveRequest != nil {
-				s.OnCMoveRequest(pdu.GetAAssociationRQ(), MoveLevel, DDO)
+				s.OnCMoveRequest(pdu.GetAAssociationRQ(), MoveLevel, ddo)
 			}
 
-			dimsec.CMoveWriteRSP(pdu, DCO, 0x00, 0x00)
+			err = dimsec.CMoveWriteRSP(pdu, dco, 0x00, 0x00)
+			if err != nil {
+				log.Printf("ERROR, handleConnection, C-Move failed to write response: %s", err.Error())
+				conn.Close()
+				return
+			}
+			log.Println("INFO, handleConnection, C-Move Success")
 			break
 		case 0x30: // C-Echo
-			if dimsec.CEchoReadRQ(pdu, DCO) {
-				err := dimsec.CEchoWriteRSP(pdu, DCO)
+			if dimsec.CEchoReadRQ(pdu, dco) {
+				err := dimsec.CEchoWriteRSP(pdu, dco)
 				if err != nil {
 					log.Println("ERROR, handleConnection, C-Echo failed to write response!")
+					conn.Close()
 					return
 				}
 				log.Println("INFO, handleConnection, C-Echo Success!")
@@ -140,8 +153,13 @@ func (s *scp) handleConnection(conn net.Conn) {
 			break
 		default:
 			log.Println("ERROR, handleConnection, service not implemented: " + string(command))
+			conn.Close()
 			return
 		}
+	}
+
+	if err != nil {
+		conn.Close()
 	}
 }
 

@@ -8,17 +8,8 @@ import (
 )
 
 // CFindReadRQ CFind request read
-func CFindReadRQ(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj) error {
-	if DCO.TagCount() != 0 {
-		// Is this a C-Find?
-		if DCO.GetUShort(0x00, 0x100) == 0x20 {
-			// Does it have data?
-			if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-				return pdu.Read(DDO)
-			}
-		}
-	}
-	return errors.New("ERROR, CFindReadRSP, unknown error")
+func CFindReadRQ(pdu network.PDUService) (media.DcmObj, error) {
+	return pdu.NextPDU()
 }
 
 // CFindWriteRQ CFind request write
@@ -49,27 +40,26 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 }
 
 // CFindReadRSP CFind response read
-func CFindReadRSP(pdu network.PDUService, DDO media.DcmObj) (int, error) {
-	DCO := media.NewEmptyDCMObj()
+func CFindReadRSP(pdu network.PDUService) (media.DcmObj, int, error) {
 	status := -1
 
-	err := pdu.Read(DCO)
+	dco, err := pdu.NextPDU()
 	if err != nil {
-		return status, err
+		return nil, status, err
 	}
 
 	// Is this a C-Find RSP?
-	if DCO.GetUShort(0x00, 0x0100) == 0x8020 {
-		if DCO.GetUShort(0x00, 0x0800) != 0x0101 {
-			err = pdu.Read(DDO)
+	if dco.GetUShort(0x00, 0x0100) == 0x8020 {
+		if dco.GetUShort(0x00, 0x0800) != 0x0101 {
+			ddo, err := pdu.NextPDU()
 			if err != nil {
-				return status, err
+				return nil, status, err
 			}
-			return int(DCO.GetUShort(0x00, 0x0900)), nil
+			return ddo, int(dco.GetUShort(0x00, 0x0900)), nil
 		}
-		return int(DCO.GetUShort(0x00, 0x0900)), nil
+		return nil, int(dco.GetUShort(0x00, 0x0900)), nil
 	}
-	return status, errors.New("ERROR, CFindReadRSP, unknown error")
+	return nil, status, errors.New("ERROR, CFindReadRSP, unknown error")
 }
 
 // CFindWriteRSP CFind response write

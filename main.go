@@ -58,11 +58,6 @@ func main() {
 
 		scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
 			called := request.GetCalledAE()
-
-			log.Printf("%x", []byte(called))
-
-			log.Printf("%x", []byte(*calledAE))
-
 			return *calledAE == called
 		})
 
@@ -166,7 +161,7 @@ func main() {
 			log.Fatalln("file is required for a C-Store")
 		}
 		scu := services.NewSCU(destination)
-		err := scu.StoreSCU(*fileName, 30)
+		err := scu.StoreSCU(*fileName, 0)
 		if err != nil {
 			log.Fatalln(err)
 		}

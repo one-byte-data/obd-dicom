@@ -1,10 +1,10 @@
 package network
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"strconv"
 	"strings"
 
@@ -20,9 +20,9 @@ type PresentationContext interface {
 	AddTransferSyntax(Tran string)
 	GetTransferSyntaxes() []UIDitem
 	Size() uint16
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (bool, error)
-	ReadDynamic(conn net.Conn) (bool, error)
+	Write(rw *bufio.ReadWriter) error
+	Read(ms media.MemoryStream) (error)
+	ReadDynamic(ms media.MemoryStream) (error)
 }
 
 type presentationContext struct {
@@ -82,7 +82,7 @@ func (pc *presentationContext) Size() uint16 {
 	return pc.Length + 4
 }
 
-func (pc *presentationContext) Write(conn net.Conn) error {
+func (pc *presentationContext) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -94,16 +94,16 @@ func (pc *presentationContext) Write(conn net.Conn) error {
 	bd.WriteByte(pc.Reserved2)
 	bd.WriteByte(pc.Reserved3)
 	bd.WriteByte(pc.Reserved4)
-	err := bd.Send(conn)
+	err := bd.Send(rw)
 	if err != nil {
 		return err
 	}
-	err = pc.AbsSyntax.Write(conn)
+	err = pc.AbsSyntax.Write(rw)
 	if err != nil {
 		return err
 	}
 	for _, TrnSyntax := range pc.TrnSyntaxs {
-		err := TrnSyntax.Write(conn)
+		err := TrnSyntax.Write(rw)
 		if err != nil {
 			return err
 		}
@@ -111,48 +111,46 @@ func (pc *presentationContext) Write(conn net.Conn) error {
 	return nil
 }
 
-func (pc *presentationContext) Read(conn net.Conn) (bool, error) {
-	var err error
-	pc.ItemType, err = ReadByte(conn)
+func (pc *presentationContext) Read(ms media.MemoryStream) (err error) {
+	pc.ItemType, err = ms.GetByte()
 	if err != nil {
-		return false, err
+		return err
 	}
-	return pc.ReadDynamic(conn)
+	return pc.ReadDynamic(ms)
 }
 
-func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
-	var err error
-	pc.Reserved1, err = ReadByte(conn)
+func (pc *presentationContext) ReadDynamic(ms media.MemoryStream) (err error) {
+	pc.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return false, err
+		return err
 	}
-	pc.Length, err = ReadUint16(conn)
+	pc.Length, err = ms.GetUint16()
 	if err != nil {
-		return false, err
+		return err
 	}
-	pc.PresentationContextID, err = ReadByte(conn)
+	pc.PresentationContextID, err = ms.GetByte()
 	if err != nil {
-		return false, err
+		return err
 	}
-	pc.Reserved2, err = ReadByte(conn)
+	pc.Reserved2, err = ms.GetByte()
 	if err != nil {
-		return false, err
+		return err
 	}
-	pc.Reserved3, err = ReadByte(conn)
+	pc.Reserved3, err = ms.GetByte()
 	if err != nil {
-		return false, err
+		return err
 	}
-	pc.Reserved4, err = ReadByte(conn)
+	pc.Reserved4, err = ms.GetByte()
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	pc.AbsSyntax.Read(conn)
+	pc.AbsSyntax.Read(ms)
 
 	Count := pc.Length - 4 - pc.AbsSyntax.Size()
 	for Count > 0 {
 		var TrnSyntax UIDitem
-		TrnSyntax.Read(conn)
+		TrnSyntax.Read(ms)
 		Count = Count - TrnSyntax.Size()
 		if TrnSyntax.Size() > 0 {
 			pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
@@ -160,10 +158,10 @@ func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
 	}
 
 	if Count == 0 {
-		return true, nil
+		return nil
 	}
 
-	return false, errors.New("ERROR, pc::ReadDynamic, Count is not zero")
+	return errors.New("ERROR, pc::ReadDynamic, Count is not zero")
 }
 
 // AAssociationRQ - AAssociationRQ
@@ -183,9 +181,8 @@ type AAssociationRQ interface {
 	SetImpClassUID(uid string)
 	SetImpVersionName(name string)
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) error
-	ReadDynamic(conn net.Conn) error
+	Write(rw *bufio.ReadWriter) error
+	Read(ms media.MemoryStream) error
 	AddPresContexts(presentationContext PresentationContext)
 }
 
@@ -291,7 +288,7 @@ func (aarq *aassociationRQ) Size() uint32 {
 	return aarq.Length + 6
 }
 
-func (aarq *aassociationRQ) Write(conn net.Conn) error {
+func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-RQ: %s <-- %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
@@ -309,52 +306,37 @@ func (aarq *aassociationRQ) Write(conn net.Conn) error {
 	bd.Write(aarq.CallingAE[:], 16)
 	bd.Write(aarq.Reserved3[:], 32)
 
-	if err := bd.Send(conn); err == nil {
-		err = aarq.AppContext.Write(conn)
+	if err := bd.Send(rw); err == nil {
+		err = aarq.AppContext.Write(rw)
 		if err != nil {
 			return err
 		}
 		for _, PresContext := range aarq.PresContexts {
-			PresContext.Write(conn)
+			PresContext.Write(rw)
 		}
-		aarq.UserInfo.Write(conn)
+		aarq.UserInfo.Write(rw)
 	}
 	return nil
 }
 
-func (aarq *aassociationRQ) Read(conn net.Conn) (err error) {
-	aarq.ItemType, err = ReadByte(conn)
+func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
+	aarq.ProtocolVersion, err = ms.GetUint16()
 	if err != nil {
-		return
-	}
-	return aarq.ReadDynamic(conn)
-}
-
-func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
-	aarq.Reserved1, err = ReadByte(conn)
-	if err != nil {
-		return
-	}
-	aarq.Length, err = ReadUint32(conn)
-	if err != nil {
-		return
-	}
-	aarq.ProtocolVersion, err = ReadUint16(conn)
-	if err != nil {
-		return
-	}
-	aarq.Reserved2, err = ReadUint16(conn)
-	if err != nil {
-		return
+		return err
 	}
 
-	conn.Read(aarq.CalledAE[:])
-	conn.Read(aarq.CallingAE[:])
-	conn.Read(aarq.Reserved3[:])
+	aarq.Reserved2, err = ms.GetUint16()
+	if err != nil {
+		return err
+	}
 
-	Count := int(aarq.Length - 4 - 16 - 16 - 32)
+	ms.ReadData(aarq.CalledAE[:])
+	ms.ReadData(aarq.CallingAE[:])
+	ms.ReadData(aarq.Reserved3[:])
+
+	Count := int(ms.GetSize() - 4 - 16 - 16 - 32)
 	for Count > 0 {
-		TempByte, err := ReadByte(conn)
+		TempByte, err := ms.GetByte()
 		if err != nil {
 			return err
 		}
@@ -362,20 +344,19 @@ func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
 		switch TempByte {
 		case 0x10:
 			aarq.AppContext.ItemType = TempByte
-			aarq.AppContext.ReadDynamic(conn)
+			aarq.AppContext.ReadDynamic(ms)
 			Count = Count - int(aarq.AppContext.Size())
 			break
 		case 0x20:
 			PresContext := NewPresentationContext()
-			PresContext.ReadDynamic(conn)
+			PresContext.ReadDynamic(ms)
 			Count = Count - int(PresContext.Size())
 			aarq.PresContexts = append(aarq.PresContexts, PresContext)
 			break
 		case 0x50: // User Information
 			aarq.UserInfo.SetItemType(TempByte)
-			aarq.UserInfo.ReadDynamic(conn)
-			Count = Count - int(aarq.UserInfo.Size())
-			break
+			aarq.UserInfo.ReadDynamic(ms)
+			return nil
 		default:
 			log.Println("ERROR, aarq::ReadDynamic, unknown Item, " + strconv.Itoa(int(TempByte)))
 			Count = -1

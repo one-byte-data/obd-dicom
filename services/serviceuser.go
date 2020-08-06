@@ -62,13 +62,12 @@ func (d *scu) FindSCU(Query media.DcmObj, Results *[]media.DcmObj, timeout int) 
 		return -1, err
 	}
 	for (status != -1) && (status != 0) {
-		DDO := media.NewEmptyDCMObj()
-		status, err = dimsec.CFindReadRSP(pdu, DDO)
+		ddo, status, err := dimsec.CFindReadRSP(pdu)
 		if err != nil {
 			return status, err
 		}
 		if (status == 0xFF00) || (status == 0xFF01) {
-			*Results = append(*Results, DDO)
+			*Results = append(*Results, ddo)
 		}
 	}
 
@@ -92,12 +91,12 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, err
 	}
 
 	for status == 0xFF00 {
-		DDO := media.NewEmptyDCMObj()
-		status, err = dimsec.CMoveReadRSP(pdu, DDO, &pending)
+		ddo, s, err := dimsec.CMoveReadRSP(pdu, &pending)
 		if err != nil {
 			return -1, err
 		}
-		DDO.DumpTags()
+		status = s
+		ddo.DumpTags()
 	}
 
 	pdu.Close()

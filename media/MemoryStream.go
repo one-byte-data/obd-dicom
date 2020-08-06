@@ -1,19 +1,31 @@
 package media
 
 import (
+	"bufio"
+	"encoding/binary"
 	"errors"
+	"io"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
 // MemoryStream - is an inteface to a memory stream
 type MemoryStream interface {
 	GetData() []byte
+	Get() (int, error)
+	GetByte() (byte, error)
+	GetUint16() (uint16, error)
+	GetUint32() (uint32, error)
+	GetInt() (int, error)
 	GetPosition() int
 	SetPosition(position int)
 	GetSize() int
+	SetSize(size int)
 	Append(data []byte) (int, error)
+	ReadData(input []byte) error
 	Read(count int) ([]byte, error)
+	ReadFully(rw *bufio.ReadWriter, length int)
 	Write(buffer []byte, count int) (int, error)
 	SaveToFile(fileName string) error
 	Clear()
@@ -57,6 +69,73 @@ func NewMemoryStreamFromFile(fileName string) (MemoryStream, error) {
 	}, nil
 }
 
+func (ms *memoryStream) GetByte() (byte, error) {
+	if ms.Position >= ms.Size {
+		return 0, errors.New("No more data to read")
+	}
+	b := ms.Data[ms.Position]
+	ms.Position++
+	return b, nil
+}
+
+func (ms *memoryStream) GetUint16() (uint16, error) {
+	if ms.Position+1 >= ms.Size {
+		return 0, errors.New("No more data to read")
+	}
+	b := make([]byte, 2)
+	copy(b, ms.Data[ms.Position:ms.Position+2])
+	ms.Position += 2
+	return binary.BigEndian.Uint16(b), nil
+}
+
+func (ms *memoryStream) GetUint32() (uint32, error) {
+	if ms.Position+3 >= ms.Size {
+		return 0, errors.New("No more data to read")
+	}
+	b := make([]byte, 4)
+	copy(b, ms.Data[ms.Position:ms.Position+4])
+	ms.Position += 4
+	return binary.BigEndian.Uint32(b), nil
+}
+
+func (ms *memoryStream) Get() (int, error) {
+	if ms.Position >= ms.Size {
+		return 0, errors.New("No more data to read")
+	}
+	b := ms.Data[ms.Position]
+	ms.Position++
+	return int(b), nil
+}
+
+func (ms *memoryStream) GetInt() (int, error) {
+	if ms.Position+3 >= ms.Size {
+		return 0, errors.New("No more data to read")
+	}
+	b := ms.Data[ms.Position : ms.Position+4]
+	ms.Position += 4
+	return int(binary.BigEndian.Uint32(b)), nil
+}
+
+func (ms *memoryStream) ReadData(dst []byte) error {
+	if ms.Position+len(dst) > ms.Size {
+		return errors.New("No more data to read")
+	}
+	copy(dst, ms.Data[ms.Position:ms.Position+len(dst)])
+	ms.Position += len(dst)
+	return nil
+}
+
+func (ms *memoryStream) ReadFully(rw *bufio.ReadWriter, length int) {
+	data := make([]byte, length)
+	_, err := io.ReadFull(rw, data)
+	if err != nil {
+		log.Print(err)
+	}
+	rw.Flush()
+	ms.Data = append(ms.Data, data...)
+	ms.Size += length
+}
+
 func (ms *memoryStream) GetData() []byte {
 	return ms.Data
 }
@@ -71,6 +150,10 @@ func (ms *memoryStream) SetPosition(position int) {
 
 func (ms *memoryStream) GetSize() int {
 	return ms.Size
+}
+
+func (ms *memoryStream) SetSize(size int) {
+	ms.Size = size
 }
 
 // Read - Read from MemoryStream into Buffer count bytes

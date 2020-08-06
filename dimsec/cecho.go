@@ -36,13 +36,12 @@ func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) error {
 
 // CEchoReadRSP CEcho response read
 func CEchoReadRSP(pdu network.PDUService) error {
-	DCO := media.NewEmptyDCMObj()
-
-	if err := pdu.Read(DCO); err != nil {
+	dco, err := pdu.NextPDU()
+	if err != nil {
 		return errors.New("ERROR, CEchoReadRSP, failed pdu.Read(&DCO)")
 	}
-	if DCO.GetUShort(0x00, 0x0100) == 0x8030 {
-		if DCO.GetUShort(0x00, 0x0900) == 0x00 {
+	if dco.GetUShort(0x00, 0x0100) == 0x8030 {
+		if dco.GetUShort(0x00, 0x0900) == 0x00 {
 
 		}
 	}

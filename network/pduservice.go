@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bufio"
 	"errors"
 	"log"
 	"net"
@@ -12,16 +13,14 @@ import (
 // PDUService - struct for PDUService
 type PDUService interface {
 	InterogateAAssociateAC() bool
-	InterogateAAssociateRQ(conn net.Conn) error
+	InterogateAAssociateRQ(rw *bufio.ReadWriter) error
 	ParseDCMIntoRaw(DCO media.DcmObj) bool
 	Write(DCO media.DcmObj, SOPClass string, ItemType byte) error
 	GetTransferSyntaxUID(pcid byte) string
 	ParseRawVRIntoDCM(DCO media.DcmObj) bool
-	Read(DCO media.DcmObj) error
 	SetTimeout(timeout int)
 	Connect(IP string, Port string) error
 	Close()
-	Multiplex(conn net.Conn) error
 	GetAAssociationRQ() AAssociationRQ
 	GetACCalledAE() string
 	SetACCalledAE(calledAE string)
@@ -31,6 +30,8 @@ type PDUService interface {
 	SetRQCalledAE(calledAE string)
 	GetRQCallingAE() string
 	SetRQCallingAE(callingAE string)
+	SetConn(rw *bufio.ReadWriter)
+	NextPDU() (media.DcmObj, error)
 	AddPresContexts(presentationContext PresentationContext)
 	GetPresentationContextID() byte
 	SetOnAssociationRequest(f func(request AAssociationRQ) bool)
@@ -38,7 +39,10 @@ type PDUService interface {
 
 type pduService struct {
 	AcceptedPresentationContexts []PresentationContextAccept
-	conn                         net.Conn
+	readWriter                   *bufio.ReadWriter
+	ms                           media.MemoryStream
+	pdutype                      int
+	pdulength                    uint32
 	AssocRQ                      AAssociationRQ
 	AssocAC                      AAssociationAC
 	AssocRJ                      AAssociationRJ
@@ -53,6 +57,7 @@ type pduService struct {
 // NewPDUService - creates a pointer to PDUService
 func NewPDUService() PDUService {
 	return &pduService{
+		ms:        media.NewEmptyMemoryStream(),
 		AssocRQ:   NewAAssociationRQ(),
 		AssocAC:   NewAAssociationAC(),
 		AssocRJ:   NewAAssociationRJ(),
@@ -60,6 +65,10 @@ func NewPDUService() PDUService {
 		ReleaseRP: NewAReleaseRP(),
 		AbortRQ:   NewAAbortRQ(),
 	}
+}
+
+func (pdu *pduService) SetConn(rw *bufio.ReadWriter) {
+	pdu.readWriter = rw
 }
 
 func (pdu *pduService) InterogateAAssociateAC() bool {
@@ -90,10 +99,10 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 	return false
 }
 
-func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
+func (pdu *pduService) InterogateAAssociateRQ(rw *bufio.ReadWriter) error {
 	if pdu.OnAssociationRequest == nil || !pdu.OnAssociationRequest(pdu.AssocRQ) {
 		pdu.AssocRJ.Set(1, 7)
-		return pdu.AssocRJ.Write(conn)
+		return pdu.AssocRJ.Write(rw)
 	}
 
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
@@ -139,16 +148,16 @@ func (pdu *pduService) InterogateAAssociateRQ(conn net.Conn) error {
 		MaxSubLength := NewMaximumSubLength()
 		UserInfo := NewUserInformation()
 
-		MaxSubLength.SetMaximumLength(16384)
+		MaxSubLength.SetMaximumLength(16378)
 		UserInfo.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 		UserInfo.SetImpVersionName("One-Byte-Data")
 		UserInfo.SetMaxSubLength(MaxSubLength)
 		pdu.AssocAC.SetUserInformation(UserInfo)
-		return pdu.AssocAC.Write(conn)
+		return pdu.AssocAC.Write(rw)
 	}
 
 	log.Println("ERROR, pduservice::InterogateAAssociateRQ, No valid AcceptedPresentationContexts")
-	return pdu.AssocRJ.Write(conn)
+	return pdu.AssocRJ.Write(rw)
 }
 
 func (pdu *pduService) ParseDCMIntoRaw(DCO media.DcmObj) bool {
@@ -177,15 +186,15 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	}
 
 	pdu.Pdata.MsgHeader = ItemType
-	if pdu.AssocAC.GetUserInformation().GetMaxSubLength().GetMaximumLength() > 16384 {
-		pdu.AssocAC.SetMaxSubLength(16384)
+	if pdu.AssocAC.GetUserInformation().GetMaxSubLength().GetMaximumLength() > 16378 {
+		pdu.AssocAC.SetMaxSubLength(16378)
 	}
 
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
 
 	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetACCallingAE())
 
-	return pdu.Pdata.Write(pdu.conn)
+	return pdu.Pdata.Write(pdu.readWriter)
 }
 
 func (pdu *pduService) GetTransferSyntaxUID(pcid byte) string {
@@ -214,87 +223,6 @@ func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 	return pdu.Pdata.Buffer.ReadObj(DCO)
 }
 
-func (pdu *pduService) Read(DCO media.DcmObj) error {
-	time.Sleep(500 * time.Millisecond)
-
-	if pdu.Pdata.Buffer != nil {
-		pdu.Pdata.Buffer.ClearMemoryStream()
-	} else {
-		pdu.Pdata.Buffer = media.NewEmptyBufData()
-	}
-
-	pdu.Pdata.MsgStatus = 0
-	if pdu.Pdata.Length != 0 {
-		pdu.Pdata.ReadDynamic(pdu.conn)
-		if pdu.Pdata.MsgStatus > 0 {
-			if !pdu.ParseRawVRIntoDCM(DCO) {
-				pdu.AbortRQ.Write(pdu.conn)
-				pdu.conn.Close()
-				return errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
-			}
-			return nil
-		}
-	}
-
-	for {
-		ItemType, err := ReadByte(pdu.conn)
-		if err != nil {
-			return err
-		}
-
-		switch ItemType {
-		case 0x01: // A-Associate-RQ, should not get here
-			log.Printf("INFO, ASSOC-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			pdu.AssocRQ.Read(pdu.conn)
-			pdu.AbortRQ.Write(pdu.conn)
-			pdu.conn.Close()
-			return errors.New("ERROR, pduservice::Read, A-Associate-RQ")
-		case 0x02: // A-Associate-AC, should not get here
-			log.Printf("INFO, ASSOC-AC: %s <-- %s\n", pdu.AssocAC.GetCallingAE(), pdu.AssocAC.GetCalledAE())
-			pdu.AssocAC.Read(pdu.conn)
-			pdu.AbortRQ.Write(pdu.conn)
-			pdu.conn.Close()
-			return errors.New("ERROR, pduservice::Read, A-Associate-AC")
-		case 0x03: // A-Associate-RJ, should not get here
-			log.Printf("INFO, ASSOC-RJ: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			pdu.AbortRQ.Write(pdu.conn)
-			pdu.conn.Close()
-			return errors.New("ERROR, pduservice::Read, A-Associate-RJ")
-		case 0x04: // P-Data-TF
-			err := pdu.Pdata.ReadDynamic(pdu.conn)
-			if err != nil {
-				return err
-			}
-			if pdu.Pdata.MsgStatus > 0 {
-				if !pdu.ParseRawVRIntoDCM(DCO) {
-					pdu.AbortRQ.Write(pdu.conn)
-					pdu.conn.Close()
-					return errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
-				}
-				return nil
-			}
-			break
-		case 0x05: // A-Release-RQ
-			log.Printf("INFO, ASSOC-R-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			pdu.ReleaseRQ.ReadDynamic(pdu.conn)
-			pdu.ReleaseRP.Write(pdu.conn)
-			return errors.New("ERROR, pduservice::Read, A-Release-RQ")
-		case 0x06: // A-Release-RP
-			log.Printf("INFO, ASSOC-R-RP: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			pdu.conn.Close()
-			return errors.New("ERROR, pduservice::Read, A-Release-RP")
-		case 0x07: //A-Abort-RQ
-			log.Printf("INFO, ASSOC-ABORT-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			pdu.conn.Close()
-			return errors.New("ERROR, pduservice::Read, A-Abort-RQ")
-		default:
-			pdu.AbortRQ.Write(pdu.conn)
-			pdu.conn.Close()
-			return errors.New("ERROR, pduservice::Read, unknown ItemType")
-		}
-	}
-}
-
 func (pdu *pduService) SetTimeout(timeout int) {
 	pdu.Timeout = timeout
 }
@@ -305,62 +233,145 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		return errors.New("ERROR, pduservice::Connect, " + err.Error())
 	}
 
-	pdu.conn = conn
+	if pdu.Timeout > 0 {
+		conn.SetDeadline(time.Now().Add(time.Duration(int32(pdu.Timeout)) * time.Second))
+	}
 
-	pdu.conn.SetDeadline(time.Now().Add(time.Duration(int32(pdu.Timeout)) * time.Second))
-	pdu.AssocRQ.SetMaxSubLength(16384)
+	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+
+	pdu.readWriter = rw
+	pdu.AssocRQ.SetMaxSubLength(16378)
 	pdu.AssocRQ.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 	pdu.AssocRQ.SetImpVersionName("One-Byte-Data")
 
-	err = pdu.AssocRQ.Write(pdu.conn)
+	err = pdu.AssocRQ.Write(pdu.readWriter)
 	if err != nil {
 		return err
 	}
 
-	ItemType, err := ReadByte(pdu.conn)
+	pdu.ms = media.NewEmptyMemoryStream()
+
+	pdu.ms.ReadFully(rw, 10)
+
+	ItemType, err := pdu.ms.GetByte()
+	if err != nil {
+		return err
+	}
+
+	_, err = pdu.ms.GetByte()
+	if err != nil {
+		return err
+	}
+
+	pdu.pdulength, err = pdu.ms.GetUint32()
 	if err != nil {
 		return err
 	}
 
 	switch ItemType {
 	case 0x02:
-		pdu.AssocAC.ReadDynamic(pdu.conn)
+		pdu.readPDU()
+		pdu.ms.SetPosition(1)
+		pdu.AssocAC.ReadDynamic(pdu.ms)
 		if !pdu.InterogateAAssociateAC() {
-			pdu.conn.Close()
 			return errors.New("ERROR, pduservice::Connect, InterogateAAssociateAC failed")
 		}
 		return nil
 	case 0x03:
-		// Error, Assoc. Rejected.
-		pdu.AssocRJ.ReadDynamic(pdu.conn)
-		pdu.conn.Close()
+		pdu.readPDU()
+		pdu.ms.SetPosition(1)
+		pdu.AssocRJ.ReadDynamic(pdu.ms)
 		return errors.New("ERROR, pduservice::Connect, Assoc. Rejected")
 	default:
 		// Error, Corrupt Transmission
-		pdu.conn.Close()
 		return errors.New("ERROR, pduservice::Connect, Corrupt Transmision")
 	}
 }
 
 func (pdu *pduService) Close() {
-	pdu.ReleaseRQ.Write(pdu.conn)
-	pdu.ReleaseRP.Read(pdu.conn)
-	pdu.conn.Close()
+	pdu.ReleaseRQ.Write(pdu.readWriter)
+	pdu.ReleaseRP.Read(pdu.ms)
 }
 
-func (pdu *pduService) Multiplex(conn net.Conn) error {
-	pdu.conn = conn
-	err := pdu.AssocRQ.Read(pdu.conn)
-	if err != nil {
-		return err
+func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
+	if pdu.Pdata.Buffer != nil {
+		pdu.Pdata.Buffer.ClearMemoryStream()
+	} else {
+		pdu.Pdata.Buffer = media.NewEmptyBufData()
 	}
 
-	err = pdu.InterogateAAssociateRQ(pdu.conn)
-	if err != nil {
-		conn.Close()
-		return err
+	for {
+		pdu.ms = media.NewEmptyMemoryStream()
+
+		pdu.ms.ReadFully(pdu.readWriter, 10)
+		pdu.ms.SetPosition(0)
+
+		pdu.pdutype, err = pdu.ms.Get()
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = pdu.ms.Get()
+		if err != nil {
+			return nil, err
+		}
+
+		pdu.pdulength, err = pdu.ms.GetUint32()
+		if err != nil {
+			return nil, err
+		}
+
+		switch pdu.pdutype {
+		case 0x01: // ASSOCIATION_REQUEST
+			pdu.readPDU()
+			err := pdu.AssocRQ.Read(pdu.ms)
+			if err != nil {
+				return nil, err
+			}
+			err = pdu.InterogateAAssociateRQ(pdu.readWriter)
+			if err != nil {
+				return nil, err
+			}
+			return nil, nil
+		case 0x02: // ASSOCIATION_ACCEPT
+			pdu.readPDU()
+			return nil, nil
+		case 0x04:
+			pdu.readPDU()
+			pdu.ms.SetPosition(1)
+			err := pdu.Pdata.ReadDynamic(pdu.ms)
+			if err != nil {
+				return nil, err
+			}
+			if pdu.Pdata.MsgStatus > 0 {
+				DCO := media.NewEmptyDCMObj()
+				if !pdu.ParseRawVRIntoDCM(DCO) {
+					pdu.AbortRQ.Write(pdu.readWriter)
+					return nil, errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
+				}
+				return DCO, nil
+			}
+			break
+		case 0x05: // A-Release-RQ
+			log.Printf("INFO, ASSOC-R-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
+			pdu.ReleaseRQ.ReadDynamic(pdu.ms)
+			pdu.ReleaseRP.Write(pdu.readWriter)
+			return nil, errors.New("ERROR, pduservice::Read, A-Release-RQ")
+		case 0x06: // A-Release-RP
+			log.Printf("INFO, ASSOC-R-RP: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
+			return nil, errors.New("ERROR, pduservice::Read, A-Release-RP")
+		case 0x07: //A-Abort-RQ
+			log.Printf("INFO, ASSOC-ABORT-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
+			return nil, errors.New("ERROR, pduservice::Read, A-Abort-RQ")
+		default:
+			pdu.AbortRQ.Write(pdu.readWriter)
+			return nil, errors.New("ERROR, pduservice::Read, unknown ItemType")
+		}
 	}
-	return nil
+}
+
+func (pdu *pduService) readPDU() {
+	pdu.ms.ReadFully(pdu.readWriter, int(pdu.pdulength)-4)
 }
 
 func (pdu *pduService) GetAAssociationRQ() AAssociationRQ {

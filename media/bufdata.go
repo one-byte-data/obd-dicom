@@ -1,9 +1,9 @@
 package media
 
 import (
+	"bufio"
 	"encoding/binary"
 	"errors"
-	"net"
 )
 
 // BufData - is an interface to buffer manipulation class
@@ -30,7 +30,7 @@ type BufData interface {
 	WriteMeta(SOPClassUID string, SOPInstanceUID string, TransferSyntax string)
 	ReadObj(obj DcmObj) bool
 	WriteObj(obj DcmObj)
-	Send(conn net.Conn) error
+	Send(rw *bufio.ReadWriter) error
 	GetAllBytes() []byte
 	SaveToFile(FileName string) error
 }
@@ -345,15 +345,16 @@ func (bd *bufData) WriteObj(obj DcmObj) {
 	}
 }
 
-func (bd *bufData) Send(conn net.Conn) error {
+func (bd *bufData) Send(rw *bufio.ReadWriter) error {
 	bd.SetPosition(0)
 	buffer, _ := bd.MS.Read(bd.GetSize())
 	bd.MS.Clear()
 
-	_, err := conn.Write(buffer)
+	_, err := rw.Write(buffer)
 	if err != nil {
 		return errors.New("ERROR, bufdata::Send, " + err.Error())
 	}
+	rw.Flush()
 	return nil
 }
 

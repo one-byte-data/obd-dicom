@@ -1,8 +1,8 @@
 package network
 
 import (
+	"bufio"
 	"log"
-	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -11,9 +11,9 @@ import (
 type AAssociationRJ interface {
 	Set(result byte, reason byte)
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type aassociationRJ struct {
@@ -43,7 +43,7 @@ func (aarj *aassociationRJ) Size() uint32 {
 	return aarj.Length + 6
 }
 
-func (aarj *aassociationRJ) Write(conn net.Conn) error {
+func (aarj *aassociationRJ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-RJ: Reason %x\n", aarj.Reason)
@@ -58,7 +58,7 @@ func (aarj *aassociationRJ) Write(conn net.Conn) error {
 	bd.WriteByte(aarj.Source)
 	bd.WriteByte(aarj.Reason)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
 func (aarj *aassociationRJ) Set(result byte, reason byte) {
@@ -66,35 +66,38 @@ func (aarj *aassociationRJ) Set(result byte, reason byte) {
 	aarj.Reason = reason
 }
 
-func (aarj *aassociationRJ) Read(conn net.Conn) (err error) {
-	aarj.ItemType, err = ReadByte(conn)
-	return aarj.ReadDynamic(conn)
+func (aarj *aassociationRJ) Read(ms media.MemoryStream) (err error) {
+	aarj.ItemType, err = ms.GetByte()
+	if err != nil {
+		return err
+	}
+	return aarj.ReadDynamic(ms)
 }
 
-func (aarj *aassociationRJ) ReadDynamic(conn net.Conn) (err error) {
-	aarj.Reserved1, err = ReadByte(conn)
+func (aarj *aassociationRJ) ReadDynamic(ms media.MemoryStream) (err error) {
+	aarj.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarj.Length, err = ReadUint32(conn)
+	aarj.Length, err = ms.GetUint32()
 	if err != nil {
-		return
+		return err
 	}
-	aarj.Reserved2, err = ReadByte(conn)
+	aarj.Reserved2, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarj.Result, err = ReadByte(conn)
+	aarj.Result, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarj.Source, err = ReadByte(conn)
+	aarj.Source, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarj.Reason, err = ReadByte(conn)
+	aarj.Reason, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
 	return
 }
@@ -102,9 +105,9 @@ func (aarj *aassociationRJ) ReadDynamic(conn net.Conn) (err error) {
 // AReleaseRQ AReleaseRQ
 type AReleaseRQ interface {
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type areleaseRQ struct {
@@ -128,7 +131,7 @@ func (arrq *areleaseRQ) Size() uint32 {
 	return arrq.Length + 6
 }
 
-func (arrq *areleaseRQ) Write(conn net.Conn) error {
+func (arrq *areleaseRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-R-RQ: <-- %x\n", arrq.Reserved1)
@@ -140,36 +143,39 @@ func (arrq *areleaseRQ) Write(conn net.Conn) error {
 	bd.WriteUint32(arrq.Length)
 	bd.WriteUint32(arrq.Reserved2)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (arrq *areleaseRQ) Read(conn net.Conn) (err error) {
-	arrq.ItemType, err = ReadByte(conn)
+func (arrq *areleaseRQ) Read(ms media.MemoryStream) (err error) {
+	arrq.ItemType, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	return arrq.ReadDynamic(conn)
+	return arrq.ReadDynamic(ms)
 }
 
-func (arrq *areleaseRQ) ReadDynamic(conn net.Conn) (err error) {
-	arrq.Reserved1, err = ReadByte(conn)
+func (arrq *areleaseRQ) ReadDynamic(ms media.MemoryStream) (err error) {
+	arrq.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	arrq.Length, err = ReadUint32(conn)
+	arrq.Length, err = ms.GetUint32()
 	if err != nil {
-		return
+		return err
 	}
-	arrq.Reserved2, err = ReadUint32(conn)
+	arrq.Reserved2, err = ms.GetUint32()
+	if err != nil {
+		return err
+	}
 	return
 }
 
 // AReleaseRP - AReleaseRP
 type AReleaseRP interface {
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type areleaseRP struct {
@@ -193,7 +199,7 @@ func (arrp *areleaseRP) Size() uint32 {
 	return arrp.Length + 6
 }
 
-func (arrp *areleaseRP) Write(conn net.Conn) error {
+func (arrp *areleaseRP) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-R-RP: %x -->\n", arrp.Reserved1)
@@ -205,36 +211,36 @@ func (arrp *areleaseRP) Write(conn net.Conn) error {
 	bd.WriteUint32(arrp.Length)
 	bd.WriteUint32(arrp.Reserved2)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (arrp *areleaseRP) Read(conn net.Conn) (err error) {
-	arrp.ItemType, err = ReadByte(conn)
+func (arrp *areleaseRP) Read(ms media.MemoryStream) (err error) {
+	arrp.ItemType, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	return arrp.ReadDynamic(conn)
+	return arrp.ReadDynamic(ms)
 }
 
-func (arrp *areleaseRP) ReadDynamic(conn net.Conn) (err error) {
-	arrp.Reserved1, err = ReadByte(conn)
+func (arrp *areleaseRP) ReadDynamic(ms media.MemoryStream) (err error) {
+	arrp.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	arrp.Length, err = ReadUint32(conn)
+	arrp.Length, err = ms.GetUint32()
 	if err != nil {
-		return
+		return err
 	}
-	arrp.Reserved2, err = ReadUint32(conn)
+	arrp.Reserved2, err = ms.GetUint32()
 	return
 }
 
 // AAbortRQ - AAbortRQ
 type AAbortRQ interface {
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(ms media.MemoryStream) (err error)
+	ReadDynamic(ms media.MemoryStream) (err error)
 }
 
 type aabortRQ struct {
@@ -264,7 +270,7 @@ func (aarq *aabortRQ) Size() uint32 {
 	return aarq.Length + 6
 }
 
-func (aarq *aabortRQ) Write(conn net.Conn) error {
+func (aarq *aabortRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -277,38 +283,41 @@ func (aarq *aabortRQ) Write(conn net.Conn) error {
 	bd.WriteByte(aarq.Source)
 	bd.WriteByte(aarq.Reason)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (aarq *aabortRQ) Read(conn net.Conn) (err error) {
-	aarq.ItemType, err = ReadByte(conn)
+func (aarq *aabortRQ) Read(ms media.MemoryStream) (err error) {
+	aarq.ItemType, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	return aarq.ReadDynamic(conn)
+	return aarq.ReadDynamic(ms)
 }
 
-func (aarq *aabortRQ) ReadDynamic(conn net.Conn) (err error) {
-	aarq.Reserved1, err = ReadByte(conn)
+func (aarq *aabortRQ) ReadDynamic(ms media.MemoryStream) (err error) {
+	aarq.Reserved1, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarq.Length, err = ReadUint32(conn)
+	aarq.Length, err = ms.GetUint32()
 	if err != nil {
-		return
+		return err
 	}
-	aarq.Reserved2, err = ReadByte(conn)
+	aarq.Reserved2, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarq.Reserved3, err = ReadByte(conn)
+	aarq.Reserved3, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarq.Source, err = ReadByte(conn)
+	aarq.Source, err = ms.GetByte()
 	if err != nil {
-		return
+		return err
 	}
-	aarq.Reason, err = ReadByte(conn)
+	aarq.Reason, err = ms.GetByte()
+	if err != nil {
+		return err
+	}
 	return
 }

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -17,7 +18,7 @@ type SCP interface {
 	SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj))
 	SetOnCMoveRequest(f func(request network.AAssociationRQ, moveLevel string, data media.DcmObj))
 	SetOnCStoreRequest(f func(request network.AAssociationRQ, data media.DcmObj))
-	handleConnection(conn net.Conn)
+	handleConnection(rw *bufio.ReadWriter)
 }
 
 type scp struct {
@@ -51,19 +52,21 @@ func (s *scp) StartServer() error {
 			log.Print(err)
 			continue
 		}
-		go s.handleConnection(conn)
+
+		log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
+		rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+		go s.handleConnection(rw)
 	}
 }
 
-func (s *scp) handleConnection(conn net.Conn) {
+func (s *scp) handleConnection(rw *bufio.ReadWriter) {
 	pdu := network.NewPDUService()
 
 	if s.OnAssociationRequest != nil {
 		pdu.SetOnAssociationRequest(s.OnAssociationRequest)
 	}
 
-	log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
-	err := pdu.Multiplex(conn)
+	err := pdu.Multiplex(rw)
 	if err != nil {
 		log.Print(err)
 		return

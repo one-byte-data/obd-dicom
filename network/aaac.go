@@ -1,11 +1,11 @@
 package network
 
 import (
+	"bufio"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"strconv"
 	"strings"
 
@@ -13,9 +13,9 @@ import (
 )
 
 // ReadByte reads a byte
-func ReadByte(conn net.Conn) (byte, error) {
+func ReadByte(rw *bufio.ReadWriter) (byte, error) {
 	c := make([]byte, 1)
-	_, err := conn.Read(c)
+	_, err := rw.Read(c)
 	if err != nil {
 		return 0, err
 	}
@@ -23,9 +23,9 @@ func ReadByte(conn net.Conn) (byte, error) {
 }
 
 // ReadUint16 read unsigned int
-func ReadUint16(conn net.Conn) (uint16, error) {
+func ReadUint16(rw *bufio.ReadWriter) (uint16, error) {
 	c := make([]byte, 2)
-	_, err := conn.Read(c)
+	_, err := rw.Read(c)
 	if err != nil {
 		return 0, err
 	}
@@ -33,9 +33,9 @@ func ReadUint16(conn net.Conn) (uint16, error) {
 }
 
 // ReadUint32 read unsigned int
-func ReadUint32(conn net.Conn) (uint32, error) {
+func ReadUint32(rw *bufio.ReadWriter) (uint32, error) {
 	c := make([]byte, 4)
-	_, err := conn.Read(c)
+	_, err := rw.Read(c)
 	if err != nil {
 		return 0, err
 	}
@@ -53,9 +53,9 @@ type PresentationContextAccept interface {
 	GetAbstractSyntax() UIDitem
 	SetAbstractSyntax(Abst string)
 	SetTransferSyntax(Tran string)
-	Write(conn net.Conn) (err error)
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) (err error)
+	Read(rw *bufio.ReadWriter) (err error)
+	ReadDynamic(rw *bufio.ReadWriter) (err error)
 }
 
 type presentationContextAccept struct {
@@ -124,7 +124,7 @@ func (pc *presentationContextAccept) SetTransferSyntax(Tran string) {
 	pc.TrnSyntax.Length = uint16(len(Tran))
 }
 
-func (pc *presentationContextAccept) Write(conn net.Conn) (err error) {
+func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -140,47 +140,47 @@ func (pc *presentationContextAccept) Write(conn net.Conn) (err error) {
 	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s\n", pc.GetAbstractSyntax().UIDName)
 	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s\n", pc.GetTrnSyntax().UIDName)
 
-	if err = bd.Send(conn); err == nil {
-		return pc.TrnSyntax.Write(conn)
+	if err = bd.Send(rw); err == nil {
+		return pc.TrnSyntax.Write(rw)
 	}
 	return
 }
 
-func (pc *presentationContextAccept) Read(conn net.Conn) (err error) {
-	pc.ItemType, err = ReadByte(conn)
+func (pc *presentationContextAccept) Read(rw *bufio.ReadWriter) (err error) {
+	pc.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return pc.ReadDynamic(conn)
+	return pc.ReadDynamic(rw)
 }
 
-func (pc *presentationContextAccept) ReadDynamic(conn net.Conn) (err error) {
-	pc.Reserved1, err = ReadByte(conn)
+func (pc *presentationContextAccept) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	pc.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	pc.Length, err = ReadUint16(conn)
+	pc.Length, err = ReadUint16(rw)
 	if err != nil {
 		return
 	}
-	pc.PresentationContextID, err = ReadByte(conn)
+	pc.PresentationContextID, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	pc.Reserved2, err = ReadByte(conn)
+	pc.Reserved2, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	pc.Result, err = ReadByte(conn)
+	pc.Result, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	pc.Reserved4, err = ReadByte(conn)
+	pc.Reserved4, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
 
-	return pc.TrnSyntax.Read(conn)
+	return pc.TrnSyntax.Read(rw)
 }
 
 // AAssociationAC AAssociationAC
@@ -198,9 +198,9 @@ type AAssociationAC interface {
 	GetMaxSubLength() uint32
 	SetMaxSubLength(length uint32)
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) (err error)
+	ReadDynamic(rw *bufio.ReadWriter) (err error)
 }
 
 type aassociationAC struct {
@@ -297,7 +297,7 @@ func (aaac *aassociationAC) Size() uint32 {
 	return aaac.Length + 6
 }
 
-func (aaac *aassociationAC) Write(conn net.Conn) error {
+func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	fmt.Println()
@@ -317,74 +317,73 @@ func (aaac *aassociationAC) Write(conn net.Conn) error {
 	bd.Write(aaac.CallingAE[:], 16)
 	bd.Write(aaac.Reserved3[:], 32)
 
-	err := bd.Send(conn)
+	err := bd.Send(rw)
 	if err != nil {
 		return err
 	}
-	err = aaac.AppContext.Write(conn)
+	err = aaac.AppContext.Write(rw)
 	if err != nil {
 		return err
 	}
 	for _, PresContextAccept := range aaac.PresContextAccepts {
-		PresContextAccept.Write(conn)
+		PresContextAccept.Write(rw)
 	}
-	return aaac.UserInfo.Write(conn)
+	return aaac.UserInfo.Write(rw)
 }
 
-func (aaac *aassociationAC) Read(conn net.Conn) (err error) {
-	aaac.ItemType, err = ReadByte(conn)
+func (aaac *aassociationAC) Read(rw *bufio.ReadWriter) (err error) {
+	aaac.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return aaac.ReadDynamic(conn)
+	return aaac.ReadDynamic(rw)
 }
 
-func (aaac *aassociationAC) ReadDynamic(conn net.Conn) (err error) {
-	aaac.Reserved1, err = ReadByte(conn)
+func (aaac *aassociationAC) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	aaac.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aaac.Length, err = ReadUint32(conn)
+	aaac.Length, err = ReadUint32(rw)
 	if err != nil {
 		return
 	}
-	aaac.ProtocolVersion, err = ReadUint16(conn)
+	aaac.ProtocolVersion, err = ReadUint16(rw)
 	if err != nil {
 		return
 	}
-	aaac.Reserved2, err = ReadUint16(conn)
+	aaac.Reserved2, err = ReadUint16(rw)
 	if err != nil {
 		return
 	}
 
-	conn.Read(aaac.CalledAE[:])
-	conn.Read(aaac.CallingAE[:])
-	conn.Read(aaac.Reserved3[:])
+	rw.Read(aaac.CalledAE[:])
+	rw.Read(aaac.CallingAE[:])
+	rw.Read(aaac.Reserved3[:])
 
 	Count := int(aaac.Length - 4 - 16 - 16 - 32)
 	for Count > 0 {
-		TempByte, err := ReadByte(conn)
+		TempByte, err := ReadByte(rw)
 		if err != nil {
 			return err
 		}
 
 		switch TempByte {
 		case 0x10:
-			aaac.AppContext.ReadDynamic(conn)
+			aaac.AppContext.ReadDynamic(rw)
 			Count = Count - int(aaac.AppContext.Size())
 			break
 		case 0x21:
 			PresContextAccept := NewPresentationContextAccept()
-			PresContextAccept.ReadDynamic(conn)
+			PresContextAccept.ReadDynamic(rw)
 			Count = Count - int(PresContextAccept.Size())
 			aaac.PresContextAccepts = append(aaac.PresContextAccepts, PresContextAccept)
 			break
 		case 0x50: // User Information
-			aaac.UserInfo.ReadDynamic(conn)
+			aaac.UserInfo.ReadDynamic(rw)
 			Count = Count - int(aaac.UserInfo.Size())
 			break
 		default:
-			conn.Close()
 			Count = -1
 			return errors.New("ERROR, aaac::ReadDynamic, unknown Item, " + strconv.Itoa(int(TempByte)))
 		}

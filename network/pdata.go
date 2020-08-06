@@ -1,8 +1,8 @@
 package network
 
 import (
+	"bufio"
 	"errors"
-	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -29,15 +29,15 @@ type PDataTF struct {
 }
 
 // ReadDynamic - ReadDynamic
-func (pd *PDataTF) ReadDynamic(conn net.Conn) (err error) {
+func (pd *PDataTF) ReadDynamic(rw *bufio.ReadWriter) (err error) {
 	var Count uint32
 
 	if pd.Length == 0 {
-		pd.Reserved1, err = ReadByte(conn)
+		pd.Reserved1, err = ReadByte(rw)
 		if err != nil {
 			return
 		}
-		pd.Length, err = ReadUint32(conn)
+		pd.Length, err = ReadUint32(rw)
 		if err != nil {
 			return
 		}
@@ -47,21 +47,21 @@ func (pd *PDataTF) ReadDynamic(conn net.Conn) (err error) {
 	pd.MsgStatus = 0
 
 	for Count > 0 {
-		pd.pdv.Length, err = ReadUint32(conn)
+		pd.pdv.Length, err = ReadUint32(rw)
 		if err != nil {
 			return
 		}
-		pd.pdv.PresentationContextID, err = ReadByte(conn)
+		pd.pdv.PresentationContextID, err = ReadByte(rw)
 		if err != nil {
 			return
 		}
-		pd.pdv.MsgHeader, err = ReadByte(conn)
+		pd.pdv.MsgHeader, err = ReadByte(rw)
 		if err != nil {
 			return
 		}
 
 		buff := make([]byte, pd.pdv.Length-2)
-		_, err := conn.Read(buff)
+		_, err := rw.Read(buff)
 		if err != nil {
 			return errors.New("ERROR, pdata::ReadDynamic, " + err.Error())
 		}
@@ -85,7 +85,7 @@ func (pd *PDataTF) ReadDynamic(conn net.Conn) (err error) {
 	return nil
 }
 
-func (pd *PDataTF) Write(conn net.Conn) error {
+func (pd *PDataTF) Write(rw *bufio.ReadWriter) error {
 	TotalSize := uint32(pd.Buffer.GetSize())
 	pd.Buffer.SetPosition(0)
 	if pd.BlockSize == 0 {
@@ -120,13 +120,13 @@ func (pd *PDataTF) Write(conn net.Conn) error {
 		bd.WriteUint32(pd.pdv.Length)
 		bd.WriteByte(pd.pdv.PresentationContextID)
 		bd.WriteByte(pd.MsgHeader)
-		if err := bd.Send(conn); err == nil {
+		if err := bd.Send(rw); err == nil {
 			buff, err := pd.Buffer.Read(int(pd.BlockSize))
 			if err != nil {
 				return errors.New("ERROR, pdata::Write, " + err.Error())
 			}
 
-			n, err := conn.Write(buff)
+			n, err := rw.Write(buff)
 			if err != nil {
 				return errors.New("ERROR, pdata::Write, " + err.Error())
 			}
@@ -135,7 +135,7 @@ func (pd *PDataTF) Write(conn net.Conn) error {
 				return errors.New("ERROR, pdata::Write, n!=int(pd.BlockSize)")
 			}
 		} else {
-			return errors.New("ERROR, pdata::Write, bd.Send(conn) failed")
+			return errors.New("ERROR, pdata::Write, bd.Send(rw) failed")
 		}
 		SentSize += pd.BlockSize
 	}

@@ -1,7 +1,7 @@
 package network
 
 import (
-	"net"
+	"bufio"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -28,7 +28,7 @@ func NewUIDitem(UIDName string, ItemType byte) *UIDitem {
 	}
 }
 
-func (uid *UIDitem) Write(conn net.Conn) error {
+func (uid *UIDitem) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -37,30 +37,30 @@ func (uid *UIDitem) Write(conn net.Conn) error {
 	bd.WriteUint16(uid.Length)
 	bd.WriteString(uid.UIDName)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (uid *UIDitem) Read(conn net.Conn) (err error) {
-	uid.ItemType, err = ReadByte(conn)
+func (uid *UIDitem) Read(rw *bufio.ReadWriter) (err error) {
+	uid.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return uid.ReadDynamic(conn)
+	return uid.ReadDynamic(rw)
 }
 
 // ReadDynamic - ReadDynamic
-func (uid *UIDitem) ReadDynamic(conn net.Conn) (err error) {
-	uid.Reserved1, err = ReadByte(conn)
+func (uid *UIDitem) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	uid.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	uid.Length, err = ReadUint16(conn)
+	uid.Length, err = ReadUint16(rw)
 	if err != nil {
 		return
 	}
 
 	buffer := make([]byte, uid.Length)
-	_, err = conn.Read(buffer)
+	_, err = rw.Read(buffer)
 	if err != nil {
 		return
 	}

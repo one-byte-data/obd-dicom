@@ -1,10 +1,10 @@
 package network
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"strconv"
 	"strings"
 
@@ -20,9 +20,9 @@ type PresentationContext interface {
 	AddTransferSyntax(Tran string)
 	GetTransferSyntaxes() []UIDitem
 	Size() uint16
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (bool, error)
-	ReadDynamic(conn net.Conn) (bool, error)
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) (bool, error)
+	ReadDynamic(rw *bufio.ReadWriter) (bool, error)
 }
 
 type presentationContext struct {
@@ -82,7 +82,7 @@ func (pc *presentationContext) Size() uint16 {
 	return pc.Length + 4
 }
 
-func (pc *presentationContext) Write(conn net.Conn) error {
+func (pc *presentationContext) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -94,16 +94,16 @@ func (pc *presentationContext) Write(conn net.Conn) error {
 	bd.WriteByte(pc.Reserved2)
 	bd.WriteByte(pc.Reserved3)
 	bd.WriteByte(pc.Reserved4)
-	err := bd.Send(conn)
+	err := bd.Send(rw)
 	if err != nil {
 		return err
 	}
-	err = pc.AbsSyntax.Write(conn)
+	err = pc.AbsSyntax.Write(rw)
 	if err != nil {
 		return err
 	}
 	for _, TrnSyntax := range pc.TrnSyntaxs {
-		err := TrnSyntax.Write(conn)
+		err := TrnSyntax.Write(rw)
 		if err != nil {
 			return err
 		}
@@ -111,48 +111,48 @@ func (pc *presentationContext) Write(conn net.Conn) error {
 	return nil
 }
 
-func (pc *presentationContext) Read(conn net.Conn) (bool, error) {
+func (pc *presentationContext) Read(rw *bufio.ReadWriter) (bool, error) {
 	var err error
-	pc.ItemType, err = ReadByte(conn)
+	pc.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return false, err
 	}
-	return pc.ReadDynamic(conn)
+	return pc.ReadDynamic(rw)
 }
 
-func (pc *presentationContext) ReadDynamic(conn net.Conn) (bool, error) {
+func (pc *presentationContext) ReadDynamic(rw *bufio.ReadWriter) (bool, error) {
 	var err error
-	pc.Reserved1, err = ReadByte(conn)
+	pc.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return false, err
 	}
-	pc.Length, err = ReadUint16(conn)
+	pc.Length, err = ReadUint16(rw)
 	if err != nil {
 		return false, err
 	}
-	pc.PresentationContextID, err = ReadByte(conn)
+	pc.PresentationContextID, err = ReadByte(rw)
 	if err != nil {
 		return false, err
 	}
-	pc.Reserved2, err = ReadByte(conn)
+	pc.Reserved2, err = ReadByte(rw)
 	if err != nil {
 		return false, err
 	}
-	pc.Reserved3, err = ReadByte(conn)
+	pc.Reserved3, err = ReadByte(rw)
 	if err != nil {
 		return false, err
 	}
-	pc.Reserved4, err = ReadByte(conn)
+	pc.Reserved4, err = ReadByte(rw)
 	if err != nil {
 		return false, err
 	}
 
-	pc.AbsSyntax.Read(conn)
+	pc.AbsSyntax.Read(rw)
 
 	Count := pc.Length - 4 - pc.AbsSyntax.Size()
 	for Count > 0 {
 		var TrnSyntax UIDitem
-		TrnSyntax.Read(conn)
+		TrnSyntax.Read(rw)
 		Count = Count - TrnSyntax.Size()
 		if TrnSyntax.Size() > 0 {
 			pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
@@ -183,9 +183,9 @@ type AAssociationRQ interface {
 	SetImpClassUID(uid string)
 	SetImpVersionName(name string)
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) error
-	ReadDynamic(conn net.Conn) error
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) error
+	ReadDynamic(rw *bufio.ReadWriter) error
 	AddPresContexts(presentationContext PresentationContext)
 }
 
@@ -291,7 +291,7 @@ func (aarq *aassociationRQ) Size() uint32 {
 	return aarq.Length + 6
 }
 
-func (aarq *aassociationRQ) Write(conn net.Conn) error {
+func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-RQ: %s <-- %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
@@ -309,52 +309,52 @@ func (aarq *aassociationRQ) Write(conn net.Conn) error {
 	bd.Write(aarq.CallingAE[:], 16)
 	bd.Write(aarq.Reserved3[:], 32)
 
-	if err := bd.Send(conn); err == nil {
-		err = aarq.AppContext.Write(conn)
+	if err := bd.Send(rw); err == nil {
+		err = aarq.AppContext.Write(rw)
 		if err != nil {
 			return err
 		}
 		for _, PresContext := range aarq.PresContexts {
-			PresContext.Write(conn)
+			PresContext.Write(rw)
 		}
-		aarq.UserInfo.Write(conn)
+		aarq.UserInfo.Write(rw)
 	}
 	return nil
 }
 
-func (aarq *aassociationRQ) Read(conn net.Conn) (err error) {
-	aarq.ItemType, err = ReadByte(conn)
+func (aarq *aassociationRQ) Read(rw *bufio.ReadWriter) (err error) {
+	aarq.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return aarq.ReadDynamic(conn)
+	return aarq.ReadDynamic(rw)
 }
 
-func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
-	aarq.Reserved1, err = ReadByte(conn)
+func (aarq *aassociationRQ) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	aarq.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarq.Length, err = ReadUint32(conn)
+	aarq.Length, err = ReadUint32(rw)
 	if err != nil {
 		return
 	}
-	aarq.ProtocolVersion, err = ReadUint16(conn)
+	aarq.ProtocolVersion, err = ReadUint16(rw)
 	if err != nil {
 		return
 	}
-	aarq.Reserved2, err = ReadUint16(conn)
+	aarq.Reserved2, err = ReadUint16(rw)
 	if err != nil {
 		return
 	}
 
-	conn.Read(aarq.CalledAE[:])
-	conn.Read(aarq.CallingAE[:])
-	conn.Read(aarq.Reserved3[:])
+	rw.Read(aarq.CalledAE[:])
+	rw.Read(aarq.CallingAE[:])
+	rw.Read(aarq.Reserved3[:])
 
 	Count := int(aarq.Length - 4 - 16 - 16 - 32)
 	for Count > 0 {
-		TempByte, err := ReadByte(conn)
+		TempByte, err := ReadByte(rw)
 		if err != nil {
 			return err
 		}
@@ -362,18 +362,18 @@ func (aarq *aassociationRQ) ReadDynamic(conn net.Conn) (err error) {
 		switch TempByte {
 		case 0x10:
 			aarq.AppContext.ItemType = TempByte
-			aarq.AppContext.ReadDynamic(conn)
+			aarq.AppContext.ReadDynamic(rw)
 			Count = Count - int(aarq.AppContext.Size())
 			break
 		case 0x20:
 			PresContext := NewPresentationContext()
-			PresContext.ReadDynamic(conn)
+			PresContext.ReadDynamic(rw)
 			Count = Count - int(PresContext.Size())
 			aarq.PresContexts = append(aarq.PresContexts, PresContext)
 			break
 		case 0x50: // User Information
 			aarq.UserInfo.SetItemType(TempByte)
-			aarq.UserInfo.ReadDynamic(conn)
+			aarq.UserInfo.ReadDynamic(rw)
 			Count = Count - int(aarq.UserInfo.Size())
 			break
 		default:

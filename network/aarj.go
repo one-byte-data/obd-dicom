@@ -1,8 +1,8 @@
 package network
 
 import (
+	"bufio"
 	"log"
-	"net"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -11,9 +11,9 @@ import (
 type AAssociationRJ interface {
 	Set(result byte, reason byte)
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) (err error)
+	ReadDynamic(rw *bufio.ReadWriter) (err error)
 }
 
 type aassociationRJ struct {
@@ -43,7 +43,7 @@ func (aarj *aassociationRJ) Size() uint32 {
 	return aarj.Length + 6
 }
 
-func (aarj *aassociationRJ) Write(conn net.Conn) error {
+func (aarj *aassociationRJ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-RJ: Reason %x\n", aarj.Reason)
@@ -58,7 +58,7 @@ func (aarj *aassociationRJ) Write(conn net.Conn) error {
 	bd.WriteByte(aarj.Source)
 	bd.WriteByte(aarj.Reason)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
 func (aarj *aassociationRJ) Set(result byte, reason byte) {
@@ -66,33 +66,33 @@ func (aarj *aassociationRJ) Set(result byte, reason byte) {
 	aarj.Reason = reason
 }
 
-func (aarj *aassociationRJ) Read(conn net.Conn) (err error) {
-	aarj.ItemType, err = ReadByte(conn)
-	return aarj.ReadDynamic(conn)
+func (aarj *aassociationRJ) Read(rw *bufio.ReadWriter) (err error) {
+	aarj.ItemType, err = ReadByte(rw)
+	return aarj.ReadDynamic(rw)
 }
 
-func (aarj *aassociationRJ) ReadDynamic(conn net.Conn) (err error) {
-	aarj.Reserved1, err = ReadByte(conn)
+func (aarj *aassociationRJ) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	aarj.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarj.Length, err = ReadUint32(conn)
+	aarj.Length, err = ReadUint32(rw)
 	if err != nil {
 		return
 	}
-	aarj.Reserved2, err = ReadByte(conn)
+	aarj.Reserved2, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarj.Result, err = ReadByte(conn)
+	aarj.Result, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarj.Source, err = ReadByte(conn)
+	aarj.Source, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarj.Reason, err = ReadByte(conn)
+	aarj.Reason, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
@@ -102,9 +102,9 @@ func (aarj *aassociationRJ) ReadDynamic(conn net.Conn) (err error) {
 // AReleaseRQ AReleaseRQ
 type AReleaseRQ interface {
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) (err error)
+	ReadDynamic(rw *bufio.ReadWriter) (err error)
 }
 
 type areleaseRQ struct {
@@ -128,7 +128,7 @@ func (arrq *areleaseRQ) Size() uint32 {
 	return arrq.Length + 6
 }
 
-func (arrq *areleaseRQ) Write(conn net.Conn) error {
+func (arrq *areleaseRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-R-RQ: <-- %x\n", arrq.Reserved1)
@@ -140,36 +140,36 @@ func (arrq *areleaseRQ) Write(conn net.Conn) error {
 	bd.WriteUint32(arrq.Length)
 	bd.WriteUint32(arrq.Reserved2)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (arrq *areleaseRQ) Read(conn net.Conn) (err error) {
-	arrq.ItemType, err = ReadByte(conn)
+func (arrq *areleaseRQ) Read(rw *bufio.ReadWriter) (err error) {
+	arrq.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return arrq.ReadDynamic(conn)
+	return arrq.ReadDynamic(rw)
 }
 
-func (arrq *areleaseRQ) ReadDynamic(conn net.Conn) (err error) {
-	arrq.Reserved1, err = ReadByte(conn)
+func (arrq *areleaseRQ) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	arrq.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	arrq.Length, err = ReadUint32(conn)
+	arrq.Length, err = ReadUint32(rw)
 	if err != nil {
 		return
 	}
-	arrq.Reserved2, err = ReadUint32(conn)
+	arrq.Reserved2, err = ReadUint32(rw)
 	return
 }
 
 // AReleaseRP - AReleaseRP
 type AReleaseRP interface {
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) (err error)
+	ReadDynamic(rw *bufio.ReadWriter) (err error)
 }
 
 type areleaseRP struct {
@@ -193,7 +193,7 @@ func (arrp *areleaseRP) Size() uint32 {
 	return arrp.Length + 6
 }
 
-func (arrp *areleaseRP) Write(conn net.Conn) error {
+func (arrp *areleaseRP) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	log.Printf("INFO, ASSOC-R-RP: %x -->\n", arrp.Reserved1)
@@ -205,36 +205,36 @@ func (arrp *areleaseRP) Write(conn net.Conn) error {
 	bd.WriteUint32(arrp.Length)
 	bd.WriteUint32(arrp.Reserved2)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (arrp *areleaseRP) Read(conn net.Conn) (err error) {
-	arrp.ItemType, err = ReadByte(conn)
+func (arrp *areleaseRP) Read(rw *bufio.ReadWriter) (err error) {
+	arrp.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return arrp.ReadDynamic(conn)
+	return arrp.ReadDynamic(rw)
 }
 
-func (arrp *areleaseRP) ReadDynamic(conn net.Conn) (err error) {
-	arrp.Reserved1, err = ReadByte(conn)
+func (arrp *areleaseRP) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	arrp.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	arrp.Length, err = ReadUint32(conn)
+	arrp.Length, err = ReadUint32(rw)
 	if err != nil {
 		return
 	}
-	arrp.Reserved2, err = ReadUint32(conn)
+	arrp.Reserved2, err = ReadUint32(rw)
 	return
 }
 
 // AAbortRQ - AAbortRQ
 type AAbortRQ interface {
 	Size() uint32
-	Write(conn net.Conn) error
-	Read(conn net.Conn) (err error)
-	ReadDynamic(conn net.Conn) (err error)
+	Write(rw *bufio.ReadWriter) error
+	Read(rw *bufio.ReadWriter) (err error)
+	ReadDynamic(rw *bufio.ReadWriter) (err error)
 }
 
 type aabortRQ struct {
@@ -264,7 +264,7 @@ func (aarq *aabortRQ) Size() uint32 {
 	return aarq.Length + 6
 }
 
-func (aarq *aabortRQ) Write(conn net.Conn) error {
+func (aarq *aabortRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	bd.SetBigEndian(true)
@@ -277,38 +277,38 @@ func (aarq *aabortRQ) Write(conn net.Conn) error {
 	bd.WriteByte(aarq.Source)
 	bd.WriteByte(aarq.Reason)
 
-	return bd.Send(conn)
+	return bd.Send(rw)
 }
 
-func (aarq *aabortRQ) Read(conn net.Conn) (err error) {
-	aarq.ItemType, err = ReadByte(conn)
+func (aarq *aabortRQ) Read(rw *bufio.ReadWriter) (err error) {
+	aarq.ItemType, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	return aarq.ReadDynamic(conn)
+	return aarq.ReadDynamic(rw)
 }
 
-func (aarq *aabortRQ) ReadDynamic(conn net.Conn) (err error) {
-	aarq.Reserved1, err = ReadByte(conn)
+func (aarq *aabortRQ) ReadDynamic(rw *bufio.ReadWriter) (err error) {
+	aarq.Reserved1, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarq.Length, err = ReadUint32(conn)
+	aarq.Length, err = ReadUint32(rw)
 	if err != nil {
 		return
 	}
-	aarq.Reserved2, err = ReadByte(conn)
+	aarq.Reserved2, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarq.Reserved3, err = ReadByte(conn)
+	aarq.Reserved3, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarq.Source, err = ReadByte(conn)
+	aarq.Source, err = ReadByte(rw)
 	if err != nil {
 		return
 	}
-	aarq.Reason, err = ReadByte(conn)
+	aarq.Reason, err = ReadByte(rw)
 	return
 }

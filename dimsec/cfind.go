@@ -5,6 +5,8 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/commandtype"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/priority"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
@@ -27,10 +29,10 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
 	DCO.WriteUint32(0x00, 0x00, "UL", size)                  // Length
-	DCO.WriteString(0x0000, 0x0002, "UI", SOPClassUID)       //SOP Class UID
-	DCO.WriteUint16(0x00, 0x0100, "US", 0x20)                //Command Field
+	DCO.WriteString(0x0000, 0x0002, "UI", SOPClassUID)
+	DCO.WriteUint16(0x00, 0x0100, "US", commandtype.CFind)
 	DCO.WriteUint16(0x00, 0x0110, "US", network.Uniq16odd()) //Message ID
-	DCO.WriteUint16(0x00, 0x0700, "US", 0x00)                // Priority
+	DCO.WriteUint16(0x00, 0x0700, "US", priority.Medium)
 	DCO.WriteUint16(0x00, 0x0800, "US", 0x0102)              //Data Set type
 
 	err := pdu.Write(DCO, SOPClassUID, 0x01)

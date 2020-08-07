@@ -9,6 +9,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/commandtype"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
@@ -77,7 +78,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 		}
 		command := dco.GetUShort(tags.CommandField)
 		switch command {
-		case 0x01: // C-Store
+		case commandtype.CStore:
 			ddo, err := dimsec.CStoreReadRQ(pdu, dco)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Store failed to read request : %s", err.Error())
@@ -97,7 +98,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			log.Println("INFO, handleConnection, C-Store Success")
 			break
-		case 0x20: // C-Find
+		case commandtype.CFind:
 			ddo, err := dimsec.CFindReadRQ(pdu)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Find failed to read request!")
@@ -120,7 +121,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			log.Println("INFO, handleConnection, C-Find Success")
 			break
-		case 0x21: // C-Move
+		case commandtype.CMove:
 			ddo, err := dimsec.CMoveReadRQ(pdu)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Move failed to read request!")
@@ -141,7 +142,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			log.Println("INFO, handleConnection, C-Move Success")
 			break
-		case 0x30: // C-Echo
+		case commandtype.CEcho:
 			if dimsec.CEchoReadRQ(pdu, dco) {
 				err := dimsec.CEchoWriteRSP(pdu, dco)
 				if err != nil {

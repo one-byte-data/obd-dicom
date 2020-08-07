@@ -5,6 +5,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/commandtype"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
@@ -28,7 +29,7 @@ func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) error {
 
 	DCO.WriteUint32(0x00, 0x00, "UL", size)                  // Length
 	DCO.WriteString(0x0000, 0x0002, "UI", SOPClassUID)       //SOP Class UID
-	DCO.WriteUint16(0x00, 0x0100, "US", 0x30)                //Command Field
+	DCO.WriteUint16(0x00, 0x0100, "US", commandtype.CEcho)                //Command Field
 	DCO.WriteUint16(0x00, 0x0110, "US", network.Uniq16odd()) //Message ID
 	DCO.WriteUint16(0x00, 0x0800, "US", 0x0101)              //Data Set type
 

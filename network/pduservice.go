@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/pdutype"
 )
 
 // PDUService - struct for PDUService
@@ -271,7 +272,7 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 	}
 
 	switch ItemType {
-	case 0x02:
+	case pdutype.AssociationAccept:
 		pdu.readPDU()
 		pdu.ms.SetPosition(1)
 		pdu.AssocAC.ReadDynamic(pdu.ms)
@@ -279,13 +280,12 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 			return errors.New("ERROR, pduservice::Connect, InterogateAAssociateAC failed")
 		}
 		return nil
-	case 0x03:
+	case pdutype.AssociationReject:
 		pdu.readPDU()
 		pdu.ms.SetPosition(1)
 		pdu.AssocRJ.ReadDynamic(pdu.ms)
 		return errors.New("ERROR, pduservice::Connect, Assoc. Rejected")
 	default:
-		// Error, Corrupt Transmission
 		return errors.New("ERROR, pduservice::Connect, Corrupt Transmision")
 	}
 }
@@ -324,7 +324,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 		}
 
 		switch pdu.pdutype {
-		case 0x01: // ASSOCIATION_REQUEST
+		case pdutype.AssocicationRequest:
 			pdu.readPDU()
 			err := pdu.AssocRQ.Read(pdu.ms)
 			if err != nil {
@@ -335,7 +335,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 				return nil, err
 			}
 			return nil, nil
-		case 0x02: // ASSOCIATION_ACCEPT
+		case pdutype.AssociationAccept:
 			pdu.readPDU()
 			return nil, nil
 		case 0x04:
@@ -354,15 +354,15 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 				return DCO, nil
 			}
 			break
-		case 0x05: // A-Release-RQ
+		case pdutype.AssociationReleaseRequest:
 			log.Printf("INFO, ASSOC-R-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.ReleaseRQ.ReadDynamic(pdu.ms)
 			pdu.ReleaseRP.Write(pdu.readWriter)
 			return nil, errors.New("ERROR, pduservice::Read, A-Release-RQ")
-		case 0x06: // A-Release-RP
+		case pdutype.AssociationReleaseResponse:
 			log.Printf("INFO, ASSOC-R-RP: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			return nil, errors.New("ERROR, pduservice::Read, A-Release-RP")
-		case 0x07: //A-Abort-RQ
+		case pdutype.AssociationAbortRequest:
 			log.Printf("INFO, ASSOC-ABORT-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			return nil, errors.New("ERROR, pduservice::Read, A-Abort-RQ")
 		default:

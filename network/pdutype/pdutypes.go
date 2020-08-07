@@ -1,0 +1,19 @@
+package pdutype
+
+// AssocicationRequest - Association request
+const AssocicationRequest = 0x01
+
+// AssociationAccept - Assocation accept
+const AssociationAccept = 0x02
+
+// AssociationReject - Association reject
+const AssociationReject = 0x03
+
+// AssociationReleaseRequest - Association release request
+const AssociationReleaseRequest = 0x05
+
+// AssociationReleaseResponse - Association release response
+const AssociationReleaseResponse = 0x06
+
+// AssociationAbortRequest - Association abort request
+const AssociationAbortRequest = 0x07

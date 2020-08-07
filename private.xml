@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+  <tag group="0019" element="1000" vr="DS" vm="1">Field Of View</tag>
+  <tag group="0019" element="1005" vr="DS" vm="1">CC Angulation</tag>
+  <tag group="0019" element="1006" vr="DS" vm="1">AP Angulation</tag>
+  <tag group="0019" element="1007" vr="DS" vm="1">LR Angulation</tag>
+  <tag group="0019" element="1008" vr="IS" vm="1">Patient Position</tag>
+  <tag group="0019" element="1009" vr="IS" vm="1">Patient Orientation</tag>
+  <tag group="0019" element="100a" vr="IS" vm="1">Slice Orientation</tag>
+  <tag group="0019" element="100b" vr="DS" vm="1">LR Offcenter</tag>
+  <tag group="0019" element="100c" vr="DS" vm="1">CC Offcenter</tag>
+  <tag group="0019" element="100d" vr="DS" vm="1">AP Offcenter</tag>
+  <tag group="0019" element="100e" vr="DS" vm="1">Unknown</tag>
+  <tag group="0019" element="100f" vr="IS" vm="1">Number Of Slices</tag>
+  <tag group="0019" element="1010" vr="DS" vm="1">Slice Factor</tag>
+  <tag group="0019" element="1011" vr="DS" vm="1-n">Echo Times</tag>
+  <tag group="0019" element="1015" vr="IS" vm="1">Dynamic Study</tag>
+  <tag group="0019" element="1018" vr="DS" vm="1">Heartbeat Interval</tag>
+  <tag group="0019" element="1019" vr="DS" vm="1">Repetition Time FFE</tag>
+  <tag group="0019" element="101a" vr="DS" vm="1">FFE Flip Angle</tag>
+  <tag group="0019" element="101b" vr="IS" vm="1">Number Of Scans</tag>
+  <tag group="0019" element="1021" vr="DS" vm="1-n">Unknown</tag>
+  <tag group="0019" element="1022" vr="DS" vm="1">Dynamic Scan Time Begin</tag>
+  <tag group="0019" element="1024" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="1064" vr="DS" vm="1">Repetition Time SE</tag>
+  <tag group="0019" element="1065" vr="DS" vm="1">Repetition Time IR</tag>
+  <tag group="0019" element="1069" vr="IS" vm="1">Number Of Phases</tag>
+  <tag group="0019" element="106a" vr="IS" vm="1">Cardiac Frequency</tag>
+  <tag group="0019" element="106b" vr="DS" vm="1">Inversion Delay</tag>
+  <tag group="0019" element="106c" vr="DS" vm="1">Gate Delay</tag>
+  <tag group="0019" element="106d" vr="DS" vm="1">Gate Width</tag>
+  <tag group="0019" element="106e" vr="DS" vm="1">Trigger Delay Time</tag>
+  <tag group="0019" element="1080" vr="IS" vm="1">Number Of Chemical Shifts</tag>
+  <tag group="0019" element="1081" vr="DS" vm="1">Chemical Shift</tag>
+  <tag group="0019" element="1084" vr="IS" vm="1">Number Of Rows</tag>
+  <tag group="0019" element="1085" vr="IS" vm="1">Number Of Samples</tag>
+  <tag group="0019" element="1094" vr="LO" vm="1">Magnetization Transfer Contrast</tag>
+  <tag group="0019" element="1095" vr="LO" vm="1">Spectral Presaturation With Inversion Recovery</tag>
+  <tag group="0019" element="1096" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="1097" vr="LO" vm="1">Unknown</tag>
+  <tag group="0019" element="10a0" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10a1" vr="DS" vm="1">Unknown</tag>
+  <tag group="0019" element="10a3" vr="DS" vm="1">Unknown</tag>
+  <tag group="0019" element="10a4" vr="CS" vm="1">Unknown</tag>
+  <tag group="0019" element="10c8" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10c9" vr="IS" vm="1">Foldover Direction Transverse</tag>
+  <tag group="0019" element="10ca" vr="IS" vm="1">Foldover Direction Sagittal</tag>
+  <tag group="0019" element="10cb" vr="IS" vm="1">Foldover Direction Coronal</tag>
+  <tag group="0019" element="10cc" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10cd" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10ce" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10cf" vr="IS" vm="1">Number Of Echoes</tag>
+  <tag group="0019" element="10d0" vr="IS" vm="1">Scan Resolution</tag>
+  <tag group="0019" element="10d2" vr="LO" vm="2">Water Fat Shift</tag>
+  <tag group="0019" element="10d4" vr="IS" vm="1">Artifact Reduction</tag>
+  <tag group="0019" element="10d5" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10d6" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10d7" vr="DS" vm="1">Scan Percentage</tag>
+  <tag group="0019" element="10d8" vr="IS" vm="1">Halfscan</tag>
+  <tag group="0019" element="10d9" vr="IS" vm="1">EPI Factor</tag>
+  <tag group="0019" element="10da" vr="IS" vm="1">Turbo Factor</tag>
+  <tag group="0019" element="10db" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="10e0" vr="IS" vm="1">Percentage Of Scan Completed</tag>
+  <tag group="0019" element="10e1" vr="IS" vm="1">Unknown</tag>
+  <tag group="0019" element="1100" vr="IS" vm="1">Number Of Stacks</tag>
+  <tag group="0019" element="1101" vr="IS" vm="1-n">Stack Type</tag>
+  <tag group="0019" element="1102" vr="IS" vm="1-n">Unknown</tag>
+  <tag group="0019" element="110b" vr="DS" vm="1">LR Offcenter</tag>
+  <tag group="0019" element="110c" vr="DS" vm="1">CC Offcenter</tag>
+  <tag group="0019" element="110d" vr="DS" vm="1">AP Offcenter</tag>
+  <tag group="0019" element="1145" vr="IS" vm="1">Reconstruction Resolution</tag>
+  <tag group="0019" element="11fc" vr="IS" vm="1">Resonance Frequency</tag>
+  <tag group="0019" element="12c0" vr="DS" vm="1">Trigger Delay Times</tag>
+  <tag group="0019" element="12e0" vr="IS" vm="1">Prepulse Type</tag>
+  <tag group="0019" element="12e1" vr="DS" vm="1">Prepulse Delay</tag>
+  <tag group="0019" element="12e3" vr="DS" vm="1">Phase Contrast Velocity</tag>
+  <tag group="0021" element="1000" vr="IS" vm="1">Reconstruction Number</tag>
+  <tag group="0021" element="1010" vr="IS" vm="1">Image Type</tag>
+  <tag group="0021" element="1020" vr="IS" vm="1">Slice Number</tag>
+  <tag group="0021" element="1030" vr="IS" vm="1">Echo Number</tag>
+  <tag group="0021" element="1031" vr="DS" vm="1">Patient Reference ID</tag>
+  <tag group="0021" element="1035" vr="IS" vm="1">Chemical Shift Number</tag>
+  <tag group="0021" element="1040" vr="IS" vm="1">Phase Number</tag>
+  <tag group="0021" element="1050" vr="IS" vm="1">Dynamic Scan Number</tag>
+  <tag group="0021" element="1060" vr="IS" vm="1">Number Of Rows In Object</tag>
+  <tag group="0021" element="1061" vr="IS" vm="1-n">Row Number</tag>
+  <tag group="0021" element="1062" vr="IS" vm="1-n">Unknown</tag>
+  <tag group="0021" element="1100" vr="DA" vm="1">Scan Date</tag>
+  <tag group="0021" element="1110" vr="TM" vm="1">Scan Time</tag>
+  <tag group="0021" element="1221" vr="IS" vm="1">Slice Gap</tag>
+</dictionary>

@@ -1,7 +1,7 @@
 package media
 
 // Tags - list of known public tags
-var Tags = []DictStruct{
+var Tags = []Tag{
 	{
 		Name:        "CommandGroupLength",
 		Description: "Command Group Length",

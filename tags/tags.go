@@ -1,7 +1,6 @@
-package media
+package tags
 
-// Tags - list of known public tags
-var Tags = []Tag{
+var tags = []Tag{
 	{
 		Name:        "CommandGroupLength",
 		Description: "Command Group Length",

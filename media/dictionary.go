@@ -4,17 +4,9 @@ import (
 	"encoding/xml"
 	"io/ioutil"
 	"strconv"
-)
 
-// Tag Dictionary Structure definition
-type Tag struct {
-	Group       uint16
-	Element     uint16
-	VR          string
-	VM          string
-	Name        string
-	Description string
-}
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+)
 
 type dictionary struct {
 	XMLName xml.Name `xml:"dictionary"`
@@ -30,7 +22,7 @@ type xmlTag struct {
 	Description string `xml:",chardata"`
 }
 
-var codes []Tag
+var codes []tags.Tag
 
 // FillTag - Populates with data from dictionary
 func FillTag(tag *DcmTag) {
@@ -42,7 +34,7 @@ func FillTag(tag *DcmTag) {
 }
 
 // GetDictionaryTag - get tag from Dictionary
-func GetDictionaryTag(group uint16, element uint16) *Tag {
+func GetDictionaryTag(group uint16, element uint16) *tags.Tag {
 	if codes == nil {
 		return nil
 	}
@@ -51,7 +43,7 @@ func GetDictionaryTag(group uint16, element uint16) *Tag {
 			return &codes[i]
 		}
 	}
-	return &Tag{
+	return &tags.Tag{
 		Group:       0,
 		Element:     0,
 		VR:          "UN",
@@ -97,7 +89,7 @@ func loadPrivateDictionary() {
 			continue
 		}
 
-		codes = append(codes, Tag{
+		codes = append(codes, tags.Tag{
 			Group:       uint16(g),
 			Element:     uint16(e),
 			Name:        t.Name,
@@ -110,6 +102,6 @@ func loadPrivateDictionary() {
 
 // InitDict Initialize Dictionary
 func InitDict() {
-	codes = Tags
+	codes = tags.GetTags()
 	loadPrivateDictionary()
 }

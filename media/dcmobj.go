@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"time"
+
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 // DcmObj - DICOM Object structure
@@ -24,9 +26,9 @@ type DcmObj interface {
 	SetTag(i int, tag DcmTag)
 	DelTag(i int)
 	GetTags() []DcmTag
-	GetUShort(tag Tag) uint16
-	GetUInt(tag Tag) uint32
-	GetString(tag Tag) string
+	GetUShort(tag tags.Tag) uint16
+	GetUInt(tag tags.Tag) uint32
+	GetString(tag tags.Tag) string
 	GetUShortGE(group uint16, element uint16) uint16
 	GetUIntGE(group uint16, element uint16) uint32
 	GetStringGE(group uint16, element uint16) string
@@ -185,7 +187,7 @@ func (obj *dcmObj) DumpTags() {
 	}
 }
 
-func (obj *dcmObj) GetUShort(tag Tag) uint16 {
+func (obj *dcmObj) GetUShort(tag tags.Tag) uint16 {
 	return obj.GetUShortGE(tag.Group, tag.Element)
 }
 
@@ -214,7 +216,7 @@ func (obj *dcmObj) GetUShortGE(group uint16, element uint16) uint16 {
 	return 0
 }
 
-func (obj *dcmObj) GetUInt(tag Tag) uint32 {
+func (obj *dcmObj) GetUInt(tag tags.Tag) uint32 {
 	return obj.GetUIntGE(tag.Group, tag.Element)
 }
 
@@ -243,7 +245,7 @@ func (obj *dcmObj) GetUIntGE(group uint16, element uint16) uint32 {
 	return 0
 }
 
-func (obj *dcmObj) GetString(tag Tag) string {
+func (obj *dcmObj) GetString(tag tags.Tag) string {
 	return obj.GetStringGE(tag.Group, tag.Element)
 }
 

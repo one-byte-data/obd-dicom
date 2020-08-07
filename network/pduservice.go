@@ -67,6 +67,8 @@ func NewPDUService() PDUService {
 	}
 }
 
+var maxPduLength uint32 = 16384
+
 func (pdu *pduService) SetConn(rw *bufio.ReadWriter) {
 	pdu.readWriter = rw
 }
@@ -148,7 +150,7 @@ func (pdu *pduService) InterogateAAssociateRQ(rw *bufio.ReadWriter) error {
 		MaxSubLength := NewMaximumSubLength()
 		UserInfo := NewUserInformation()
 
-		MaxSubLength.SetMaximumLength(16378)
+		MaxSubLength.SetMaximumLength(maxPduLength)
 		UserInfo.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 		UserInfo.SetImpVersionName("One-Byte-Data")
 		UserInfo.SetMaxSubLength(MaxSubLength)
@@ -186,8 +188,8 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	}
 
 	pdu.Pdata.MsgHeader = ItemType
-	if pdu.AssocAC.GetUserInformation().GetMaxSubLength().GetMaximumLength() > 16378 {
-		pdu.AssocAC.SetMaxSubLength(16378)
+	if pdu.AssocAC.GetUserInformation().GetMaxSubLength().GetMaximumLength() > maxPduLength {
+		pdu.AssocAC.SetMaxSubLength(maxPduLength)
 	}
 
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
@@ -240,7 +242,7 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 
 	pdu.readWriter = rw
-	pdu.AssocRQ.SetMaxSubLength(16378)
+	pdu.AssocRQ.SetMaxSubLength(maxPduLength)
 	pdu.AssocRQ.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
 	pdu.AssocRQ.SetImpVersionName("One-Byte-Data")
 

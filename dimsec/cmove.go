@@ -63,10 +63,9 @@ func CMoveReadRSP(pdu network.PDUService, pending *int) (media.DcmObj, int, erro
 			status = int(dco.GetUShort(0x00, 0x0900))
 			*pending = int(dco.GetUShort(0x00, 0x1020))
 			return ddo, status, nil
-		} else {
-			status = int(dco.GetUShort(0x00, 0x0900))
-			*pending = -1
 		}
+		status = int(dco.GetUShort(0x00, 0x0900))
+		*pending = -1
 	}
 	return nil, status, nil
 }

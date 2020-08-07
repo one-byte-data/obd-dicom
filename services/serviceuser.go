@@ -7,6 +7,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 // SCU - inteface to a scu
@@ -109,7 +110,7 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 		return err
 	}
 
-	SOPClassUID := DDO.GetString(0x08, 0x16)
+	SOPClassUID := DDO.GetString(tags.SOPClassUID)
 	if len(SOPClassUID) > 0 {
 		pdu := network.NewPDUService()
 		err := d.openAssociation(pdu, SOPClassUID, timeout)

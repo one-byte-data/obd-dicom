@@ -5,6 +5,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 // CFindReadRQ CFind request read
@@ -49,15 +50,15 @@ func CFindReadRSP(pdu network.PDUService) (media.DcmObj, int, error) {
 	}
 
 	// Is this a C-Find RSP?
-	if dco.GetUShort(0x00, 0x0100) == 0x8020 {
-		if dco.GetUShort(0x00, 0x0800) != 0x0101 {
+	if dco.GetUShort(tags.CommandField) == 0x8020 {
+		if dco.GetUShort(tags.CommandDataSetType) != 0x0101 {
 			ddo, err := pdu.NextPDU()
 			if err != nil {
 				return nil, status, err
 			}
-			return ddo, int(dco.GetUShort(0x00, 0x0900)), nil
+			return ddo, int(dco.GetUShort(tags.Status)), nil
 		}
-		return nil, int(dco.GetUShort(0x00, 0x0900)), nil
+		return nil, int(dco.GetUShort(tags.Status)), nil
 	}
 	return nil, status, errors.New("ERROR, CFindReadRSP, unknown error")
 }
@@ -75,7 +76,7 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 	} else {
 		leDSType = 0x0101
 	}
-	SOPClassUID := DCO.GetString(0x00, 0x02)
+	SOPClassUID := DCO.GetString(tags.AffectedSOPClassUID)
 	sopclasslength = uint16(len(SOPClassUID))
 	if sopclasslength > 0 {
 		if sopclasslength%2 == 1 {
@@ -87,7 +88,7 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 		DCOR.WriteUint32(0x00, 0x00, "UL", size)        // Length
 		DCOR.WriteString(0x00, 0x02, "UI", SOPClassUID) //SOP Class UID
 		DCOR.WriteUint16(0x00, 0x0100, "US", 0x8020)    //Command Field
-		valor := DCO.GetUShort(0x00, 0x0110)
+		valor := DCO.GetUShort(tags.MessageID)
 		DCOR.WriteUint16(0x00, 0x0120, "US", valor)    //Message ID
 		DCOR.WriteUint16(0x00, 0x0800, "US", leDSType) //Data Set type
 		DCOR.WriteUint16(0x00, 0x0900, "US", status)   // Status

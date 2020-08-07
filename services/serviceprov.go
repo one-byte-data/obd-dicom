@@ -9,6 +9,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 // SCP - Interface to scp
@@ -74,7 +75,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 		if dco == nil {
 			continue
 		}
-		command := dco.GetUShort(0x00, 0x0100)
+		command := dco.GetUShort(tags.CommandField)
 		switch command {
 		case 0x01: // C-Store
 			ddo, err := dimsec.CStoreReadRQ(pdu, dco)
@@ -103,7 +104,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 				conn.Close()
 				return
 			}
-			QueryLevel := ddo.GetString(0x08, 0x52) // Get Query Level
+			QueryLevel := ddo.GetString(tags.QueryRetrieveLevel)
 
 			Result := media.NewEmptyDCMObj()
 
@@ -126,7 +127,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 				conn.Close()
 				return
 			}
-			MoveLevel := ddo.GetString(0x08, 0x52) // Get Move Level
+			MoveLevel := ddo.GetString(tags.QueryRetrieveLevel)
 
 			if s.OnCMoveRequest != nil {
 				s.OnCMoveRequest(pdu.GetAAssociationRQ(), MoveLevel, ddo)

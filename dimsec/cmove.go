@@ -5,6 +5,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 // CMoveReadRQ CMove request read
@@ -54,17 +55,17 @@ func CMoveReadRSP(pdu network.PDUService, pending *int) (media.DcmObj, int, erro
 		return nil, status, err
 	}
 	// Is this a C-Find RSP?
-	if dco.GetUShort(0x00, 0x0100) == 0x8021 {
-		if dco.GetUShort(0x00, 0x0800) != 0x0101 {
+	if dco.GetUShort(tags.CommandField) == 0x8021 {
+		if dco.GetUShort(tags.CommandDataSetType) != 0x0101 {
 			ddo, err := pdu.NextPDU()
 			if err != nil {
 				return nil, status, err
 			}
-			status = int(dco.GetUShort(0x00, 0x0900))
-			*pending = int(dco.GetUShort(0x00, 0x1020))
+			status = int(dco.GetUShort(tags.Status))
+			*pending = int(dco.GetUShort(tags.NumberOfRemainingSuboperations))
 			return ddo, status, nil
 		}
-		status = int(dco.GetUShort(0x00, 0x0900))
+		status = int(dco.GetUShort(tags.Status))
 		*pending = -1
 	}
 	return nil, status, nil
@@ -77,7 +78,7 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 
 	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 
-	SOPClassUID := DCO.GetString(0x00, 0x02)
+	SOPClassUID := DCO.GetString(tags.AffectedSOPClassUID)
 	sopclasslength := uint16(len(SOPClassUID))
 	if sopclasslength > 0 {
 		if sopclasslength%2 == 1 {
@@ -89,7 +90,7 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 		DCOR.WriteUint32(0x00, 0x00, "UL", size)        // Length
 		DCOR.WriteString(0x00, 0x02, "UI", SOPClassUID) //SOP Class UID
 		DCOR.WriteUint16(0x00, 0x0100, "US", 0x8021)    //Command Field
-		valor := DCO.GetUShort(0x00, 0x0110)
+		valor := DCO.GetUShort(tags.MessageID)
 		DCOR.WriteUint16(0x00, 0x0120, "US", valor)   //Message ID
 		DCOR.WriteUint16(0x00, 0x0800, "US", 0x101)   //Data Set type
 		DCOR.WriteUint16(0x00, 0x0900, "US", status)  //Status

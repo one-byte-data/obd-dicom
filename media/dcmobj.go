@@ -24,9 +24,12 @@ type DcmObj interface {
 	SetTag(i int, tag DcmTag)
 	DelTag(i int)
 	GetTags() []DcmTag
-	GetUShort(group uint16, element uint16) uint16
-	GetUInt(group uint16, element uint16) uint32
-	GetString(group uint16, element uint16) string
+	GetUShort(tag Tag) uint16
+	GetUInt(tag Tag) uint32
+	GetString(tag Tag) string
+	GetUShortGE(group uint16, element uint16) uint16
+	GetUIntGE(group uint16, element uint16) uint32
+	GetStringGE(group uint16, element uint16) string
 	WriteUint16(group uint16, element uint16, vr string, val uint16)
 	WriteUint32(group uint16, element uint16, vr string, val uint32)
 	WriteString(group uint16, element uint16, vr string, content string)
@@ -182,8 +185,12 @@ func (obj *dcmObj) DumpTags() {
 	}
 }
 
-// GetUShort - return the Uint16 for this group & element
-func (obj *dcmObj) GetUShort(group uint16, element uint16) uint16 {
+func (obj *dcmObj) GetUShort(tag Tag) uint16 {
+	return obj.GetUShortGE(tag.Group, tag.Element)
+}
+
+// GetUShortGE - return the Uint16 for this group & element
+func (obj *dcmObj) GetUShortGE(group uint16, element uint16) uint16 {
 	var i int
 	var tag DcmTag
 	sq := 0
@@ -207,8 +214,12 @@ func (obj *dcmObj) GetUShort(group uint16, element uint16) uint16 {
 	return 0
 }
 
-// GetUInt - return the Uint32 for this group & element
-func (obj *dcmObj) GetUInt(group uint16, element uint16) uint32 {
+func (obj *dcmObj) GetUInt(tag Tag) uint32 {
+	return obj.GetUIntGE(tag.Group, tag.Element)
+}
+
+// GetUIntGE - return the Uint32 for this group & element
+func (obj *dcmObj) GetUIntGE(group uint16, element uint16) uint32 {
 	var i int
 	var tag DcmTag
 	sq := 0
@@ -232,8 +243,12 @@ func (obj *dcmObj) GetUInt(group uint16, element uint16) uint32 {
 	return 0
 }
 
-// GetString - return the String for this group & element
-func (obj *dcmObj) GetString(group uint16, element uint16) string {
+func (obj *dcmObj) GetString(tag Tag) string {
+	return obj.GetStringGE(tag.Group, tag.Element)
+}
+
+// GetStringGE - return the String for this group & element
+func (obj *dcmObj) GetStringGE(group uint16, element uint16) string {
 	var i int
 	var tag DcmTag
 	sq := 0
@@ -268,8 +283,8 @@ func (obj *dcmObj) WriteToBytes() []byte {
 	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
 		bufdata.SetBigEndian(true)
 	}
-	SOPClassUID := obj.GetString(0x08, 0x16)
-	SOPInstanceUID := obj.GetString(0x08, 0x18)
+	SOPClassUID := obj.GetStringGE(0x08, 0x16)
+	SOPInstanceUID := obj.GetStringGE(0x08, 0x18)
 	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax)
 	bufdata.WriteObj(obj)
 	bufdata.SetPosition(0)
@@ -283,8 +298,8 @@ func (obj *dcmObj) WriteToFile(fileName string) error {
 	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
 		bufdata.SetBigEndian(true)
 	}
-	SOPClassUID := obj.GetString(0x08, 0x16)
-	SOPInstanceUID := obj.GetString(0x08, 0x18)
+	SOPClassUID := obj.GetStringGE(0x08, 0x16)
+	SOPInstanceUID := obj.GetStringGE(0x08, 0x18)
 	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax)
 	bufdata.WriteObj(obj)
 	bufdata.SetPosition(0)

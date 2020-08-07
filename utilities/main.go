@@ -76,7 +76,7 @@ func writeDictionaryTags(tags []tag) {
 		if strings.Contains(tag.Group, "x") || strings.Contains(tag.Element, "x") {
 			continue
 		}
-		f.WriteString(fmt.Sprintf("// %s - %s\n", tag.Keyword, tag.Name))
+		f.WriteString(fmt.Sprintf("// %s - (%s,%s) %s\n", tag.Keyword, tag.Group, tag.Element, tag.Name))
 		f.WriteString(fmt.Sprintf("var %s = media.Tag{\n", tag.Keyword))
 		f.WriteString(fmt.Sprintf("  Group: 0x%s,\n", tag.Group))
 		f.WriteString(fmt.Sprintf("  Element: 0x%s,\n", tag.Element))

@@ -5,11 +5,12 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 // CEchoReadRQ CEcho request read
 func CEchoReadRQ(pdu network.PDUService, DCO media.DcmObj) bool {
-	return DCO.GetUShort(0x00, 0x0100) == 0x30
+	return DCO.GetUShort(tags.CommandField) == 0x30
 }
 
 // CEchoWriteRQ CEcho request write
@@ -40,8 +41,8 @@ func CEchoReadRSP(pdu network.PDUService) error {
 	if err != nil {
 		return errors.New("ERROR, CEchoReadRSP, failed pdu.Read(&DCO)")
 	}
-	if dco.GetUShort(0x00, 0x0100) == 0x8030 {
-		if dco.GetUShort(0x00, 0x0900) == 0x00 {
+	if dco.GetUShort(tags.CommandField) == 0x8030 {
+		if dco.GetUShort(tags.Status) == 0x00 {
 
 		}
 	}
@@ -55,7 +56,7 @@ func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
 	var valor uint16
 
 	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
-	SOPClassUID := DCO.GetString(0x00, 0x02)
+	SOPClassUID := DCO.GetString(tags.AffectedSOPClassUID)
 	valor = uint16(len(SOPClassUID))
 	if valor > 0 {
 		if valor%2 == 1 {
@@ -67,9 +68,9 @@ func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
 		DCOR.WriteUint32(0x00, 0x00, "UL", size)        // Length
 		DCOR.WriteString(0x00, 0x02, "UI", SOPClassUID) //SOP Class UID
 		DCOR.WriteUint16(0x00, 0x0100, "US", 0x8030)    //Command Field
-		valor = DCO.GetUShort(0x00, 0x0110)
+		valor = DCO.GetUShort(tags.MessageID)
 		DCOR.WriteUint16(0x00, 0x0110, "US", valor) //Message ID
-		valor = DCO.GetUShort(0x00, 0x0800)
+		valor = DCO.GetUShort(tags.CommandDataSetType)
 		DCOR.WriteUint16(0x00, 0x0800, "US", valor) //Data Set type
 		DCOR.WriteUint16(0x00, 0x0900, "US", 0x00)  //Data Set type
 		return pdu.Write(DCOR, SOPClassUID, 0x01)

@@ -10,6 +10,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/services"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 var destination *network.Destination
@@ -70,11 +71,11 @@ func main() {
 		})
 
 		scp.SetOnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
-			log.Printf("INFO, C-Store recieved %s", data.GetString(0x0008, 0x0018))
-			directory := filepath.Join(*datastore, data.GetString(0x0010, 0x0020), data.GetString(0x0020, 0x000d), data.GetString(0x0020, 0x000e))
+			log.Printf("INFO, C-Store recieved %s", data.GetString(tags.SOPInstanceUID))
+			directory := filepath.Join(*datastore, data.GetString(tags.PatientID), data.GetString(tags.StudyInstanceUID), data.GetString(tags.SeriesInstanceUID))
 			os.MkdirAll(directory, 0755)
 
-			path := filepath.Join(directory, data.GetString(0x0008, 0x0018)+".dcm")
+			path := filepath.Join(directory, data.GetString(tags.SOPInstanceUID)+".dcm")
 
 			err := data.WriteToFile(path)
 			if err != nil {
@@ -133,7 +134,7 @@ func main() {
 		log.Println("CFind was successful")
 		log.Printf("Found %d results\n\n", len(results))
 		for _, result := range results {
-			log.Printf("Found study %s\n", result.GetString(0x0020, 0x000D))
+			log.Printf("Found study %s\n", result.GetString(tags.StudyInstanceUID))
 			result.DumpTags()
 		}
 		os.Exit(0)

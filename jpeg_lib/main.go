@@ -93,7 +93,7 @@ func test16() {
 	}
 
 	// Need an uncompressed image
-	if obj.GetTransferSynxtax() == "1.2.840.10008.1.2.1" {
+	if obj.GetTransferSyntax() == "1.2.840.10008.1.2.1" {
 		var index int
 		width := int(obj.GetUShort(0x28, 0x10))
 		height := int(obj.GetUShort(0x28, 0x11))
@@ -113,13 +113,34 @@ func test16() {
 			obj.SetTag(index, tag)
 			obj.SetTransferSyntax("1.2.840.10008.1.2.4.70")
 			index++
-			tag = media.DcmTag{0xFFFE, 0xE000, 0, "DL", nil, false}
+			tag = media.DcmTag{
+				Group: 0xFFFE,
+				Element: 0xE000,
+				Length: 0,
+				VR: "DL",
+				Data: nil,
+				BigEndian: false,
+			}
 			obj.SetTag(index, tag)
 			index++
-			tag = media.DcmTag{0xFFFE, 0xE000, uint32(len(outData)), "DL", outData, false}
+			tag = media.DcmTag{
+				Group: 0xFFFE,
+				Element: 0xE000,
+				Length: uint32(len(outData)),
+				VR: "DL",
+				Data: outData,
+				BigEndian: false,
+			}
 			obj.SetTag(index, tag)
 			index++
-			tag = media.DcmTag{0xFFFE, 0xE0DD, 0, "DL", nil, false}
+			tag = media.DcmTag{
+				Group: 0xFFFE,
+				Element: 0xE0DD,
+				Length: 0,
+				VR: "DL",
+				Data: nil,
+				BigEndian: false,
+			}
 			obj.SetTag(index, tag)
 
 			err = obj.WriteToFile("out.dcm")

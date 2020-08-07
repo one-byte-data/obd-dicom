@@ -165,20 +165,20 @@ func (obj *dcmObj) GetTags() []DcmTag {
 }
 
 func (obj *dcmObj) DelTag(i int) {
-	obj.Tags=append(obj.Tags[:i], obj.Tags[i+1:]...)
+	obj.Tags = append(obj.Tags[:i], obj.Tags[i+1:]...)
 }
 
 func (obj *dcmObj) DumpTags() {
 	for _, tag := range obj.Tags {
 		if tag.VR == "SQ" {
-			fmt.Printf("\t(%04X,%04X) %s - %s\n", tag.Group, tag.Element, tag.VR, TagDescription(tag.Group, tag.Element))
+			fmt.Printf("\t(%04X,%04X) %s - %s\n", tag.Group, tag.Element, tag.VR, tag.Description)
 			continue
 		}
 		if tag.Length > 128 {
-			fmt.Printf("\t(%04X,%04X) %s - %s : (Not displayed)\n", tag.Group, tag.Element, tag.VR, TagDescription(tag.Group, tag.Element))
+			fmt.Printf("\t(%04X,%04X) %s - %s : (Not displayed)\n", tag.Group, tag.Element, tag.VR, tag.Description)
 			continue
 		}
-		fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, TagDescription(tag.Group, tag.Element), tag.Data)
+		fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
 	}
 }
 
@@ -300,7 +300,15 @@ func (obj *dcmObj) WriteUint16(group uint16, element uint16, vr string, val uint
 		binary.LittleEndian.PutUint16(c, val)
 	}
 
-	tag := DcmTag{group, element, 2, vr, c, obj.BigEndian}
+	tag := DcmTag{
+		Group:     group,
+		Element:   element,
+		Length:    2,
+		VR:        vr,
+		Data:      c,
+		BigEndian: obj.BigEndian,
+	}
+	FillTag(&tag)
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -313,7 +321,15 @@ func (obj *dcmObj) WriteUint32(group uint16, element uint16, vr string, val uint
 		binary.LittleEndian.PutUint32(c, val)
 	}
 
-	tag := DcmTag{group, element, 4, vr, c, obj.BigEndian}
+	tag := DcmTag{
+		Group:     group,
+		Element:   element,
+		Length:    4,
+		VR:        vr,
+		Data:      c,
+		BigEndian: obj.BigEndian,
+	}
+	FillTag(&tag)
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -330,7 +346,15 @@ func (obj *dcmObj) WriteString(group uint16, element uint16, vr string, content 
 			content = content + " "
 		}
 	}
-	tag := DcmTag{group, element, length, vr, []byte(content), false}
+	tag := DcmTag{
+		Group:     group,
+		Element:   element,
+		Length:    length,
+		VR:        vr,
+		Data:      []byte(content),
+		BigEndian: false,
+	}
+	FillTag(&tag)
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -476,7 +500,14 @@ func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 		mstream.Append([]byte{0})
 	}
 	obj.WriteString(0x42, 0x10, "ST", fileName)
-	obj.Add(DcmTag{0x42, 0x11, size, "OB", mstream.GetData(), obj.BigEndian})
+	obj.Add(DcmTag{
+		Group:     0x42,
+		Element:   0x11,
+		Length:    size,
+		VR:        "OB",
+		Data:      mstream.GetData(),
+		BigEndian: obj.BigEndian,
+	})
 	obj.WriteString(0x42, 0x12, "LO", "application/pdf")
 }
 

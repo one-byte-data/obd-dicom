@@ -176,6 +176,7 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 		Group:   group,
 		Element: element,
 	}
+	FillTag(tag)
 
 	internalVR := explicitVR
 
@@ -206,7 +207,7 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 		}
 	} else {
 		if internalVR == false {
-			tag.VR = AddVRData(tag.Group, tag.Element)
+			tag.VR = GetDictionaryVR(tag.Group, tag.Element)
 		}
 		length, err := bd.ReadUint32()
 		if err != nil {
@@ -258,7 +259,14 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 			content = content + " "
 		}
 	}
-	tag := DcmTag{group, element, length, vr, []byte(content), false}
+	tag := DcmTag{
+		Group:     group,
+		Element:   element,
+		Length:    length,
+		VR:        vr,
+		Data:      []byte(content),
+		BigEndian: false,
+	}
 	bd.WriteTag(tag, explicitVR)
 }
 
@@ -295,9 +303,22 @@ func (bd *bufData) WriteMeta(SOPClassUID string, SOPInstanceUID string, Transfer
 
 	bd.MS.Write(buffer, 128)
 	bd.MS.Write([]byte("DICM"), 4)
-	tag = DcmTag{0x02, 0x00, 4, "UL", []byte{0, 0, 0, 0}, false}
+	tag = DcmTag{
+		Group:     0x02,
+		Element:   0x00,
+		Length:    4,
+		VR:        "UL",
+		Data:      []byte{0, 0, 0, 0},
+		BigEndian: false}
 	bd.WriteTag(tag, explicitVR)
-	tag = DcmTag{0x02, 0x01, 2, "OB", []byte{0x00, 0x01}, false}
+	tag = DcmTag{
+		Group:     0x02,
+		Element:   0x01,
+		Length:    2,
+		VR:        "OB",
+		Data:      []byte{0x00, 0x01},
+		BigEndian: false,
+	}
 	bd.WriteTag(tag, explicitVR)
 
 	bd.WriteStringTag(0x02, 0x02, "UI", SOPClassUID, explicitVR)
@@ -325,7 +346,7 @@ func (bd *bufData) ReadObj(obj DcmObj) bool {
 	for bd.GetPosition() < bd.GetSize() {
 		if tag, err := bd.ReadTag(obj.IsExplicitVR()); err == nil {
 			if obj.IsExplicitVR() == false {
-				tag.VR = AddVRData(tag.Group, tag.Element)
+				tag.VR = GetDictionaryVR(tag.Group, tag.Element)
 			}
 			obj.Add(*tag)
 		}

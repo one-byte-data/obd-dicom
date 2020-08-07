@@ -9,12 +9,15 @@ import (
 
 // DcmTag DICOM tag structure
 type DcmTag struct {
-	Group     uint16
-	Element   uint16
-	Length    uint32
-	VR        string
-	Data      []byte
-	BigEndian bool
+	Name        string
+	Description string
+	Group       uint16
+	Element     uint16
+	Length      uint32
+	VR          string
+	VM          string
+	Data        []byte
+	BigEndian   bool
 }
 
 // GetUShort convert tag.Data to uint16
@@ -93,6 +96,7 @@ func (tag *DcmTag) WriteSeq(group uint16, element uint16, seq DcmObj) {
 	}
 }
 
+// ReadSeq - reads a dicom sequence
 func (tag *DcmTag) ReadSeq(ExplicitVR bool) DcmObj {
 	seq := NewEmptyDCMObj()
 	bufdata := &bufData{
@@ -110,7 +114,7 @@ func (tag *DcmTag) ReadSeq(ExplicitVR bool) DcmObj {
 		}
 
 		if !ExplicitVR {
-			temptag.VR = AddVRData(tag.Group, tag.Element)
+			temptag.VR = GetDictionaryVR(tag.Group, tag.Element)
 		}
 		seq.Add(*temptag)
 	}

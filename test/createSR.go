@@ -31,7 +31,7 @@ func createSR() {
 				} else {
 					val = tag.GetString()
 				}
-				fmt.Printf("(%04x,%04x),%d, %s, %s, %s\n", tag.Group, tag.Element, tag.Length, tag.VR, val, media.TagDescription(tag.Group, tag.Element))
+				fmt.Printf("(%04x,%04x),%d, %s, %s, %s\n", tag.Group, tag.Element, tag.Length, tag.VR, val, tag.Description)
 			}
 		}
 		if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {

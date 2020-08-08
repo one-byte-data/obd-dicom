@@ -7,8 +7,23 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
 
+// PermanentRejectReasons - Permanent association reject reasons
+var PermanentRejectReasons map[byte]string = map[byte]string{
+	1: "no-reason-given",
+	2: "application-context-name-not-supported",
+	3: "calling-AE-title-not-recognized",
+	7: "called-AE-title-not-recognized",
+}
+
+// TransientRejectReasons - Transient association reject reasons
+var TransientRejectReasons map[byte]string = map[byte]string{
+	1: "temporary-congestion",
+	2: "local-limit-exceeded",
+}
+
 // AAssociationRJ association reject struct
 type AAssociationRJ interface {
+	GetReason() string
 	Set(result byte, reason byte)
 	Size() uint32
 	Write(rw *bufio.ReadWriter) error
@@ -38,6 +53,17 @@ func NewAAssociationRJ() AAssociationRJ {
 	}
 }
 
+func (aarj *aassociationRJ) GetReason() string {
+	reason := ""
+	if aarj.Result == 0x01 {
+		reason = PermanentRejectReasons[aarj.Reason]
+	}
+	if aarj.Result == 0x02 {
+		reason = TransientRejectReasons[aarj.Reason]
+	}
+	return reason
+}
+
 func (aarj *aassociationRJ) Size() uint32 {
 	aarj.Length = 4
 	return aarj.Length + 6
@@ -46,7 +72,9 @@ func (aarj *aassociationRJ) Size() uint32 {
 func (aarj *aassociationRJ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	log.Printf("INFO, ASSOC-RJ: Reason %x\n", aarj.Reason)
+	reason := aarj.GetReason()
+
+	log.Printf("INFO, ASSOC-RJ: Reason %x\n", reason)
 
 	bd.SetBigEndian(true)
 	aarj.Size()

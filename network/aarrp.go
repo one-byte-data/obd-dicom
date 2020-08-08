@@ -2,7 +2,6 @@ package network
 
 import (
 	"bufio"
-	"log"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -38,8 +37,6 @@ func (arrp *areleaseRP) Size() uint32 {
 
 func (arrp *areleaseRP) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
-
-	log.Printf("INFO, ASSOC-R-RP: %x -->\n", arrp.Reserved1)
 
 	bd.SetBigEndian(true)
 	arrp.Size()

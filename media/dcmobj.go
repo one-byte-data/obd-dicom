@@ -18,7 +18,6 @@ type DcmObj interface {
 	AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string)
 	AddSRText(text string)
 	DumpTags()
-	Clear()
 	IsExplicitVR() bool
 	SetExplicitVR(explicit bool)
 	IsBigEndian() bool
@@ -46,6 +45,7 @@ type DcmObj interface {
 	CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string)
 	WriteToBytes() []byte
 	WriteToFile(fileName string) error
+	dumpSeq(indent int)
 }
 
 type dcmObj struct {
@@ -155,11 +155,6 @@ func (obj *dcmObj) TagCount() int {
 	return len(obj.Tags)
 }
 
-// Clear - clear tags array
-func (obj *dcmObj) Clear() {
-	obj.Tags = nil
-}
-
 // GetTag - return the Tag at position i
 func (obj *dcmObj) GetTag(i int) DcmTag {
 	return obj.Tags[i]
@@ -181,6 +176,8 @@ func (obj *dcmObj) DumpTags() {
 	for _, tag := range obj.Tags {
 		if tag.VR == "SQ" {
 			fmt.Printf("\t(%04X,%04X) %s - %s\n", tag.Group, tag.Element, tag.VR, tag.Description)
+			seq := tag.ReadSeq(obj.IsExplicitVR())
+			seq.dumpSeq(1)
 			continue
 		}
 		if tag.Length > 128 {
@@ -188,6 +185,27 @@ func (obj *dcmObj) DumpTags() {
 			continue
 		}
 		fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
+	}
+}
+
+func (obj *dcmObj) dumpSeq(indent int) {
+	tabs := "\t"
+	for i := 0; i < indent; i++ {
+		tabs += "\t"
+	}
+
+	for _, tag := range obj.Tags {
+		if tag.VR == "SQ" {
+			fmt.Printf("%s(%04X,%04X) %s - %s\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description)
+			seq := tag.ReadSeq(obj.IsExplicitVR())
+			seq.dumpSeq(indent + 1)
+			continue
+		}
+		if tag.Length > 128 {
+			fmt.Printf("%s(%04X,%04X) %s - %s : (Not displayed)\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description)
+			continue
+		}
+		fmt.Printf("%s(%04X,%04X) %s - %s : %s\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
 	}
 }
 

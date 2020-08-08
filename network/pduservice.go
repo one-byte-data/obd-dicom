@@ -3,6 +3,7 @@ package network
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -160,7 +161,7 @@ func (pdu *pduService) InterogateAAssociateRQ(rw *bufio.ReadWriter) error {
 		return pdu.AssocAC.Write(rw)
 	}
 
-	log.Println("ERROR, pduservice::InterogateAAssociateRQ, No valid AcceptedPresentationContexts")
+	log.Println("ERROR, pduservice::InterogateAAssociateRQ - No valid AcceptedPresentationContexts")
 	return pdu.AssocRJ.Write(rw)
 }
 
@@ -177,15 +178,15 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	}
 
 	if pdu.Pdata.PresentationContextID == 0 {
-		return errors.New("ERROR, pduservice::Write, PresentationContextID==0")
+		return errors.New("ERROR, pduservice::Write - PresentationContextID==0")
 	}
 	if ItemType == 0x01 {
 		if pdu.ParseDCMIntoRaw(DCO) == false {
-			return errors.New("ERROR, pduservice::Write, ParseDCMIntoRaw failed")
+			return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
 		}
 	} else {
 		if pdu.ParseDCMIntoRaw(DCO) == false {
-			return errors.New("ERROR, pduservice::Write, ParseDCMIntoRaw failed")
+			return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
 		}
 	}
 
@@ -213,7 +214,7 @@ func (pdu *pduService) GetTransferSyntaxUID(pcid byte) string {
 func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 	TrnSyntax := pdu.GetTransferSyntaxUID(pdu.Pdata.PresentationContextID)
 	if len(TrnSyntax) == 0 {
-		log.Println("ERROR, pduservice::ParseRawVRIntoDCM, TrnSyntax len is 0")
+		log.Println("ERROR, pduservice::ParseRawVRIntoDCM - Transfer syntax length is 0")
 		return false
 	}
 	DCO.SetTransferSyntax(TrnSyntax)
@@ -234,7 +235,7 @@ func (pdu *pduService) SetTimeout(timeout int) {
 func (pdu *pduService) Connect(IP string, Port string) error {
 	conn, err := net.Dial("tcp", IP+":"+Port)
 	if err != nil {
-		return errors.New("ERROR, pduservice::Connect, " + err.Error())
+		return errors.New("ERROR, pduservice::Connect - " + err.Error())
 	}
 
 	if pdu.Timeout > 0 {
@@ -278,16 +279,16 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		pdu.ms.SetPosition(1)
 		pdu.AssocAC.ReadDynamic(pdu.ms)
 		if !pdu.InterogateAAssociateAC() {
-			return errors.New("ERROR, pduservice::Connect, InterogateAAssociateAC failed")
+			return errors.New("ERROR, pduservice::Connect - InterogateAAssociateAC failed")
 		}
 		return nil
 	case pdutype.AssociationReject:
 		pdu.readPDU()
 		pdu.ms.SetPosition(1)
 		pdu.AssocRJ.ReadDynamic(pdu.ms)
-		return errors.New("ERROR, pduservice::Connect, Assoc. Rejected")
+		return fmt.Errorf("ERROR, pduservice::Connect - %s", pdu.AssocRJ.GetReason())
 	default:
-		return errors.New("ERROR, pduservice::Connect, Corrupt Transmision")
+		return errors.New("ERROR, pduservice::Connect - Corrupt Transmision")
 	}
 }
 
@@ -350,7 +351,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 				DCO := media.NewEmptyDCMObj()
 				if !pdu.ParseRawVRIntoDCM(DCO) {
 					pdu.AbortRQ.Write(pdu.readWriter)
-					return nil, errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
+					return nil, errors.New("ERROR, pduservice::Read - ParseRawVRIntoDCM failed")
 				}
 				return DCO, nil
 			}
@@ -359,16 +360,16 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 			log.Printf("INFO, ASSOC-R-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.ReleaseRQ.ReadDynamic(pdu.ms)
 			pdu.ReleaseRP.Write(pdu.readWriter)
-			return nil, errors.New("ERROR, pduservice::Read, A-Release-RQ")
+			return nil, errors.New("ERROR, pduservice::Read - A-Release-RQ")
 		case pdutype.AssociationReleaseResponse:
 			log.Printf("INFO, ASSOC-R-RP: %s <-- %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			return nil, errors.New("ERROR, pduservice::Read, A-Release-RP")
+			return nil, errors.New("ERROR, pduservice::Read - A-Release-RP")
 		case pdutype.AssociationAbortRequest:
 			log.Printf("INFO, ASSOC-ABORT-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
-			return nil, errors.New("ERROR, pduservice::Read, A-Abort-RQ")
+			return nil, errors.New("ERROR, pduservice::Read - A-Abort-RQ")
 		default:
 			pdu.AbortRQ.Write(pdu.readWriter)
-			return nil, errors.New("ERROR, pduservice::Read, unknown ItemType")
+			return nil, errors.New("ERROR, pduservice::Read - unknown ItemType")
 		}
 	}
 }

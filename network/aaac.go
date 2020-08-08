@@ -32,13 +32,13 @@ type AAssociationAC interface {
 }
 
 type aassociationAC struct {
-	ItemType           byte // 0x02
+	ItemType           byte
 	Reserved1          byte
 	Length             uint32
-	ProtocolVersion    uint16 // 0x01
+	ProtocolVersion    uint16
 	Reserved2          uint16
-	CallingAE          [16]byte // 16 bytes transfered
-	CalledAE           [16]byte // 16 bytes transfered
+	CallingAE          [16]byte
+	CalledAE           [16]byte
 	Reserved3          [32]byte
 	AppContext         UIDitem
 	PresContextAccepts []PresentationContextAccept

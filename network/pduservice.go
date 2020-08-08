@@ -10,7 +10,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/pdutype"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/transfersyntax"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uid"
 )
 
 // PDUService - struct for PDUService
@@ -84,13 +84,13 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 		if presContextAccept.GetResult() == 0 {
 			pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, presContextAccept)
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == transfersyntax.ExplicitVRLittleEndian {
+				if presContextAccept.GetTrnSyntax().UIDName == uid.ExplicitVRLittleEndian {
 					TS = presContextAccept.GetTrnSyntax().UIDName
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
 			}
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == transfersyntax.ImplicitVRLittleEndian {
+				if presContextAccept.GetTrnSyntax().UIDName == uid.ImplicitVRLittleEndian {
 					TS = presContextAccept.GetTrnSyntax().UIDName
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
@@ -129,13 +129,13 @@ func (pdu *pduService) InterogateAAssociateRQ(rw *bufio.ReadWriter) error {
 		PresContextAccept.SetAbstractSyntax(PresContext.GetAbstractSyntax().UIDName)
 		TS := ""
 		for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-			if TrnSyntax.UIDName == transfersyntax.ExplicitVRLittleEndian {
+			if TrnSyntax.UIDName == uid.ExplicitVRLittleEndian {
 				TS = TrnSyntax.UIDName
 			}
 		}
 		if TS == "" {
 			for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-				if TrnSyntax.UIDName == transfersyntax.ImplicitVRLittleEndian {
+				if TrnSyntax.UIDName == uid.ImplicitVRLittleEndian {
 					TS = TrnSyntax.UIDName
 				}
 			}
@@ -218,10 +218,10 @@ func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 		return false
 	}
 	DCO.SetTransferSyntax(TrnSyntax)
-	if TrnSyntax == transfersyntax.ExplicitVRLittleEndian {
+	if TrnSyntax == uid.ExplicitVRLittleEndian {
 		DCO.SetExplicitVR(true)
 	}
-	if TrnSyntax == transfersyntax.ExplicitVRBigEndian {
+	if TrnSyntax == uid.ExplicitVRBigEndian {
 		DCO.SetBigEndian(true)
 	}
 	pdu.Pdata.Buffer.SetPosition(0)
@@ -340,7 +340,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 		case pdutype.AssociationAccept:
 			pdu.readPDU()
 			return nil, nil
-		case 0x04:
+		case pdutype.PDUDataTransfer:
 			pdu.readPDU()
 			pdu.ms.SetPosition(1)
 			err := pdu.Pdata.ReadDynamic(pdu.ms)
@@ -353,6 +353,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 					pdu.AbortRQ.Write(pdu.readWriter)
 					return nil, errors.New("ERROR, pduservice::Read - ParseRawVRIntoDCM failed")
 				}
+				DCO.DumpTags()
 				return DCO, nil
 			}
 			break

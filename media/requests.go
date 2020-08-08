@@ -16,6 +16,9 @@ func DefaultCFindRequest() DcmObj {
 	query.WriteString(tags.PatientBirthDate, "")
 	query.WriteString(tags.PatientSex, "")
 	query.WriteString(tags.StudyInstanceUID, "")
+	query.WriteString(tags.StudyID, "")
+	query.WriteString(tags.NumberOfStudyRelatedSeries, "")
+	query.WriteString(tags.NumberOfStudyRelatedInstances, "")
 	return query
 }
 

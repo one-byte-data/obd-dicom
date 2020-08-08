@@ -9,6 +9,9 @@ const AssociationAccept = 0x02
 // AssociationReject - Association reject
 const AssociationReject = 0x03
 
+// PDUDataTransfer - PDU Data
+const PDUDataTransfer = 0x04
+
 // AssociationReleaseRequest - Association release request
 const AssociationReleaseRequest = 0x05
 

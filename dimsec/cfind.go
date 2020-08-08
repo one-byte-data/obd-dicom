@@ -28,12 +28,12 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 
 	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
-	DCO.WriteUint32(0x00, 0x00, "UL", size)                  // Length
-	DCO.WriteString(0x0000, 0x0002, "UI", SOPClassUID)
-	DCO.WriteUint16(0x00, 0x0100, "US", commandtype.CFind)
-	DCO.WriteUint16(0x00, 0x0110, "US", network.Uniq16odd()) //Message ID
-	DCO.WriteUint16(0x00, 0x0700, "US", priority.Medium)
-	DCO.WriteUint16(0x00, 0x0800, "US", 0x0102)              //Data Set type
+	DCO.WriteUint32(tags.CommandGroupLength, size)
+	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
+	DCO.WriteUint16(tags.CommandField, commandtype.CFind)
+	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
+	DCO.WriteUint16(tags.Priority, priority.Medium)
+	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
 
 	err := pdu.Write(DCO, SOPClassUID, 0x01)
 	if err != nil {
@@ -87,13 +87,13 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 
 		size = uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2)
 
-		DCOR.WriteUint32(0x00, 0x00, "UL", size)        // Length
-		DCOR.WriteString(0x00, 0x02, "UI", SOPClassUID) //SOP Class UID
-		DCOR.WriteUint16(0x00, 0x0100, "US", 0x8020)    //Command Field
+		DCOR.WriteUint32(tags.CommandGroupLength, size)
+		DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
+		DCOR.WriteUint16(tags.CommandField, 0x8020)
 		valor := DCO.GetUShort(tags.MessageID)
-		DCOR.WriteUint16(0x00, 0x0120, "US", valor)    //Message ID
-		DCOR.WriteUint16(0x00, 0x0800, "US", leDSType) //Data Set type
-		DCOR.WriteUint16(0x00, 0x0900, "US", status)   // Status
+		DCOR.WriteUint16(tags.MessageIDBeingRespondedTo, valor)
+		DCOR.WriteUint16(tags.CommandDataSetType, leDSType)
+		DCOR.WriteUint16(tags.Status, status)
 		err := pdu.Write(DCOR, SOPClassUID, 0x01)
 		if err != nil {
 			return err

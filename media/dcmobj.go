@@ -32,9 +32,12 @@ type DcmObj interface {
 	GetUShortGE(group uint16, element uint16) uint16
 	GetUIntGE(group uint16, element uint16) uint32
 	GetStringGE(group uint16, element uint16) string
-	WriteUint16(group uint16, element uint16, vr string, val uint16)
-	WriteUint32(group uint16, element uint16, vr string, val uint32)
-	WriteString(group uint16, element uint16, vr string, content string)
+	WriteUint16(tag tags.Tag, val uint16)
+	WriteUint32(tag tags.Tag, val uint32)
+	WriteString(tag tags.Tag, content string)
+	WriteUint16GE(group uint16, element uint16, vr string, val uint16)
+	WriteUint32GE(group uint16, element uint16, vr string, val uint32)
+	WriteStringGE(group uint16, element uint16, vr string, content string)
 	GetTransferSyntax() string
 	SetTransferSyntax(ts string)
 	TagCount() int
@@ -308,8 +311,20 @@ func (obj *dcmObj) WriteToFile(fileName string) error {
 	return bufdata.SaveToFile(fileName)
 }
 
-// WriteUint16 - Writes a Uint16 to a DICOM tag
-func (obj *dcmObj) WriteUint16(group uint16, element uint16, vr string, val uint16) {
+func (obj *dcmObj) WriteUint16(tag tags.Tag, val uint16) {
+	obj.WriteUint16GE(tag.Group, tag.Element, tag.VR, val)
+}
+
+func (obj *dcmObj) WriteUint32(tag tags.Tag, val uint32) {
+	obj.WriteUint32GE(tag.Group, tag.Element, tag.VR, val)
+}
+
+func (obj *dcmObj) WriteString(tag tags.Tag, content string) {
+	obj.WriteStringGE(tag.Group, tag.Element, tag.VR, content)
+}
+
+// WriteUint16GE - Writes a Uint16 to a DICOM tag
+func (obj *dcmObj) WriteUint16GE(group uint16, element uint16, vr string, val uint16) {
 	c := make([]byte, 2)
 	if obj.BigEndian {
 		binary.BigEndian.PutUint16(c, val)
@@ -329,8 +344,8 @@ func (obj *dcmObj) WriteUint16(group uint16, element uint16, vr string, val uint
 	obj.Tags = append(obj.Tags, tag)
 }
 
-// WriteUint32 - Writes a Uint32 to a DICOM tag
-func (obj *dcmObj) WriteUint32(group uint16, element uint16, vr string, val uint32) {
+// WriteUint32GE - Writes a Uint32 to a DICOM tag
+func (obj *dcmObj) WriteUint32GE(group uint16, element uint16, vr string, val uint32) {
 	c := make([]byte, 4)
 	if obj.BigEndian {
 		binary.BigEndian.PutUint32(c, val)
@@ -350,8 +365,8 @@ func (obj *dcmObj) WriteUint32(group uint16, element uint16, vr string, val uint
 	obj.Tags = append(obj.Tags, tag)
 }
 
-// WriteString - Writes a String to a DICOM tag
-func (obj *dcmObj) WriteString(group uint16, element uint16, vr string, content string) {
+// WriteStringGE - Writes a String to a DICOM tag
+func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, content string) {
 	var length uint32
 
 	length = uint32(len(content))
@@ -406,12 +421,9 @@ func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue str
 	seq.BigEndian = obj.BigEndian
 	seq.ExplicitVR = obj.ExplicitVR
 
-	// Code Value
-	item.WriteString(0x08, 0x100, "SH", CodeValue)
-	// Coding Scheme Designator
-	item.WriteString(0x08, 0x102, "SH", "OneByteData")
-	// Code Meaning
-	item.WriteString(0x08, 0x104, "LO", CodeMeaning)
+	item.WriteString(tags.CodeValue, CodeValue)
+	item.WriteString(tags.CodingSchemeDesignator, "OneByteData")
+	item.WriteString(tags.CodeMeaning, CodeMeaning)
 	tag.WriteSeq(0xFFFE, 0xE000, item)
 	seq.Add(tag)
 	tag.WriteSeq(group, element, seq)
@@ -441,12 +453,10 @@ func (obj *dcmObj) AddSRText(text string) {
 	seq.BigEndian = obj.BigEndian
 	seq.ExplicitVR = obj.ExplicitVR
 
-	// Relationship Type
-	item.WriteString(0x40, 0xA010, "CS", "CONTAINS")
-	// Value Type
-	item.WriteString(0x40, 0xA040, "CS", "TEXT")
+	item.WriteString(tags.RelationshipType, "CONTAINS")
+	item.WriteString(tags.ValueType, "TEXT")
 	item.AddConceptNameSeq(0x40, 0xA043, "2222", "Report Text")
-	item.WriteString(0x40, 0xA160, "UT", text)
+	item.WriteString(tags.TextValue, text)
 	tag.WriteSeq(0xFFFE, 0xE000, item)
 	seq.Add(tag)
 	tag.WriteSeq(0x40, 0xA730, seq)
@@ -455,58 +465,52 @@ func (obj *dcmObj) AddSRText(text string) {
 
 // CreateSR - Create a DICOM SR object
 func (obj *dcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string) {
-	// Instance Creation Date
-	obj.WriteString(0x08, 0x12, "DA", time.Now().Format("20060102"))
-	// Instance Creation Time
-	obj.WriteString(0x08, 0x13, "TM", time.Now().Format("150405"))
-	// Basic Text SOP Class
-	obj.WriteString(0x08, 0x16, "UI", "1.2.840.10008.5.1.4.1.1.88.11")
-	obj.WriteString(0x0008, 0x0018, "UI", SOPInstanceUID)
-	obj.WriteString(0x0008, 0x0050, "SH", study.AccessionNumber) // Accession Number
-	obj.WriteString(0x0008, 0x0060, "CS", "SR")
-	obj.WriteString(0x0008, 0x0080, "LO", study.InstitutionName)
-	obj.WriteString(0x0008, 0x0090, "PN", study.ReferringPhysician)
-	obj.WriteString(0x0008, 0x1030, "LO", study.Description)
-	obj.WriteString(0x0008, 0x103E, "LO", "REPORT")
-	obj.WriteString(0x0010, 0x0010, "PN", study.PatientName)
-	obj.WriteString(0x0010, 0x0020, "LO", study.PatientID)  // Patient ID
-	obj.WriteString(0x0010, 0x0030, "DA", study.PatientBD)  // Patient's Birth Date
-	obj.WriteString(0x0010, 0x0040, "CS", study.PatientSex) // Patient's Sex
-	obj.WriteString(0x0020, 0x000d, "UI", study.StudyInstanceUID)
-	obj.WriteString(0x0020, 0x000e, "UI", SeriesInstanceUID)
-	obj.WriteString(0x0020, 0x0011, "IS", "200")
-	obj.WriteString(0x0020, 0x0013, "IS", "1")
-	obj.WriteString(0x0040, 0xA040, "CS", "CONTAINER") // Value Type
+	obj.WriteString(tags.InstanceCreationDate, time.Now().Format("20060102"))
+	obj.WriteString(tags.InstanceCreationTime, time.Now().Format("150405"))
+	obj.WriteString(tags.SOPClassUID, "1.2.840.10008.5.1.4.1.1.88.11")
+	obj.WriteString(tags.SOPInstanceUID, SOPInstanceUID)
+	obj.WriteString(tags.AccessionNumber, study.AccessionNumber)
+	obj.WriteString(tags.Modality, "SR")
+	obj.WriteString(tags.InstitutionName, study.InstitutionName)
+	obj.WriteString(tags.ReferringPhysicianName, study.ReferringPhysician)
+	obj.WriteString(tags.StudyDescription, study.Description)
+	obj.WriteString(tags.SeriesDescription, "REPORT")
+	obj.WriteString(tags.PatientName, study.PatientName)
+	obj.WriteString(tags.PatientID, study.PatientID)
+	obj.WriteString(tags.PatientBirthDate, study.PatientBD)
+	obj.WriteString(tags.PatientSex, study.PatientSex)
+	obj.WriteString(tags.StudyInstanceUID, study.StudyInstanceUID)
+	obj.WriteString(tags.SeriesInstanceUID, SeriesInstanceUID)
+	obj.WriteString(tags.SeriesNumber, "200")
+	obj.WriteString(tags.InstanceNumber, "1")
+	obj.WriteString(tags.ValueType, "CONTAINER")
 	obj.AddConceptNameSeq(0x0040, 0xA043, "1111", "Radiology Report")
-	obj.WriteString(0x0040, 0xA050, "CS", "SEPARATE") // Continuity of Context
-	obj.WriteString(0x40, 0xa075, "PN", study.ObserverName)
-	obj.WriteString(0x0040, 0xa491, "CS", "COMPLETE") // CompletionFlag
-	obj.WriteString(0x0040, 0xa493, "CS", "VERIFIED") // VerificationFlag
+	obj.WriteString(tags.ContinuityOfContent, "SEPARATE")
+	obj.WriteString(tags.VerifyingObserverName, study.ObserverName)
+	obj.WriteString(tags.CompletionFlag, "COMPLETE")
+	obj.WriteString(tags.VerificationFlag, "VERIFIED")
 	obj.AddSRText(study.ReportText)
 }
 
 // CreatePDF - Create a DICOM SR object
 func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string) {
-	// Instance Creation Date
-	obj.WriteString(0x08, 0x12, "DA", time.Now().Format("20060102"))
-	// Instance Creation Time
-	obj.WriteString(0x08, 0x13, "TM", time.Now().Format("150405"))
-	// DICOM PDF SOP Class
-	obj.WriteString(0x08, 0x16, "UI", "1.2.840.10008.5.1.4.1.1.104.1")
-	obj.WriteString(0x0008, 0x0018, "UI", SOPInstanceUID)
-	obj.WriteString(0x0008, 0x0050, "SH", study.AccessionNumber) // Accession Number
-	obj.WriteString(0x0008, 0x0060, "CS", "OT")
-	obj.WriteString(0x0008, 0x0080, "LO", study.InstitutionName)
-	obj.WriteString(0x0008, 0x0090, "PN", study.ReferringPhysician)
-	obj.WriteString(0x0008, 0x1030, "LO", study.Description)
-	obj.WriteString(0x0010, 0x0010, "PN", study.PatientName)
-	obj.WriteString(0x0010, 0x0020, "LO", study.PatientID)  // Patient ID
-	obj.WriteString(0x0010, 0x0030, "DA", study.PatientBD)  // Patient's Birth Date
-	obj.WriteString(0x0010, 0x0040, "CS", study.PatientSex) // Patient's Sex
-	obj.WriteString(0x0020, 0x000d, "UI", study.StudyInstanceUID)
-	obj.WriteString(0x0020, 0x000e, "UI", SeriesInstanceUID)
-	obj.WriteString(0x0020, 0x0011, "IS", "300")
-	obj.WriteString(0x0020, 0x0013, "IS", "1")
+	obj.WriteString(tags.InstanceCreationDate, time.Now().Format("20060102"))
+	obj.WriteString(tags.InstanceCreationTime, time.Now().Format("150405"))
+	obj.WriteString(tags.SOPClassUID, "1.2.840.10008.5.1.4.1.1.104.1")
+	obj.WriteString(tags.SOPInstanceUID, SOPInstanceUID)
+	obj.WriteString(tags.AccessionNumber, study.AccessionNumber)
+	obj.WriteString(tags.Modality, "OT")
+	obj.WriteString(tags.InstitutionName, study.InstitutionName)
+	obj.WriteString(tags.ReferringPhysicianName, study.ReferringPhysician)
+	obj.WriteString(tags.StudyDescription, study.Description)
+	obj.WriteString(tags.PatientName, study.PatientName)
+	obj.WriteString(tags.PatientID, study.PatientID)  // Patient ID
+	obj.WriteString(tags.PatientBirthDate, study.PatientBD)  // Patient's Birth Date
+	obj.WriteString(tags.PatientSex, study.PatientSex) // Patient's Sex
+	obj.WriteString(tags.StudyInstanceUID, study.StudyInstanceUID)
+	obj.WriteString(tags.SeriesInstanceUID, SeriesInstanceUID)
+	obj.WriteString(tags.SeriesNumber, "300")
+	obj.WriteString(tags.InstanceNumber, "1")
 
 	mstream, _ := NewMemoryStreamFromFile(fileName)
 
@@ -516,7 +520,7 @@ func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 		size++
 		mstream.Append([]byte{0})
 	}
-	obj.WriteString(0x42, 0x10, "ST", fileName)
+	obj.WriteString(tags.DocumentTitle, fileName)
 	obj.Add(DcmTag{
 		Group:     0x42,
 		Element:   0x11,
@@ -525,7 +529,7 @@ func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 		Data:      mstream.GetData(),
 		BigEndian: obj.BigEndian,
 	})
-	obj.WriteString(0x42, 0x12, "LO", "application/pdf")
+	obj.WriteString(tags.MIMETypeOfEncapsulatedDocument, "application/pdf")
 }
 
 func fileExists(name string) bool {

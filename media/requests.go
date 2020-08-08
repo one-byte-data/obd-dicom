@@ -1,35 +1,37 @@
 package media
 
+import "git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+
 // DefaultCFindRequest - Creates a default C-Find request
 func DefaultCFindRequest() DcmObj {
 	query := NewEmptyDCMObj()
-	query.WriteString(0x08, 0x20, "DA", "")
-	query.WriteString(0x08, 0x30, "TM", "")
-	query.WriteString(0x08, 0x50, "SH", "")
-	query.WriteString(0x08, 0x52, "CS", "STUDY")
-	query.WriteString(0x08, 0x61, "CS", "")
-	query.WriteString(0x08, 0x1030, "LO", "")
-	query.WriteString(0x10, 0x10, "PN", "")
-	query.WriteString(0x10, 0x20, "LO", "")
-	query.WriteString(0x10, 0x30, "DA", "")
-	query.WriteString(0x10, 0x40, "CS", "")
-	query.WriteString(0x20, 0x0D, "UI", "")
+	query.WriteString(tags.StudyDate, "")
+	query.WriteString(tags.StudyTime, "")
+	query.WriteString(tags.AccessionNumber, "")
+	query.WriteString(tags.QueryRetrieveLevel, "STUDY")
+	query.WriteString(tags.ModalitiesInStudy, "")
+	query.WriteString(tags.StudyDescription, "")
+	query.WriteString(tags.PatientName, "")
+	query.WriteString(tags.PatientID, "")
+	query.WriteString(tags.PatientBirthDate, "")
+	query.WriteString(tags.PatientSex, "")
+	query.WriteString(tags.StudyInstanceUID, "")
 	return query
 }
 
 // DefaultCMoveRequest - Creates a default C-Move request
 func DefaultCMoveRequest(studyUID string) DcmObj {
 	query := NewEmptyDCMObj()
-	query.WriteString(0x08, 0x20, "DA", "")
-	query.WriteString(0x08, 0x30, "TM", "")
-	query.WriteString(0x08, 0x50, "SH", "")
-	query.WriteString(0x08, 0x52, "CS", "STUDY")
-	query.WriteString(0x08, 0x61, "CS", "")
-	query.WriteString(0x08, 0x1030, "LO", "")
-	query.WriteString(0x10, 0x10, "PN", "")
-	query.WriteString(0x10, 0x20, "LO", "")
-	query.WriteString(0x10, 0x30, "DA", "")
-	query.WriteString(0x10, 0x40, "CS", "")
-	query.WriteString(0x20, 0x0D, "UI", studyUID)
+	query.WriteString(tags.StudyDate, "")
+	query.WriteString(tags.StudyTime, "")
+	query.WriteString(tags.AccessionNumber, "")
+	query.WriteString(tags.QueryRetrieveLevel, "STUDY")
+	query.WriteString(tags.ModalitiesInStudy, "")
+	query.WriteString(tags.StudyDescription, "")
+	query.WriteString(tags.PatientName, "")
+	query.WriteString(tags.PatientID, "")
+	query.WriteString(tags.PatientBirthDate, "")
+	query.WriteString(tags.PatientSex, "")
+	query.WriteString(tags.StudyInstanceUID, studyUID)
 	return query
 }

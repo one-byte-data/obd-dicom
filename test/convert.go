@@ -1,16 +1,109 @@
 package main
 
 import (
-	"log"
+	"encoding/binary"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"log"
 	"strconv"
+	"strings"
 )
 
 func SupportedTS(TransferSyntax string) bool {
 	return true
 }
 
-func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bitsa uint16) bool {
+func GetUint32(in []byte, length int) uint32 {
+	c:= make([]byte, length)
+	copy(c, in)
+	return binary.LittleEndian.Uint32(c)
+}
+
+func ReadSegment(in []byte, out []byte, seg_offset uint32, seg_size uint32, i uint32, rawSize uint32){
+	var count int8
+	out_offset:=i*rawSize
+	in_offset:=seg_offset
+	
+	for (out_offset-i*rawSize) < rawSize {
+		count=int8(in[in_offset])
+		in_offset++
+		if count >= 0 {
+			copy(out[out_offset:count+1], in[in_offset:count+1])
+			in_offset += uint32(count + 1)
+			out_offset += uint32(count + 1)
+		} else {
+			if count <= -1 && count >= -127 {
+				newByte:=in[in_offset]
+				in_offset++
+				for j:=0; j<int(-count + 1); j++ {
+					out[i+out_offset] = newByte
+				}
+				out_offset += uint32(-count + 1);
+				if in_offset-seg_offset>seg_size {
+					log.Println("ERROR, overflow decoding RLE")
+					return
+					}
+				}
+			}
+		}
+	}
+	
+func RLEdecode(in []byte, out []byte, length uint32, size uint32, PhotoInt string) {
+	var segment_count, offset, i uint32
+	var segment_offset [15]uint32
+	var segment_length [15]uint32
+	
+	offset = 0
+	for i:=0; i<15; i++ {
+		segment_offset[i]=0
+		segment_length[i]=0
+		}
+	
+	segment_count=GetUint32(in, 4)
+	for i:=0; i<15; i++ {
+		offset = offset+4
+		segment_offset[i] = GetUint32(in[offset:], 4)
+		}
+
+	segment_offset[segment_count]=length
+	temp := make([]byte, size)
+	for i=0; i<segment_count; i++ {
+		segment_length[i] = segment_offset[i+1]-segment_offset[i]
+		ReadSegment(in, temp, segment_offset[i], segment_length[i], i, size/segment_count)
+		}
+	
+	offset=size/segment_count
+	if (strings.Contains(PhotoInt, "MONO"))&&(segment_count==2) {
+		for i=0; i<size/segment_count; i++ {
+			out[2*i]=temp[i+offset]
+			out[2*i+1]=temp[i]
+		}
+	} else if (strings.Contains(PhotoInt, "MONO"))&&(segment_count==1) {
+		for i=0; i<size; i++ {
+			out[i]=temp[i]
+		}
+	} else if (PhotoInt=="YBR_FULL")&&(segment_count==3) {
+		var Y, Cb, Cr float32
+		for i=0; i<size/segment_count; i++ {
+			Y = float32(temp[i])
+			Cb = float32(temp[i+offset])
+			Cr = float32(temp[i+2*offset])
+			out[3*i] = byte(Y + 1.402*(Cr-128.0))
+			out[3*i+1] = byte(Y - 0.344136*(Cb -128.0)-0.714136*(Cr-128.0))
+			out[3*i+2] = byte(Y + 1.772*(Cb-128.0))
+		}
+	} else if (PhotoInt=="RGB")&&(segment_count==3) {
+		for i=0; i<size/segment_count; i++ {
+			out[3*i] = temp[i]
+			out[3*i+1] = temp[i+offset]
+			out[3*i+2] = temp[i+2*offset]
+		}
+	} else {
+		log.Println("ERROR, format not supported")
+		}
+	}
+	
+
+func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bitsa uint16, PhotoInt string) bool {
 	var tag media.DcmTag
 	var j, offset, single uint32
 	
@@ -21,7 +114,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 		for j=0; j<frames; j++ {
 			offset = j*single
 			tag = obj.GetTag(i+1)
-			RLEdecode(tag.Data, img[offset:], tag.Length, single, bitsa)
+			RLEdecode(tag.Data, img[offset:], tag.Length, single, PhotoInt)
 			obj.DelTag(i+1)
 			}
 		obj.DelTag(i+1);
@@ -261,7 +354,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	var i int
 	var tag media.DcmTag
 	var rows, cols, bitss, bitsa, planar, pixelrep uint16
-	var PhotometricInterpretation string
+	var PhotoInt string
 	sq := 0
 	frames:=uint32(0)
 	RGB :=false
@@ -270,14 +363,14 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	if len(outTS)==0 {
 		return true
 	}
-	if obj.GetTransferSynxtax() == outTS {
+	if obj.GetTransferSyntax() == outTS {
 		return true
 	}
 	// We don't process MPEG2 or MPEG4
-	if (obj.GetTransferSynxtax() == "1.2.840.10008.1.2.4.100") || (obj.GetTransferSynxtax() == "1.2.840.10008.1.2.4.102") {
+	if (obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.100") || (obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.102") {
 		return true
 	}
-	if !SupportedTS(obj.GetTransferSynxtax()) {
+	if !SupportedTS(obj.GetTransferSyntax()) {
 		return false
 	}
 	if !SupportedTS(outTS) {
@@ -296,7 +389,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 			if (tag.Group==0x0028)&&(!icon){
 				switch(tag.Element){
 					 case 0x04:
-						PhotometricInterpretation=tag.GetString()
+						PhotoInt=tag.GetString()
 						break
 					 case 0x06:
 						planar = tag.GetUShort()
@@ -345,8 +438,8 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 					}
 					img := make([]byte, size)
 					if tag.Length==0xFFFFFFFF { // 
-						if Decomp(i, img, size, frames, bitsa) {
-							flag = Comp(i, img, RGB, cols, rows, bitss, bitsa, pixelrep, planar, frames, outTS)
+						if Decomp(obj, i, img, size, frames, bitsa, PhotoInt) {
+							flag = Comp(obj, &i, img, RGB, cols, rows, bitss, bitsa, pixelrep, planar, frames, outTS)
                         }
  					} else { // Uncompressed
 						if RGB&&(planar==1) { // change from planar=1 to planar=0

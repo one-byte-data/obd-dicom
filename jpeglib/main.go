@@ -103,7 +103,7 @@ func test16() {
 		if len(pixelData) > 0 {
 			var outData []byte
 			// Encode image
-			err := Encode16(pixelData, width, height, 1, &outData)
+			err := EIJG16encode(pixelData, width, height, 1, &outData)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -161,7 +161,7 @@ func test8() {
 		outSize := 1576 * 1134 * 3 // Image Size, have to know in advance.
 		outData = make([]byte, outSize)
 
-		err := Decode8(jpegData, len(jpegData), outData, outSize)
+		err := DIJG8decode(jpegData, len(jpegData), outData, outSize)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -179,7 +179,7 @@ func test8() {
 	jpegData = nil
 	outData = nil
 	if LoadFromFile("test.raw", &outData) {
-		err := Encode8(outData, 1576, 1134, 3, &jpegData)
+		err := EIJG8encode(outData, 1576, 1134, 3, &jpegData)
 		if err != nil {
 			log.Panic(err)
 		}

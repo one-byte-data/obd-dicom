@@ -9,6 +9,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/pdutype"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/transfersyntax"
 )
 
 // PDUService - struct for PDUService
@@ -82,13 +83,13 @@ func (pdu *pduService) InterogateAAssociateAC() bool {
 		if presContextAccept.GetResult() == 0 {
 			pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, presContextAccept)
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == "1.2.840.10008.1.2.1" {
+				if presContextAccept.GetTrnSyntax().UIDName == transfersyntax.ExplicitVRLittleEndian {
 					TS = presContextAccept.GetTrnSyntax().UIDName
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
 			}
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == "1.2.840.10008.1.2" {
+				if presContextAccept.GetTrnSyntax().UIDName == transfersyntax.ImplicitVRLittleEndian {
 					TS = presContextAccept.GetTrnSyntax().UIDName
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
@@ -127,13 +128,13 @@ func (pdu *pduService) InterogateAAssociateRQ(rw *bufio.ReadWriter) error {
 		PresContextAccept.SetAbstractSyntax(PresContext.GetAbstractSyntax().UIDName)
 		TS := ""
 		for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-			if TrnSyntax.UIDName == "1.2.840.10008.1.2.1" {
+			if TrnSyntax.UIDName == transfersyntax.ExplicitVRLittleEndian {
 				TS = TrnSyntax.UIDName
 			}
 		}
 		if TS == "" {
 			for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-				if TrnSyntax.UIDName == "1.2.840.10008.1.2" {
+				if TrnSyntax.UIDName == transfersyntax.ImplicitVRLittleEndian {
 					TS = TrnSyntax.UIDName
 				}
 			}
@@ -216,10 +217,10 @@ func (pdu *pduService) ParseRawVRIntoDCM(DCO media.DcmObj) bool {
 		return false
 	}
 	DCO.SetTransferSyntax(TrnSyntax)
-	if TrnSyntax == "1.2.840.10008.1.2.1" {
+	if TrnSyntax == transfersyntax.ExplicitVRLittleEndian {
 		DCO.SetExplicitVR(true)
 	}
-	if TrnSyntax == "1.2.840.10008.1.2.2" {
+	if TrnSyntax == transfersyntax.ExplicitVRBigEndian {
 		DCO.SetBigEndian(true)
 	}
 	pdu.Pdata.Buffer.SetPosition(0)

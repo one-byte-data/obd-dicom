@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/transfersyntax"
 )
 
 // LoadFromFile - Load from File into MemoryStream
@@ -93,10 +95,10 @@ func test16() {
 	}
 
 	// Need an uncompressed image
-	if obj.GetTransferSyntax() == "1.2.840.10008.1.2.1" {
+	if obj.GetTransferSyntax() == transfersyntax.ExplicitVRLittleEndian {
 		var index int
-		width := int(obj.GetUShort(0x28, 0x10))
-		height := int(obj.GetUShort(0x28, 0x11))
+		width := int(obj.GetUShort(tags.Rows))
+		height := int(obj.GetUShort(tags.Columns))
 		pixelData := GetPixelData(obj, &index)
 		if len(pixelData) > 0 {
 			var outData []byte
@@ -111,7 +113,7 @@ func test16() {
 			tag.VR = "OB"
 			tag.Data = nil
 			obj.SetTag(index, tag)
-			obj.SetTransferSyntax("1.2.840.10008.1.2.4.70")
+			obj.SetTransferSyntax(transfersyntax.JPEGProcess14SV1)
 			index++
 			tag = media.DcmTag{
 				Group: 0xFFFE,

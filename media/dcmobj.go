@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/transfersyntax"
 )
 
 // DcmObj - DICOM Object structure
@@ -89,10 +90,10 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 
 	obj.TransferSyntax = bufdata.ReadMeta()
 	if len(obj.TransferSyntax) > 0 {
-		if obj.TransferSyntax != "1.2.840.10008.1.2" {
+		if obj.TransferSyntax != transfersyntax.ImplicitVRLittleEndian {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+		if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -118,12 +119,12 @@ func NewDCMObjFromBytes(data []byte) DcmObj {
 
 	obj.TransferSyntax = bufdata.ReadMeta()
 	if len(obj.TransferSyntax) > 0 {
-		if obj.TransferSyntax == "1.2.840.10008.1.2" {
+		if obj.TransferSyntax == transfersyntax.ImplicitVRLittleEndian {
 			obj.ExplicitVR = false
 		} else {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+		if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -285,7 +286,7 @@ func (obj *dcmObj) Add(tag DcmTag) {
 func (obj *dcmObj) WriteToBytes() []byte {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+	if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
@@ -300,7 +301,7 @@ func (obj *dcmObj) WriteToBytes() []byte {
 func (obj *dcmObj) WriteToFile(fileName string) error {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax == "1.2.840.10008.1.2.2" {
+	if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
@@ -504,9 +505,9 @@ func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 	obj.WriteString(tags.ReferringPhysicianName, study.ReferringPhysician)
 	obj.WriteString(tags.StudyDescription, study.Description)
 	obj.WriteString(tags.PatientName, study.PatientName)
-	obj.WriteString(tags.PatientID, study.PatientID)  // Patient ID
-	obj.WriteString(tags.PatientBirthDate, study.PatientBD)  // Patient's Birth Date
-	obj.WriteString(tags.PatientSex, study.PatientSex) // Patient's Sex
+	obj.WriteString(tags.PatientID, study.PatientID)
+	obj.WriteString(tags.PatientBirthDate, study.PatientBD)
+	obj.WriteString(tags.PatientSex, study.PatientSex)
 	obj.WriteString(tags.StudyInstanceUID, study.StudyInstanceUID)
 	obj.WriteString(tags.SeriesInstanceUID, SeriesInstanceUID)
 	obj.WriteString(tags.SeriesNumber, "300")

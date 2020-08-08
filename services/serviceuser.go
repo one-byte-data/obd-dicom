@@ -8,6 +8,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/transfersyntax"
 )
 
 // SCU - inteface to a scu
@@ -146,8 +147,8 @@ func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, tim
 	network.Resetuniq()
 	PresContext := network.NewPresentationContext()
 	PresContext.SetAbstractSyntax(AbstractSyntax)
-	PresContext.AddTransferSyntax("1.2.840.10008.1.2")
-	PresContext.AddTransferSyntax("1.2.840.10008.1.2.1")
+	PresContext.AddTransferSyntax(transfersyntax.ImplicitVRLittleEndian)
+	PresContext.AddTransferSyntax(transfersyntax.ExplicitVRLittleEndian)
 	pdu.AddPresContexts(PresContext)
 
 	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))
@@ -176,10 +177,10 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		DDO.SetTransferSyntax(TrnSyntOUT)
 		DDO.SetExplicitVR(true)
 		DDO.SetBigEndian(false)
-		if TrnSyntOUT == "1.2.840.10008.1.2" {
+		if TrnSyntOUT == transfersyntax.ImplicitVRLittleEndian {
 			DDO.SetExplicitVR(false)
 		}
-		if TrnSyntOUT == "1.2.840.10008.1.2.2" {
+		if TrnSyntOUT == transfersyntax.ExplicitVRBigEndian {
 			DDO.SetBigEndian(true)
 		}
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)

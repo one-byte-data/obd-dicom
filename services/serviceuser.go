@@ -165,8 +165,8 @@ func (d *scu) SetOnCMoveResult(f func(result media.DcmObj)) {
 }
 
 func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error {
-	pdu.SetRQCallingAE(d.destination.CallingAE)
-	pdu.SetRQCalledAE(d.destination.CalledAE)
+	pdu.SetCallingAE(d.destination.CallingAE)
+	pdu.SetCalledAE(d.destination.CalledAE)
 	pdu.SetTimeout(timeout)
 
 	network.Resetuniq()

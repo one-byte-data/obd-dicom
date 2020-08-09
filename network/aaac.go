@@ -117,7 +117,8 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 
 	fmt.Println()
 
-	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.CallingAE, aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
 	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().UIDName)
 	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().UIDName)
 
@@ -204,7 +205,8 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 		}
 	}
 
-	log.Printf("INFO, ASSOC-AC: %s --> %s\n", aaac.CallingAE, aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
 	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.GetUserInformation().GetImpClass().UIDName)
 	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.GetUserInformation().GetImpVersion().UIDName)
 

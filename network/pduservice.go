@@ -25,13 +25,11 @@ type PDUService interface {
 	Connect(IP string, Port string) error
 	Close()
 	GetAAssociationRQ() AAssociationRQ
-	GetACCalledAE() string
 	SetACCalledAE(calledAE string)
-	GetACCallingAE() string
 	SetACCallingAE(callingAE string)
-	GetRQCalledAE() string
+	GetCalledAE() string
 	SetRQCalledAE(calledAE string)
-	GetRQCallingAE() string
+	GetCallingAE() string
 	SetRQCallingAE(callingAE string)
 	SetConn(rw *bufio.ReadWriter)
 	NextPDU() (media.DcmObj, error)
@@ -197,7 +195,7 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
 
-	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetACCallingAE())
+	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
 
 	return pdu.Pdata.Write(pdu.readWriter)
 }
@@ -395,23 +393,15 @@ func (pdu *pduService) GetAAssociationRQ() AAssociationRQ {
 	return pdu.AssocRQ
 }
 
-func (pdu *pduService) GetACCalledAE() string {
-	return pdu.AssocAC.GetCalledAE()
-}
-
 func (pdu *pduService) SetACCalledAE(calledAE string) {
 	pdu.AssocAC.SetCalledAE(calledAE)
-}
-
-func (pdu *pduService) GetACCallingAE() string {
-	return pdu.AssocAC.GetCallingAE()
 }
 
 func (pdu *pduService) SetACCallingAE(callingAE string) {
 	pdu.AssocAC.SetCallingAE(callingAE)
 }
 
-func (pdu *pduService) GetRQCalledAE() string {
+func (pdu *pduService) GetCalledAE() string {
 	return pdu.AssocRQ.GetCalledAE()
 }
 
@@ -419,7 +409,7 @@ func (pdu *pduService) SetRQCalledAE(calledAE string) {
 	pdu.AssocRQ.SetCalledAE(calledAE)
 }
 
-func (pdu *pduService) GetRQCallingAE() string {
+func (pdu *pduService) GetCallingAE() string {
 	return pdu.AssocRQ.GetCallingAE()
 }
 

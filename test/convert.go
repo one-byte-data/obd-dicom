@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/binary"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/jpeglib"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/openjpeg"	
 	"log"
 	"strconv"
 	"strings"
@@ -103,7 +105,7 @@ func RLEdecode(in []byte, out []byte, length uint32, size uint32, PhotoInt strin
 	}
 	
 
-func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bitsa uint16, PhotoInt string) bool {
+func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bitsa uint16, PhotoInt string) {
 	var tag media.DcmTag
 	var j, offset, single uint32
 	
@@ -123,9 +125,9 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			offset = j*single
 			tag = obj.GetTag(i+1)
 			if bitsa==8 {
-				DIJG8decode(tag.Data, img[offset:], tag.Length)
+				jpeglib.DIJG8decode(tag.Data, tag.Length, img[offset:], single)
 			} else {
-				DIJG16decode(tag.Data, img[offset:], tag.Length)
+				jpeglib.DIJG16decode(tag.Data, tag.Length, img[offset:], single)
 			}
 		obj.DelTag(i+1)
 		}
@@ -135,9 +137,9 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			offset = j*single
 			tag = obj.GetTag(i+1)
 			if bitsa==8 {
-				DIJG8decode(tag.Data, img[offset:], tag.Length)
+				jpeglib.DIJG8decode(tag.Data, tag.Length, img[offset:], single)
 			} else {
-				DIJG12decode(tag.Data, img[offset:], tag.Length)
+				jpeglib.DIJG12decode(tag.Data, tag.Length, img[offset:], single)
 			}
 			obj.DelTag(i+1)
 		}
@@ -146,7 +148,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 		 for j=0; j<frames; j++ {
 			offset = j*single
 			tag = obj.GetTag(i+1)
-			DIJG12decode(tag.Data, img[offset:], tag.Length)
+			jpeglib.DIJG12decode(tag.Data, tag.Length, img[offset:], single)
 			obj.DelTag(i+1)
 		}
 		obj.DelTag(i+1)
@@ -154,7 +156,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 		for j=0; j< frames; j++ {
 			offset = j*single
 			tag = obj.GetTag(i+1)
-			J2Kdecode(tag.Data, img[offset:], tag.Length)
+			openjpeg.J2Kdecode(tag.Data, tag.Length, img[offset:])
 			obj.DelTag(i+1)
 		}
 		obj.DelTag(i+1)
@@ -162,7 +164,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 		for j=0; j<frames; j++ {
 			offset = j*single
 			tag = obj.GetTag(i+1)
-			J2Kdecode(tag.Data, img[offset:], tag.Length)
+			openjpeg.J2Kdecode(tag.Data, tag.Length, img[offset:])
 			obj.DelTag(i+1)
 		}
 	obj.DelTag(i+1)
@@ -189,9 +191,18 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		if tag.Data!= nil {
 			tag.Data=nil
 		}
+		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag := media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE000,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		for j=0; j<frames; j++ {
 			index++
 			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
@@ -201,20 +212,36 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			// Bug de MRI Neusoft. 08/05/2015
 			if bitsa==8 {
 				if RGB {
-					encode8(cols, rows, 3, img[offset:], JPEGData, &JPEGBytes, 4)
+					jpeglib.EIJG8encode(img[offset:], cols, rows, 3, &JPEGData, &JPEGBytes, 4)
 				} else {
-					encode8(cols, rows, 1, img[offset:], JPEGData, &JPEGBytes, 4)
+					jpeglib.EIJG8encode(img[offset:], cols, rows, 1, &JPEGData, &JPEGBytes, 4)
 				}
 			} else {
-				encode16(cols, rows, 1, img[offset/2:], JPEGData, &JPEGBytes)
+				jpeglib.EIJG16encode(img[offset/2:], cols, rows, 1, &JPEGData, &JPEGBytes, 0)
 			}
-			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
-			obj.SetTag(index, newtag)
+			newtag = media.DcmTag{
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    uint32(JPEGBytes),
+				VR:        "DL",
+				Data:      JPEGData,
+				BigEndian: obj.IsBigEndian(),
+			}
+//				newtag = media.DcmTag {0xFFFE, 0xE000, , "DL", JPEGData, obj.IsBigEndian()}
+			obj.InsertTag(index, newtag)
 			JPEGData=nil
 		}
 		index++
-		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag = media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE0DD,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.50" {
 		tag.VR="OB"
@@ -222,32 +249,57 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		if tag.Data!= nil {
 			tag.Data=nil
 		}
+		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag := media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE000,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		jpeg_size=0
 		for j=0; j<frames; j++ {
 			index++;
 			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
 			if(RGB) {
 				offset=3*offset
-				encode8(cols, rows, 3, img[offset:], JPEGData, &JPEGBytes, 0)
+				jpeglib.EIJG8encode(img[offset:], cols, rows, 3, &JPEGData, &JPEGBytes, 0)
 			} else {
 				if(bitsa==8) {
-					encode8(cols, rows, 1, img[offset:], JPEGData, &JPEGBytes, 0)
+					jpeglib.EIJG8encode(img[offset:], cols, rows, 1, &JPEGData, &JPEGBytes, 0)
 				} else { // ERROR...
 					// Can't use this transfer Syntax with bitsa!=8
 					return false
 				}
 			}
-			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
-			obj.SetTag(index, newtag)
+			newtag = media.DcmTag{
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    uint32(JPEGBytes),
+				VR:        "DL",
+				Data:      JPEGData,
+				BigEndian: obj.IsBigEndian(),
+			}			
+			//newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
 		}
 		index++
-		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag = media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE0DD,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.51" {
 		if (bitss==8)&&(bitsa!=16) {
@@ -258,9 +310,18 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		if tag.Data!= nil {
 			tag.Data=nil
 			}
+		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag := media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE000,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		jpeg_size=0;
 		for j=0; j<frames; j++ {
 			index++
@@ -268,15 +329,31 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			if(bitss>12) {
 				return false
 			}
-			encode12(cols, rows, 1, img[offset/2:], JPEGData, &JPEGBytes)
-			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
-			obj.SetTag(index, newtag)
+			jpeglib.EIJG12encode(img[offset/2:], cols, rows, 1, &JPEGData, &JPEGBytes, 0)
+			newtag = media.DcmTag{
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    uint32(JPEGBytes),
+				VR:        "DL",
+				Data:      JPEGData,
+				BigEndian: obj.IsBigEndian(),
+			}			
+//			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
 		}
 		index++
-		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag = media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE0DD,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.90" {
 		tag.VR="OB"
@@ -284,25 +361,50 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		if tag.Data!= nil {
 			tag.Data=nil
 			}
+		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag := media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE000,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		for j=0; j<frames; j++ {
 			index++
 			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
 			if(RGB) {
 				offset=3*offset
-				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 3, bitsa, 0)
+				openjpeg.J2Kencode(img[offset:], cols, rows, 3, bitsa, &JPEGData, &JPEGBytes, 0)
 			} else {
-				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 1, bitsa, 0)
+				openjpeg.J2Kencode(img[offset:], cols, rows, 1, bitsa, &JPEGData, &JPEGBytes, 0)
 			}
-			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			newtag = media.DcmTag{
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    uint32(JPEGBytes),
+				VR:        "DL",
+				Data:      JPEGData,
+				BigEndian: obj.IsBigEndian(),
+			}			
+//			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
 			obj.SetTag(index, newtag)
 			JPEGData=nil
 			}
 		index++
-		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag = media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE0DD,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}
+//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.91" {
 		tag.VR="OB"
@@ -310,27 +412,52 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		if tag.Data!= nil {
 			tag.Data=nil
 			}
+		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag := media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE000,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}		
+//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		jpeg_size=0;
 		for j=0; j<frames; j++ {
 			index++
 			offset = j*uint32(cols)*uint32(rows)*uint32(bitsa)/8
 			if RGB {
 				offset=3*offset;
-				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 3, bitsa, 10)
+				openjpeg.J2Kencode(img[offset:], cols, rows, 3, bitsa, &JPEGData, &JPEGBytes, 10)
 			} else {
-				J2Kencode(img[offset:], JPEGData, &JPEGBytes, cols, rows, 1, bitsa, 10);
+				openjpeg.J2Kencode(img[offset:], cols, rows, 1, bitsa, &JPEGData, &JPEGBytes, 10);
 			}
-			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
-			obj.SetTag(index, newtag)
+			newtag = media.DcmTag{
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    uint32(JPEGBytes),
+				VR:        "DL",
+				Data:      JPEGData,
+				BigEndian: obj.IsBigEndian(),
+			}			
+//			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
+			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
 		}
 		index++
-		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
-		obj.SetTag(index, newtag)
+		newtag = media.DcmTag{
+			Group:     0xFFFE,
+			Element:   0xE0DD,
+			Length:    0,
+			VR:        "DL",
+			Data:      nil,
+			BigEndian: obj.IsBigEndian(),
+		}		
+//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
+		obj.InsertTag(index, newtag)
 		*i=index
 	} else {
 		if bitss==8 {
@@ -350,7 +477,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		
 func ConvertTS(obj media.DcmObj, outTS string) bool {
 	flag:=false
-	ExplicitVROUT:=true
+//	ExplicitVROUT:=true
 	var i int
 	var tag media.DcmTag
 	var rows, cols, bitss, bitsa, planar, pixelrep uint16
@@ -395,9 +522,11 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 						planar = tag.GetUShort()
 						break
 					 case 0x08:
-						frames, err := strconv.Atoi(tag.GetString())
+						uframes, err := strconv.Atoi(tag.GetString())
 						if err != nil {
 							frames = 0
+						} else {
+							frames=uint32(uframes)
 						}
 						break
 					case 0x10:
@@ -416,6 +545,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 						pixelrep = tag.GetUShort()
 						break
 					}
+				}
 				if (tag.Group==0x0088)&&(tag.Element==0x0200)&&(tag.Length==0xFFFFFFFF) {
 					icon=true
 				}
@@ -437,10 +567,8 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 						return false
 					}
 					img := make([]byte, size)
-					if tag.Length==0xFFFFFFFF { // 
-						if Decomp(obj, i, img, size, frames, bitsa, PhotoInt) {
-							flag = Comp(obj, &i, img, RGB, cols, rows, bitss, bitsa, pixelrep, planar, frames, outTS)
-                        }
+					if tag.Length==0xFFFFFFFF { 
+						Decomp(obj, i, img, size, frames, bitsa, PhotoInt)							
  					} else { // Uncompressed
 						if RGB&&(planar==1) { // change from planar=1 to planar=0
 							var img_offset, img_size uint32
@@ -458,13 +586,13 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 							copy(img, tag.Data)
 						}
 					}
+					flag = Comp(obj, &i, img, RGB, cols, rows, bitss, bitsa, pixelrep, planar, frames, outTS)
 				}
-			} 
-		} 
-		if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {
-			sq--
+			}
+			if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {
+				sq--
+			}
 		}
-	}
 	return flag
 }
 
@@ -474,5 +602,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	ConvertTS(obj, "")
+	if ConvertTS(obj, "1.2.840.10008.1.2.4.70") {
+		obj.WriteToFile("outll.dcm")
+	}
 }

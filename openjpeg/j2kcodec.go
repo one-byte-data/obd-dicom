@@ -1,9 +1,9 @@
 package openjpeg
 
-// #cgo CFLAGS: -Iinclude -Iwin64
-// #cgo LDFLAGS: -Lwin64 -lopenjpeg.dll
-// #include "decomj2k.c"
-// #include "comj2k.c"
+// #cgo CFLAGS: -Ij2klib/include -Ij2klib/win64
+// #cgo LDFLAGS: -Lj2klib/win64 -lopenjpeg.dll
+// #include "j2klib/decomj2k.c"
+// #include "j2klib/comj2k.c"
 import "C"
 import (
 	"errors"
@@ -12,20 +12,20 @@ import (
 
 // J2Kdecode - J2K File to RAW
 func J2Kdecode(j2kData []byte, j2kSize uint32, outputData []byte) error {
-	if C.J2Kdecode((*C.char)(unsafe.Pointer(&j2kData[0])), C.int(j2kSize), (*C.char)(unsafe.Pointer(&outputData[0]))) == 1 {
+	if C.J2KDecode((*C.char)(unsafe.Pointer(&j2kData[0])), C.int(j2kSize), (*C.char)(unsafe.Pointer(&outputData[0]))) == true {
 		return nil
 	}
 	return errors.New("ERROR, J2Kdecode, JPEG failed")
 }
 
 // J2Kencode - RAW File to J2K
-func J2Kencode(rawData []byte, width uint16, height uint16, samples uint16, bitsa int, outData *[]byte, outSize *int, ratio int) error {
+func J2Kencode(rawData []byte, width uint16, height uint16, samples uint16, bitsa uint16, outData *[]byte, outSize *int, ratio int) error {
 	var j2kData *C.char
 	var j2kSize C.int
-	if C.J2Kencode((*C.char)(unsafe.Pointer(&rawData[0])), C.int(width), C.int(height), C.int(samples), C.int(bitsa), &j2kData, &j2kSize, C.int(ratio)) == 1 {
+	if C.J2KEncode((*C.char)(unsafe.Pointer(&rawData[0])), C.int(width), C.int(height), C.int(samples), C.int(bitsa), &j2kData, &j2kSize, C.int(ratio)) == true {
 		if j2kSize > 0 {
 			*outData = C.GoBytes(unsafe.Pointer(j2kData), j2kSize)
-			* outSize = j2kSize
+			* outSize = int(j2kSize)
 			C.free(unsafe.Pointer(j2kData))
 			return nil
 		}

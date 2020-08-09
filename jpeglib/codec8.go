@@ -11,7 +11,7 @@ import (
 )
 
 // DIJG8decode - JPEG File to RAW
-func DIJG8decode(jpegData []byte, jpegSize int, outputData []byte, outputSize int) error {
+func DIJG8decode(jpegData []byte, jpegSize uint32, outputData []byte, outputSize uint32) error {
 	if C.decode8((*C.uchar)(unsafe.Pointer(&jpegData[0])), C.int(jpegSize), (*C.uchar)(unsafe.Pointer(&outputData[0])), C.int(outputSize)) == 1 {
 		return nil
 	}
@@ -19,12 +19,13 @@ func DIJG8decode(jpegData []byte, jpegSize int, outputData []byte, outputSize in
 }
 
 // EIJG8encode - RAW File to JPEG
-func EIJG8encode(rawData []byte, width int, height int, samples int, outData *[]byte) error {
+func EIJG8encode(rawData []byte, width uint16, height uint16, samples uint16, outData *[]byte, outSize *int, mode int) error {
 	var jpegData *C.uchar
 	var jpegSize C.int
-	if C.encode8((*C.uchar)(unsafe.Pointer(&rawData[0])), C.ushort(width), C.ushort(height), C.ushort(samples), &jpegData, &jpegSize, C.int(0)) == 1 {
+	if C.encode8((*C.uchar)(unsafe.Pointer(&rawData[0])), C.ushort(width), C.ushort(height), C.ushort(samples), &jpegData, &jpegSize, C.int(mode)) == 1 {
 		if jpegSize > 0 {
 			*outData = C.GoBytes(unsafe.Pointer(jpegData), jpegSize)
+			*outSize = int(jpegSize)
 			C.free(unsafe.Pointer(jpegData))
 			return nil
 		}

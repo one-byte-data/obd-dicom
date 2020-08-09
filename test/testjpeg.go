@@ -8,7 +8,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/jpeglib"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/transfersyntax"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uid"
 )
 
 // LoadFromFile - Load from File into MemoryStream
@@ -96,7 +96,7 @@ func test16() {
 	}
 
 	// Need an uncompressed image
-	if obj.GetTransferSyntax() == transfersyntax.ExplicitVRLittleEndian {
+	if obj.GetTransferSyntax() == uid.ExplicitVRLittleEndian {
 		var index int
 		width := obj.GetUShort(tags.Rows)
 		height := obj.GetUShort(tags.Columns)
@@ -105,7 +105,7 @@ func test16() {
 			var outData []byte
 			var outSize int
 			// Encode image
-			err := jpeglib.EIJG16encode(pixelData, width, height, 1, &outData, &outSize)
+			err := jpeglib.EIJG16encode(pixelData, width, height, 1, &outData, &outSize, 0)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -115,7 +115,7 @@ func test16() {
 			tag.VR = "OB"
 			tag.Data = nil
 			obj.InsertTag(index, tag)
-			obj.SetTransferSyntax(transfersyntax.JPEGProcess14SV1)
+//			obj.SetTransferSyntax(uid.JPEGProcess14SV1)
 			index++
 			tag = media.DcmTag{
 				Group: 0xFFFE,
@@ -181,7 +181,7 @@ func test8() {
 	jpegData = nil
 	outData = nil
 	if LoadFromFile("test.raw", &outData) {
-		err := jpeglib.EIJG8encode(outData, 1576, 1134, 3, &jpegData, &jpegSize)
+		err := jpeglib.EIJG8encode(outData, 1576, 1134, 3, &jpegData, &jpegSize, 4)
 		if err != nil {
 			log.Panic(err)
 		}

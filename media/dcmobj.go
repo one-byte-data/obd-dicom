@@ -24,7 +24,7 @@ type DcmObj interface {
 	SetBigEndian(bigEndian bool)
 	GetTag(i int) DcmTag
 	SetTag(i int, tag DcmTag)
-  InsertTag(i int, tag DcmTag)
+  	InsertTag(i int, tag DcmTag)
 	DelTag(i int)
 	GetTags() []DcmTag
 	GetUShort(tag tags.Tag) uint16

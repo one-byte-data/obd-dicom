@@ -32,13 +32,15 @@ type PDataTF struct {
 func (pd *PDataTF) ReadDynamic(ms media.MemoryStream) (err error) {
 	var Count uint32
 
-	pd.Reserved1, err = ms.GetByte()
-	if err != nil {
-		return
-	}
-	pd.Length, err = ms.GetUint32()
-	if err != nil {
-		return
+	if pd.Length == 0 {
+		pd.Reserved1, err = ms.GetByte()
+		if err != nil {
+			return
+		}
+		pd.Length, err = ms.GetUint32()
+		if err != nil {
+			return
+		}
 	}
 
 	Count = pd.Length

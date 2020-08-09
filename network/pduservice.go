@@ -353,7 +353,6 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 					pdu.AbortRQ.Write(pdu.readWriter)
 					return nil, errors.New("ERROR, pduservice::Read - ParseRawVRIntoDCM failed")
 				}
-				DCO.DumpTags()
 				return DCO, nil
 			}
 			break

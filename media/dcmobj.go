@@ -32,6 +32,8 @@ type DcmObj interface {
 	GetUShortGE(group uint16, element uint16) uint16
 	GetUIntGE(group uint16, element uint16) uint32
 	GetStringGE(group uint16, element uint16) string
+	WriteDate(tag tags.Tag, date time.Time)
+	WriteTime(tag tags.Tag, date time.Time)
 	WriteUint16(tag tags.Tag, val uint16)
 	WriteUint32(tag tags.Tag, val uint32)
 	WriteString(tag tags.Tag, content string)
@@ -328,6 +330,14 @@ func (obj *dcmObj) WriteToFile(fileName string) error {
 	bufdata.WriteObj(obj)
 	bufdata.SetPosition(0)
 	return bufdata.SaveToFile(fileName)
+}
+
+func (obj *dcmObj) WriteDate(tag tags.Tag, date time.Time) {
+	obj.WriteString(tag, date.Format("20060102"))
+}
+
+func (obj *dcmObj) WriteTime(tag tags.Tag, date time.Time) {
+	obj.WriteString(tag, date.Format("150405"))
 }
 
 func (obj *dcmObj) WriteUint16(tag tags.Tag, val uint16) {

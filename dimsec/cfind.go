@@ -58,7 +58,6 @@ func CFindReadRSP(pdu network.PDUService) (media.DcmObj, int, error) {
 			if err != nil {
 				return nil, status, err
 			}
-			ddo.DumpTags()
 			return ddo, int(dco.GetUShort(tags.Status)), nil
 		}
 		return nil, int(dco.GetUShort(tags.Status)), nil

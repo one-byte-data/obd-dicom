@@ -195,6 +195,7 @@ func (obj *dcmObj) DumpTags() {
 		}
 		fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
 	}
+	fmt.Println()
 }
 
 func (obj *dcmObj) dumpSeq(indent int) {

@@ -113,12 +113,10 @@ func main() {
 	if *cfind {
 		request := media.DefaultCFindRequest()
 		scu := services.NewSCU(destination)
-
-		results := make([]media.DcmObj, 0)
-		_, err := scu.FindSCU(request, &results, 30)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		scu.SetOnCFindResult(func(result media.DcmObj) {
+			log.Printf("Found study %s\n", result.GetString(tags.StudyInstanceUID))
+			result.DumpTags()
+		})
 
 		if *query != "" {
 			parts := strings.Split(*query, ",")
@@ -131,12 +129,13 @@ func main() {
 			}
 		}
 
-		log.Println("CFind was successful")
-		log.Printf("Found %d results\n\n", len(results))
-		for _, result := range results {
-			log.Printf("Found study %s\n", result.GetString(tags.StudyInstanceUID))
-			result.DumpTags()
+		count, status, err := scu.FindSCU(request, 30)
+		if err != nil {
+			log.Fatalln(err)
 		}
+
+		log.Println("CFind was successful")
+		log.Printf("Found %d results with status %d\n\n", count, status)
 		os.Exit(0)
 	}
 	if *cmove {

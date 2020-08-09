@@ -144,7 +144,7 @@ func Test_scu_StoreSCU(t *testing.T) {
 				},
 			},
 			args: args{
-				FileName: "../test/test.dcm",
+				FileName: "../test/test2.dcm",
 				timeout:  0,
 			},
 		},

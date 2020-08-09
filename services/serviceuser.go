@@ -192,7 +192,6 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 	}
 
 	if TrnSyntOUT == DDO.GetTransferSyntax() {
-		DDO.DumpTags()
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
 		if err != nil {
 			return status, err
@@ -208,7 +207,6 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		if TrnSyntOUT == uid.ExplicitVRBigEndian {
 			DDO.SetBigEndian(true)
 		}
-		DDO.DumpTags()
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
 		if err != nil {
 			return -1, err

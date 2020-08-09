@@ -304,6 +304,19 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 		pdu.Pdata.Buffer = media.NewEmptyBufData()
 	}
 
+	pdu.Pdata.MsgStatus = 0
+	if pdu.Pdata.Length != 0 {
+		DCO := media.NewEmptyDCMObj()
+		pdu.Pdata.ReadDynamic(pdu.ms)
+		if pdu.Pdata.MsgStatus > 0 {
+			if !pdu.ParseRawVRIntoDCM(DCO) {
+				pdu.AbortRQ.Write(pdu.readWriter)
+				return nil, errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
+			}
+			return DCO, nil
+		}
+	}
+
 	for {
 		pdu.ms = media.NewEmptyMemoryStream()
 

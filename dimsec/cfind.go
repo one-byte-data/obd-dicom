@@ -5,7 +5,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/commandtype"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomcommand"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/priority"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
@@ -30,7 +30,7 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 
 	DCO.WriteUint32(tags.CommandGroupLength, size)
 	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
-	DCO.WriteUint16(tags.CommandField, commandtype.CFind)
+	DCO.WriteUint16(tags.CommandField, dicomcommand.CFindRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
 	DCO.WriteUint16(tags.Priority, priority.Medium)
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
@@ -52,7 +52,7 @@ func CFindReadRSP(pdu network.PDUService) (media.DcmObj, int, error) {
 	}
 
 	// Is this a C-Find RSP?
-	if dco.GetUShort(tags.CommandField) == 0x8020 {
+	if dco.GetUShort(tags.CommandField) == dicomcommand.CFindResponse {
 		if dco.GetUShort(tags.CommandDataSetType) != 0x0101 {
 			ddo, err := pdu.NextPDU()
 			if err != nil {
@@ -89,7 +89,7 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 
 		DCOR.WriteUint32(tags.CommandGroupLength, size)
 		DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
-		DCOR.WriteUint16(tags.CommandField, 0x8020)
+		DCOR.WriteUint16(tags.CommandField, dicomcommand.CFindResponse)
 		valor := DCO.GetUShort(tags.MessageID)
 		DCOR.WriteUint16(tags.MessageIDBeingRespondedTo, valor)
 		DCOR.WriteUint16(tags.CommandDataSetType, leDSType)

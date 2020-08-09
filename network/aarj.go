@@ -9,16 +9,16 @@ import (
 
 // PermanentRejectReasons - Permanent association reject reasons
 var PermanentRejectReasons map[byte]string = map[byte]string{
-	1: "no-reason-given",
-	2: "application-context-name-not-supported",
-	3: "calling-AE-title-not-recognized",
-	7: "called-AE-title-not-recognized",
+	1: "No reason given",
+	2: "Application context not supported",
+	3: "Calling AE not recognized",
+	7: "Called AE not recognized",
 }
 
 // TransientRejectReasons - Transient association reject reasons
 var TransientRejectReasons map[byte]string = map[byte]string{
-	1: "temporary-congestion",
-	2: "local-limit-exceeded",
+	1: "Temporary congestion",
+	2: "Local limit exceeded",
 }
 
 // AAssociationRJ association reject struct
@@ -54,7 +54,7 @@ func NewAAssociationRJ() AAssociationRJ {
 }
 
 func (aarj *aassociationRJ) GetReason() string {
-	reason := ""
+	reason := "No reason given"
 	if aarj.Result == 0x01 {
 		reason = PermanentRejectReasons[aarj.Reason]
 	}
@@ -72,9 +72,7 @@ func (aarj *aassociationRJ) Size() uint32 {
 func (aarj *aassociationRJ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	reason := aarj.GetReason()
-
-	log.Printf("INFO, ASSOC-RJ: Reason %x\n", reason)
+	log.Printf("INFO, ASSOC-RJ: Reason %x\n", aarj.GetReason())
 
 	bd.SetBigEndian(true)
 	aarj.Size()

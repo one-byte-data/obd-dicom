@@ -8,6 +8,7 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uid"
 )
@@ -75,7 +76,7 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 		if err != nil {
 			return results, status, err
 		}
-		if (status == 0xFF00) || (status == 0xFF01) {
+		if (status == dicomstatus.Pending) || (status == dicomstatus.PendingWithWarnings) {
 			results++
 			if d.onCFindResult != nil {
 				d.onCFindResult(ddo)
@@ -91,7 +92,7 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 
 func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, error) {
 	var pending int
-	status := 0xFF00
+	status := dicomstatus.Pending
 	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelMOVE
 
 	pdu := network.NewPDUService()
@@ -104,7 +105,7 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, err
 		return -1, err
 	}
 
-	for status == 0xFF00 {
+	for status == dicomstatus.Pending {
 		ddo, s, err := dimsec.CMoveReadRSP(pdu, &pending)
 		status = s
 		if err != nil {
@@ -138,14 +139,14 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 		if err != nil {
 			return err
 		}
-		if r != 0x00 {
+		if r != dicomstatus.Success {
 			return errors.New("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
 		}
 		c, err := dimsec.CStoreReadRSP(pdu)
 		if err != nil {
 			return err
 		}
-		if c != 0x00 {
+		if c != dicomstatus.Success {
 			return errors.New("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
 		}
 
@@ -196,7 +197,7 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		if err != nil {
 			return status, err
 		}
-		status = 0
+		status = dicomstatus.Success
 	} else {
 		DDO.SetTransferSyntax(TrnSyntOUT)
 		DDO.SetExplicitVR(true)
@@ -211,7 +212,7 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		if err != nil {
 			return -1, err
 		}
-		status = 0
+		status = dicomstatus.Success
 	}
 
 	return status, nil

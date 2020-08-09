@@ -1,6 +1,11 @@
 package media
 
-import "git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+import (
+	"time"
+
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uuids"
+)
 
 // DefaultCFindRequest - Creates a default C-Find request
 func DefaultCFindRequest() DcmObj {
@@ -36,5 +41,26 @@ func DefaultCMoveRequest(studyUID string) DcmObj {
 	query.WriteString(tags.PatientBirthDate, "")
 	query.WriteString(tags.PatientSex, "")
 	query.WriteString(tags.StudyInstanceUID, studyUID)
+	return query
+}
+
+// GenerateCFindRequest - Generates C-Find request
+func GenerateCFindRequest() DcmObj {
+	studyUID := uuids.CreateStudyUID("FAKE^PATIENT", "123456789", "AC1234", time.Now().Format("20060102"))
+	query := NewEmptyDCMObj()
+	query.WriteDate(tags.StudyDate, time.Now())
+	query.WriteDate(tags.StudyTime, time.Now())
+	query.WriteString(tags.AccessionNumber, "AC1234")
+	query.WriteString(tags.QueryRetrieveLevel, "STUDY")
+	query.WriteString(tags.ModalitiesInStudy, "MR")
+	query.WriteString(tags.StudyDescription, "Fake study")
+	query.WriteString(tags.PatientName, "FAKE^PATIENT")
+	query.WriteString(tags.PatientID, "123456789")
+	query.WriteDate(tags.PatientBirthDate, time.Now())
+	query.WriteString(tags.PatientSex, "O")
+	query.WriteString(tags.StudyInstanceUID, studyUID)
+	query.WriteString(tags.StudyID, "123")
+	query.WriteString(tags.NumberOfStudyRelatedSeries, "1")
+	query.WriteString(tags.NumberOfStudyRelatedInstances, "1")
 	return query
 }

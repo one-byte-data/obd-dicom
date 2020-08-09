@@ -62,8 +62,13 @@ func main() {
 			return *calledAE == called
 		})
 
-		scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj, result media.DcmObj) {
+		scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj) []media.DcmObj {
 			query.DumpTags()
+			results := make([]media.DcmObj, 0)
+			for i := 0; i < 10; i++ {
+				results = append(results, media.GenerateCFindRequest())
+			}
+			return results
 		})
 
 		scp.SetOnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
@@ -129,7 +134,7 @@ func main() {
 			}
 		}
 
-		count, status, err := scu.FindSCU(request, 30)
+		count, status, err := scu.FindSCU(request, 0)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -149,7 +154,7 @@ func main() {
 		request := media.DefaultCMoveRequest(*studyUID)
 
 		scu := services.NewSCU(destination)
-		_, err := scu.MoveSCU(*destinationAE, request, 30)
+		_, err := scu.MoveSCU(*destinationAE, request, 0)
 		if err != nil {
 			log.Fatalln(err)
 		}

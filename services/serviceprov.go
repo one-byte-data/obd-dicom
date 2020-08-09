@@ -17,7 +17,7 @@ import (
 type SCP interface {
 	StartServer() error
 	SetOnAssociationRequest(f func(request network.AAssociationRQ) bool)
-	SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj))
+	SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj)
 	SetOnCMoveRequest(f func(request network.AAssociationRQ, moveLevel string, data media.DcmObj))
 	SetOnCStoreRequest(f func(request network.AAssociationRQ, data media.DcmObj))
 	handleConnection(conn net.Conn)
@@ -27,7 +27,7 @@ type scp struct {
 	CalledAEs            []string
 	Port                 int
 	OnAssociationRequest func(request network.AAssociationRQ) bool
-	OnCFindRequest       func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj)
+	OnCFindRequest       func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj
 	OnCMoveRequest       func(request network.AAssociationRQ, moveLevel string, data media.DcmObj)
 	OnCStoreRequest      func(request network.AAssociationRQ, data media.DcmObj)
 }
@@ -107,13 +107,22 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			QueryLevel := ddo.GetString(tags.QueryRetrieveLevel)
 
-			Result := media.NewEmptyDCMObj()
+			Results := make([]media.DcmObj, 0)
 
 			if s.OnCFindRequest != nil {
-				s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, ddo, Result)
+				Results = s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, ddo)
 			}
 
-			err = dimsec.CFindWriteRSP(pdu, dco, Result, 0x00)
+			for _, result := range Results {
+				err = dimsec.CFindWriteRSP(pdu, dco, result, 0xff00)
+				if err != nil {
+					log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
+					conn.Close()
+					return
+				}
+			}
+
+			err = dimsec.CFindWriteRSP(pdu, dco, dco, 0x00)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
 				conn.Close()
@@ -169,7 +178,7 @@ func (s *scp) SetOnAssociationRequest(f func(request network.AAssociationRQ) boo
 	s.OnAssociationRequest = f
 }
 
-func (s *scp) SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj)) {
+func (s *scp) SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj) {
 	s.OnCFindRequest = f
 }
 

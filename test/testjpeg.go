@@ -115,7 +115,7 @@ func test16() {
 			tag.VR = "OB"
 			tag.Data = nil
 			obj.InsertTag(index, tag)
-//			obj.SetTransferSyntax(uid.JPEGProcess14SV1)
+			obj.SetTransferSyntax(uid.JPEGLosslessNonHierarchical14)
 			index++
 			tag = media.DcmTag{
 				Group: 0xFFFE,

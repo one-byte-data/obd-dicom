@@ -110,7 +110,7 @@ func (tag *DcmTag) ReadSeq(ExplicitVR bool) DcmObj {
 	for bufdata.MS.GetPosition() < bufdata.MS.GetSize() {
 		temptag, err := bufdata.ReadTag(ExplicitVR)
 		if err != nil {
-			return nil
+			continue
 		}
 
 		if !ExplicitVR {

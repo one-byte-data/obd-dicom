@@ -5,7 +5,7 @@ import (
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/commandtype"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomcommand"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/priority"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
@@ -37,7 +37,7 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 
 	DCO.WriteUint32(tags.CommandGroupLength, size)
 	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
-	DCO.WriteUint16(tags.CommandField, commandtype.CStore)
+	DCO.WriteUint16(tags.CommandField, dicomcommand.CStoreRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
 	DCO.WriteUint16(tags.Priority, priority.Medium)
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
@@ -60,7 +60,7 @@ func CStoreReadRSP(pdu network.PDUService) (int, error) {
 		return -1, err
 	}
 	// Is this a C-Store RSP?
-	if dco.GetUShort(tags.CommandField) == 0x8001 {
+	if dco.GetUShort(tags.CommandField) == dicomcommand.CStoreResponse {
 		return int(dco.GetUShort(tags.Status)), nil
 	}
 	return -1, errors.New("ERROR, CStoreReadRSP, unknown error")
@@ -91,7 +91,7 @@ func CStoreWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16) err
 
 			DCOR.WriteUint32(tags.CommandGroupLength, size)
 			DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
-			DCOR.WriteUint16(tags.CommandField, 0x8001)
+			DCOR.WriteUint16(tags.CommandField, dicomcommand.CStoreResponse)
 			valor := DCO.GetUShort(tags.MessageID)
 			DCOR.WriteUint16(tags.MessageIDBeingRespondedTo, valor)
 			DCOR.WriteUint16(tags.CommandDataSetType, 0x0101)

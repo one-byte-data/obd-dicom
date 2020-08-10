@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 )
@@ -15,9 +14,7 @@ import (
 type AAssociationAC interface {
 	GetAppContext() UIDitem
 	SetAppContext(context UIDitem)
-	GetCallingAE() string
 	SetCallingAE(AET string)
-	GetCalledAE() string
 	SetCalledAE(AET string)
 	AddPresContextAccept(context PresentationContextAccept)
 	GetPresContextAccepts() []PresentationContextAccept
@@ -71,18 +68,8 @@ func (aaac *aassociationAC) SetAppContext(context UIDitem) {
 	aaac.AppContext = context
 }
 
-func (aaac *aassociationAC) GetCallingAE() string {
-	temp := strings.ReplaceAll(fmt.Sprintf("%s", aaac.CallingAE), "\x20", "\x00")
-	return strings.ReplaceAll(temp, "\x00", "")
-}
-
 func (aaac *aassociationAC) SetCallingAE(AET string) {
 	copy(aaac.CallingAE[:], AET)
-}
-
-func (aaac *aassociationAC) GetCalledAE() string {
-	temp := strings.ReplaceAll(fmt.Sprintf("%s", aaac.CalledAE), "\x20", "\x00")
-	return strings.ReplaceAll(temp, "\x00", "")
 }
 
 func (aaac *aassociationAC) SetCalledAE(AET string) {
@@ -130,7 +117,8 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 
 	fmt.Println()
 
-	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.CallingAE, aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
 	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().UIDName)
 	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().UIDName)
 
@@ -217,7 +205,8 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 		}
 	}
 
-	log.Printf("INFO, ASSOC-AC: %s --> %s\n", aaac.GetCallingAE(), aaac.GetCalledAE())
+	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
 	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.GetUserInformation().GetImpClass().UIDName)
 	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.GetUserInformation().GetImpVersion().UIDName)
 

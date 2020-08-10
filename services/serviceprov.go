@@ -9,7 +9,8 @@ import (
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/dimsec"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/commandtype"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomcommand"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
@@ -17,7 +18,7 @@ import (
 type SCP interface {
 	StartServer() error
 	SetOnAssociationRequest(f func(request network.AAssociationRQ) bool)
-	SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj))
+	SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj)
 	SetOnCMoveRequest(f func(request network.AAssociationRQ, moveLevel string, data media.DcmObj))
 	SetOnCStoreRequest(f func(request network.AAssociationRQ, data media.DcmObj))
 	handleConnection(conn net.Conn)
@@ -27,7 +28,7 @@ type scp struct {
 	CalledAEs            []string
 	Port                 int
 	OnAssociationRequest func(request network.AAssociationRQ) bool
-	OnCFindRequest       func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj)
+	OnCFindRequest       func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj
 	OnCMoveRequest       func(request network.AAssociationRQ, moveLevel string, data media.DcmObj)
 	OnCStoreRequest      func(request network.AAssociationRQ, data media.DcmObj)
 }
@@ -78,7 +79,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 		}
 		command := dco.GetUShort(tags.CommandField)
 		switch command {
-		case commandtype.CStore:
+		case dicomcommand.CStoreRequest:
 			ddo, err := dimsec.CStoreReadRQ(pdu, dco)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Store failed to read request : %s", err.Error())
@@ -98,7 +99,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			log.Println("INFO, handleConnection, C-Store Success")
 			break
-		case commandtype.CFind:
+		case dicomcommand.CFindRequest:
 			ddo, err := dimsec.CFindReadRQ(pdu)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Find failed to read request!")
@@ -107,13 +108,22 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			QueryLevel := ddo.GetString(tags.QueryRetrieveLevel)
 
-			Result := media.NewEmptyDCMObj()
+			Results := make([]media.DcmObj, 0)
 
 			if s.OnCFindRequest != nil {
-				s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, ddo, Result)
+				Results = s.OnCFindRequest(pdu.GetAAssociationRQ(), QueryLevel, ddo)
 			}
 
-			err = dimsec.CFindWriteRSP(pdu, dco, Result, 0x00)
+			for _, result := range Results {
+				err = dimsec.CFindWriteRSP(pdu, dco, result, dicomstatus.Pending)
+				if err != nil {
+					log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
+					conn.Close()
+					return
+				}
+			}
+
+			err = dimsec.CFindWriteRSP(pdu, dco, dco, dicomstatus.Success)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
 				conn.Close()
@@ -121,7 +131,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			log.Println("INFO, handleConnection, C-Find Success")
 			break
-		case commandtype.CMove:
+		case dicomcommand.CMoveRequest:
 			ddo, err := dimsec.CMoveReadRQ(pdu)
 			if err != nil {
 				log.Println("ERROR, handleConnection, C-Move failed to read request!")
@@ -134,7 +144,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 				s.OnCMoveRequest(pdu.GetAAssociationRQ(), MoveLevel, ddo)
 			}
 
-			err = dimsec.CMoveWriteRSP(pdu, dco, 0x00, 0x00)
+			err = dimsec.CMoveWriteRSP(pdu, dco, dicomstatus.Success, 0x00)
 			if err != nil {
 				log.Printf("ERROR, handleConnection, C-Move failed to write response: %s", err.Error())
 				conn.Close()
@@ -142,7 +152,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			log.Println("INFO, handleConnection, C-Move Success")
 			break
-		case commandtype.CEcho:
+		case dicomcommand.CEchoRequest:
 			if dimsec.CEchoReadRQ(pdu, dco) {
 				err := dimsec.CEchoWriteRSP(pdu, dco)
 				if err != nil {
@@ -169,7 +179,7 @@ func (s *scp) SetOnAssociationRequest(f func(request network.AAssociationRQ) boo
 	s.OnAssociationRequest = f
 }
 
-func (s *scp) SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj, Result media.DcmObj)) {
+func (s *scp) SetOnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj) {
 	s.OnCFindRequest = f
 }
 

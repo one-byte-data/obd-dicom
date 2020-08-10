@@ -201,7 +201,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		for j=0; j<frames; j++ {
 			index++
@@ -209,7 +208,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			if RGB {
 				offset=3*offset
 			}
-			// Bug de MRI Neusoft. 08/05/2015
 			if bitsa==8 {
 				if RGB {
 					jpeglib.EIJG8encode(img[offset:], cols, rows, 3, &JPEGData, &JPEGBytes, 4)
@@ -227,7 +225,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 				Data:      JPEGData,
 				BigEndian: obj.IsBigEndian(),
 			}
-//				newtag = media.DcmTag {0xFFFE, 0xE000, , "DL", JPEGData, obj.IsBigEndian()}
 			obj.InsertTag(index, newtag)
 			JPEGData=nil
 		}
@@ -240,7 +237,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.50" {
@@ -259,7 +255,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		jpeg_size=0
 		for j=0; j<frames; j++ {
@@ -284,7 +279,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 				Data:      JPEGData,
 				BigEndian: obj.IsBigEndian(),
 			}			
-			//newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
 			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
@@ -298,7 +292,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.51" {
@@ -320,7 +313,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		jpeg_size=0;
 		for j=0; j<frames; j++ {
@@ -338,7 +330,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 				Data:      JPEGData,
 				BigEndian: obj.IsBigEndian(),
 			}			
-//			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
 			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
@@ -352,7 +343,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.90" {
@@ -371,7 +361,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		for j=0; j<frames; j++ {
 			index++
@@ -390,8 +379,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 				Data:      JPEGData,
 				BigEndian: obj.IsBigEndian(),
 			}			
-//			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
-			obj.SetTag(index, newtag)
+			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			}
 		index++
@@ -403,7 +391,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}
-//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		*i=index
 	} else if outTS=="1.2.840.10008.1.2.4.91" {
@@ -422,7 +409,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}		
-//		newtag := media.DcmTag {0xFFFE, 0xE000, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		jpeg_size=0;
 		for j=0; j<frames; j++ {
@@ -442,7 +428,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 				Data:      JPEGData,
 				BigEndian: obj.IsBigEndian(),
 			}			
-//			newtag = media.DcmTag {0xFFFE, 0xE000, uint32(JPEGBytes), "DL", JPEGData, obj.IsBigEndian()}
 			obj.InsertTag(index, newtag)
 			JPEGData=nil
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
@@ -456,7 +441,6 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			Data:      nil,
 			BigEndian: obj.IsBigEndian(),
 		}		
-//		newtag = media.DcmTag {0xFFFE, 0xE0DD, 0, "DL", nil, obj.IsBigEndian()}
 		obj.InsertTag(index, newtag)
 		*i=index
 	} else {
@@ -471,6 +455,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		}
 		tag.Data = make([]byte, tag.Length)
 		copy(tag.Data, img)
+		obj.SetTag(index, tag)
 	}
 	return true
 }
@@ -593,6 +578,9 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 				sq--
 			}
 		}
+	if(flag) {
+		obj.SetTransferSyntax(outTS)
+	}		
 	return flag
 }
 
@@ -602,7 +590,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	if ConvertTS(obj, "1.2.840.10008.1.2.4.70") {
-		obj.WriteToFile("outll.dcm")
+	if ConvertTS(obj, "1.2.840.10008.1.2.1") {
+		obj.WriteToFile("out.dcm")
 	}
 }

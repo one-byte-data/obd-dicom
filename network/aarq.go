@@ -138,7 +138,8 @@ func (aarq *aassociationRQ) Size() uint32 {
 func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	log.Printf("INFO, ASSOC-RQ: %s <-- %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
+	log.Printf("INFO, ASSOC-RQ: CalledAE - %s\n", aarq.CalledAE)
+	log.Printf("INFO, ASSOC-RQ: CallingAE - %s\n", aarq.CallingAE)
 	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().UIDName)
 	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().UIDName)
 
@@ -210,7 +211,8 @@ func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
 		}
 	}
 
-	log.Printf("INFO, ASSOC-RQ: %s --> %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
+	log.Printf("INFO, ASSOC-RQ: CalledAE - %s\n", aarq.CalledAE)
+	log.Printf("INFO, ASSOC-RQ: CallingAE - %s\n", aarq.CallingAE)
 	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().UIDName)
 	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().UIDName)
 

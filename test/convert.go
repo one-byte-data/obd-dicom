@@ -502,6 +502,9 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 				switch(tag.Element){
 					 case 0x04:
 						PhotoInt=tag.GetString()
+						if strings.Contains(PhotoInt, "MONO")==false {
+							RGB=true;
+						}
 						break
 					 case 0x06:
 						planar = tag.GetUShort()
@@ -586,7 +589,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 
 func main() {
 	media.InitDict()
-	obj, err := media.NewDCMObjFromFile("test.dcm")
+	obj, err := media.NewDCMObjFromFile("images/rle_color.dcm")
 	if err != nil {
 		log.Panic(err)
 	}

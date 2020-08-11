@@ -298,7 +298,8 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 		pdu.AssocAC.SetMaxSubLength(maxPduLength)
 	}
 
-	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()
+	// Fixed MaxLength - 6 20200811
+	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()-6
 
 	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
 

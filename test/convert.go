@@ -29,15 +29,15 @@ func ReadSegment(in []byte, out []byte, seg_offset uint32, seg_size uint32, i ui
 		count=int8(in[in_offset])
 		in_offset++
 		if count >= 0 {
-			copy(out[out_offset:count+1], in[in_offset:count+1])
+			copy(out[out_offset:out_offset+uint32(count+1)], in[in_offset:in_offset+uint32(count+1)])
 			in_offset += uint32(count + 1)
 			out_offset += uint32(count + 1)
 		} else {
-			if count <= -1 && count >= -127 {
+			if (count <= -1)&&(count >= -127) {
 				newByte:=in[in_offset]
 				in_offset++
-				for j:=0; j<int(-count + 1); j++ {
-					out[i+out_offset] = newByte
+				for j:=uint32(0); j<uint32(-count + 1); j++ {
+					out[j+out_offset] = newByte
 				}
 				out_offset += uint32(-count + 1);
 				if in_offset-seg_offset>seg_size {
@@ -589,7 +589,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 
 func main() {
 	media.InitDict()
-	obj, err := media.NewDCMObjFromFile("images/rle_color.dcm")
+	obj, err := media.NewDCMObjFromFile("images/rle_gray.dcm")
 	if err != nil {
 		log.Panic(err)
 	}

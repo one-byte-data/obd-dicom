@@ -25,14 +25,25 @@ func main() {
 
 	scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, obj media.DcmObj) []media.DcmObj {
 		// Make Query from query.
-		var study DCMStudy 
-		QueryString := study.DICOM2Query(obj)
-		err, results:= study.QueryDB(QueryString)
-		if err!= nil {
-			log.Println(err.Error())
-			return nil
+		if queryLevel == "STUDY" {
+			var study DCMStudy
+			err, results:= study.Select(obj)
+			if err!= nil {
+				log.Println(err.Error())
+				return nil
+			}
+			return results
 		}
-		return results
+		if queryLevel == "SERIES" {
+			var series DCMSeries
+			err, results:= series.Select(obj)
+			if err!= nil {
+				log.Println(err.Error())
+				return nil
+			}
+			return results
+		}
+	return nil
 	})
 
 	scp.SetOnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {

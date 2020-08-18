@@ -3,7 +3,10 @@ package main
 import (
 	"database/sql"
 	"log"
+
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	_ "github.com/mattn/go-sqlite3"
+
 )
 
 type DCMStudy struct {
@@ -13,20 +16,20 @@ type DCMStudy struct {
 	PatientSex      string
 	PatientComments string
 
-	StudyInstanceUID  string
-	StudyDate       string
-	StudyTime       string
-	Modality      	string
-	InstitutionName   string
-	Description   	string
-	AccessionNumber   string
+	StudyInstanceUID   string
+	StudyDate          string
+	StudyTime          string
+	Modality           string
+	InstitutionName    string
+	Description        string
+	AccessionNumber    string
 	ReferringPhysician string
 }
 
-func (study *DCMStudy)DICOM2Query(obj media.DcmObj) string {
+func (study *DCMStudy) Query(obj media.DcmObj) string {
 	var tag media.DcmTag
 	var query, partial string
-	previous:=false
+	previous := false
 
 	for i := 0; i < len(obj.GetTags()); i++ {
 		tag = obj.GetTag(i)
@@ -36,31 +39,31 @@ func (study *DCMStudy)DICOM2Query(obj media.DcmObj) string {
 				switch tag.Element {
 				case 0x20:
 					study.StudyDate = tag.GetString()
-					partial = "StudyDate='"+study.StudyDate+"'"
+					partial = "StudyDate='" + study.StudyDate + "'"
 					break
 				case 0x30:
 					study.StudyTime = tag.GetString()
-					partial = "StudyTime='"+study.StudyTime+"'"
+					partial = "StudyTime='" + study.StudyTime + "'"
 					break
 				case 0x50:
 					study.AccessionNumber = tag.GetString()
-					partial = "AccessionNumber='"+study.AccessionNumber+"'"
+					partial = "AccessionNumber='" + study.AccessionNumber + "'"
 					break
 				case 0x60:
 					study.Modality = tag.GetString()
-					partial = "Modality='"+study.Modality+"'"
+					partial = "Modality='" + study.Modality + "'"
 					break
 				case 0x80:
 					study.InstitutionName = tag.GetString()
-					partial = "InstitutionName LIKE '%"+study.InstitutionName+"'%"
+					partial = "InstitutionName LIKE '%" + study.InstitutionName + "'%"
 					break
 				case 0x90:
 					study.ReferringPhysician = tag.GetString()
-					partial = "ReferringPhysician='"+study.ReferringPhysician+"'"
+					partial = "ReferringPhysician='" + study.ReferringPhysician + "'"
 					break
 				case 0x1030:
 					study.Description = tag.GetString()
-					partial = "Description LIKE '%"+study.Description+"%'"
+					partial = "Description LIKE '%" + study.Description + "%'"
 					break
 				}
 				break
@@ -68,19 +71,19 @@ func (study *DCMStudy)DICOM2Query(obj media.DcmObj) string {
 				switch tag.Element {
 				case 0x0010:
 					study.PatientName = tag.GetString()
-					partial = "PatientName LIKE '"+study.PatientName+"%'"
+					partial = "PatientName LIKE '" + study.PatientName + "%'"
 					break
 				case 0x0020:
 					study.PatientID = tag.GetString()
-					partial = "PatientID='"+study.PatientID+"'"
+					partial = "PatientID='" + study.PatientID + "'"
 					break
 				case 0x0030: //Patient Birth Date
 					study.PatientBD = tag.GetString()
-					partial = "PatientBD='"+study.PatientBD+"'"
+					partial = "PatientBD='" + study.PatientBD + "'"
 					break
 				case 0x0040:
 					study.PatientSex = tag.GetString()
-					partial = "PatientSex='"+study.PatientSex+"'"
+					partial = "PatientSex='" + study.PatientSex + "'"
 					break
 				}
 				break
@@ -88,22 +91,22 @@ func (study *DCMStudy)DICOM2Query(obj media.DcmObj) string {
 				switch tag.Element {
 				case 0x000D:
 					study.StudyInstanceUID = tag.GetString()
-					partial = "StudyInstanceUID='"+study.StudyInstanceUID+"'"
+					partial = "StudyInstanceUID='" + study.StudyInstanceUID + "'"
 					break
 				}
 				break
 			}
 			if len(partial) > 0 {
-				if previous==true {
-					query = query +" AND "+partial
+				if previous == true {
+					query = query + " AND " + partial
 				} else {
-					query = " WHERE "+partial
+					query = " WHERE " + partial
 					previous = true
 				}
 			}
 		}
 	}
-return query
+	return query
 }
 
 func (study *DCMStudy) QueryResult() media.DcmObj {
@@ -113,6 +116,7 @@ func (study *DCMStudy) QueryResult() media.DcmObj {
 	query.WriteStringGE(0x08, 0x20, "DA", study.StudyDate)
 	query.WriteStringGE(0x08, 0x30, "TM", study.StudyTime)
 	query.WriteStringGE(0x08, 0x50, "SH", study.AccessionNumber)
+	query.WriteStringGE(0x08, 0x52, "CS", "STUDY")
 	query.WriteStringGE(0x08, 0x61, "CS", study.Modality)
 	query.WriteStringGE(0x08, 0x1030, "LO", study.Description)
 	query.WriteStringGE(0x10, 0x10, "PN", study.PatientName)
@@ -124,7 +128,8 @@ func (study *DCMStudy) QueryResult() media.DcmObj {
 	return query
 }
 
-func (study *DCMStudy) QueryDB(QueryString string) (error, []media.DcmObj) {
+func (study *DCMStudy) Select(query media.DcmObj) (error, []media.DcmObj) {
+	QueryString := study.Query(query)
 	results := make([]media.DcmObj, 0)
 	db, err := sql.Open("sqlite3", "./pacs.db")
 	if err != nil {
@@ -132,17 +137,17 @@ func (study *DCMStudy) QueryDB(QueryString string) (error, []media.DcmObj) {
 		return err, nil
 	}
 
-	fields := "StudyDate, StudyTime, StudyDescription, AccessionNumber, ReferPhysician, StudyModality, PatientID, PatientName, PatientSex, PatientBD"
-	Query := "SELECT " + fields + " FROM Study "+QueryString
-	rows, err := db.Query(Query)
+	fields := "StudyDate, StudyTime, StudyDescription, AccessionNumber, ReferPhysician, StudyModality, PatientID, PatientName, PatientSex, PatientBD, StudyInstanceUID"
+	QueryString = "SELECT " + fields + " FROM Study " + QueryString
+	rows, err := db.Query(QueryString)
 	if err != nil {
 		log.Println(err.Error())
 		return err, nil
 	}
 
 	for rows.Next() {
-		rows.Scan(&study.StudyDate, &study.StudyTime, &study.Description, &study.AccessionNumber, &study.ReferringPhysician, &study.Modality, &study.PatientID, &study.PatientName, &study.PatientSex, &study.PatientBD)
-		obj := study.QueryResult()		
+		rows.Scan(&study.StudyDate, &study.StudyTime, &study.Description, &study.AccessionNumber, &study.ReferringPhysician, &study.Modality, &study.PatientID, &study.PatientName, &study.PatientSex, &study.PatientBD, &study.StudyInstanceUID)
+		obj := study.QueryResult()
 		results = append(results, obj)
 	}
 	rows.Close()

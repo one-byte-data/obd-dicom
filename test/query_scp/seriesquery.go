@@ -82,19 +82,59 @@ func (series *DCMSeries)Query(obj media.DcmObj) string {
 return query
 }
 
-func (series *DCMSeries) QueryResult() media.DcmObj {
+func (series *DCMSeries) QueryResult(obj media.DcmObj) media.DcmObj {
+	var added bool
+	var tag media.DcmTag
 	query := media.NewEmptyDCMObj()
 	query.SetTransferSyntax("1.2.840.10008.1.2")
 
-	query.WriteStringGE(0x08, 0x21, "DA", series.SeriesDate)
-	query.WriteStringGE(0x08, 0x32, "TM", series.SeriesTime)
-	query.WriteStringGE(0x08, 0x52, "CS", "SERIES")
-	query.WriteStringGE(0x08, 0x60, "CS", series.Modality)
-	query.WriteStringGE(0x08, 0x103E, "LO", series.Description)
-	query.WriteStringGE(0x20, 0x0d, "UI", series.StudyInstanceUID)
-	query.WriteStringGE(0x20, 0x0e, "UI", series.SeriesInstanceUID)
-	query.WriteStringGE(0x20, 0x11, "IS", series.SeriesNumber)
-
+	for i := 0; i < len(obj.GetTags()); i++ {
+		tag = obj.GetTag(i)
+		added=true
+		switch tag.Group {
+		case 0x08:
+			switch tag.Element {
+			case 0x21:
+				query.WriteStringGE(0x08, 0x21, "DA", series.SeriesDate)
+				break
+			case 0x32:
+				query.WriteStringGE(0x08, 0x32, "TM", series.SeriesTime)
+				break
+			case 0x52:
+				query.WriteStringGE(0x08, 0x52, "CS", "SERIES")
+				break
+			case 0x60:
+				query.WriteStringGE(0x08, 0x60, "CS", series.Modality)
+				break
+			case 0x103E:
+				query.WriteStringGE(0x08, 0x103E, "LO", series.Description)
+				break
+			default:
+				added=false
+			}
+			break
+		case 0x20:
+			switch tag.Element {
+			case 0x0D:
+				query.WriteStringGE(0x20, 0x0d, "UI", series.StudyInstanceUID)
+				break
+			case 0x0E:
+				query.WriteStringGE(0x20, 0x0e, "UI", series.SeriesInstanceUID)
+				break
+			case 0x11:
+				query.WriteStringGE(0x20, 0x11, "IS", series.SeriesNumber)
+				break
+			default:
+				added=false
+			}
+			break
+		default:
+			added=false
+		}
+		if added==false {
+			query.Add(tag)
+		}
+	}
 	return query
 }
 
@@ -117,7 +157,7 @@ func (series *DCMSeries)Select(query media.DcmObj) (error, []media.DcmObj) {
 
 	for rows.Next() {
 		rows.Scan(&series.SeriesDate, &series.SeriesTime, &series.Modality, &series.InstitutionName, &series.Description, &series.StudyInstanceUID, &series.SeriesInstanceUID, &series.SeriesNumber)
-		obj := series.QueryResult()		
+		obj := series.QueryResult(query)		
 		results = append(results, obj)
 	}
 	rows.Close()

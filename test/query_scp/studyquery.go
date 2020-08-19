@@ -109,22 +109,69 @@ func (study *DCMStudy) Query(obj media.DcmObj) string {
 	return query
 }
 
-func (study *DCMStudy) QueryResult() media.DcmObj {
+func (study *DCMStudy) QueryResult(obj media.DcmObj) media.DcmObj {
+	var added bool
+	var tag media.DcmTag
 	query := media.NewEmptyDCMObj()
 	query.SetTransferSyntax("1.2.840.10008.1.2")
 
-	query.WriteStringGE(0x08, 0x20, "DA", study.StudyDate)
-	query.WriteStringGE(0x08, 0x30, "TM", study.StudyTime)
-	query.WriteStringGE(0x08, 0x50, "SH", study.AccessionNumber)
-	query.WriteStringGE(0x08, 0x52, "CS", "STUDY")
-	query.WriteStringGE(0x08, 0x61, "CS", study.Modality)
-	query.WriteStringGE(0x08, 0x1030, "LO", study.Description)
-	query.WriteStringGE(0x10, 0x10, "PN", study.PatientName)
-	query.WriteStringGE(0x10, 0x20, "LO", study.PatientID)
-	query.WriteStringGE(0x10, 0x30, "DA", study.PatientBD)
-	query.WriteStringGE(0x10, 0x40, "CS", study.PatientSex)
-	query.WriteStringGE(0x20, 0x0d, "UI", study.StudyInstanceUID)
-
+	for i := 0; i < len(obj.GetTags()); i++ {
+		tag = obj.GetTag(i)
+		added=true
+		switch tag.Group {
+		case 0x08:
+			switch tag.Element {
+			case 0x20:
+				query.WriteStringGE(0x08, 0x20, "DA", study.StudyDate)
+				break
+			case 0x30:
+				query.WriteStringGE(0x08, 0x30, "TM", study.StudyTime)
+				break
+			case 0x50:
+				query.WriteStringGE(0x08, 0x50, "SH", study.AccessionNumber)
+				break
+			case 0x52:
+				query.WriteStringGE(0x08, 0x52, "CS", "STUDY")
+				break
+			case 0x61:
+				query.WriteStringGE(0x08, 0x61, "CS", study.Modality)
+				break
+			case 0x1030:
+				query.WriteStringGE(0x08, 0x1030, "LO", study.Description)
+				break
+			default:
+				added=false
+			}
+			break
+		case 0x10:
+			switch tag.Element {
+			case 0x10:
+				query.WriteStringGE(0x10, 0x10, "PN", study.PatientName)
+				break
+			case 0x20:
+				query.WriteStringGE(0x10, 0x20, "LO", study.PatientID)
+				break
+			case 0x30:
+				query.WriteStringGE(0x10, 0x30, "DA", study.PatientBD)
+				break
+			case 0x40:
+				query.WriteStringGE(0x10, 0x40, "CS", study.PatientSex)
+				break
+			default:
+				added=false
+			}
+			break
+		default:
+				added=false
+		}
+		if (tag.Group==0x20)&&(tag.Element==0x0D) {
+			query.WriteStringGE(0x20, 0x0d, "UI", study.StudyInstanceUID)
+			added=true
+		}
+		if added==false {
+			query.Add(tag)
+		}
+	}
 	return query
 }
 
@@ -147,7 +194,7 @@ func (study *DCMStudy) Select(query media.DcmObj) (error, []media.DcmObj) {
 
 	for rows.Next() {
 		rows.Scan(&study.StudyDate, &study.StudyTime, &study.Description, &study.AccessionNumber, &study.ReferringPhysician, &study.Modality, &study.PatientID, &study.PatientName, &study.PatientSex, &study.PatientBD, &study.StudyInstanceUID)
-		obj := study.QueryResult()
+		obj := study.QueryResult(query)
 		results = append(results, obj)
 	}
 	rows.Close()

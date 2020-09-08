@@ -164,14 +164,15 @@ func (obj *dcmObj) GetTag(i int) DcmTag {
 }
 
 func (obj *dcmObj) SetTag(i int, tag DcmTag) {
-	obj.Tags[i] = tag
+	if i<=obj.TagCount() {
+		obj.Tags[i] = tag
+	}
 }
 
 func (obj *dcmObj) InsertTag(index int, tag DcmTag) {
 	obj.Tags = append(obj.Tags[:index+1], obj.Tags[index:]...)
 	obj.Tags[index] = tag
 }
-
 
 func (obj *dcmObj) GetTags() []DcmTag {
 	return obj.Tags

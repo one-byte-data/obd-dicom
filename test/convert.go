@@ -587,6 +587,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	return flag
 }
 
+/*
 func main() {
 	media.InitDict()
 	obj, err := media.NewDCMObjFromFile("images/rle_gray.dcm")
@@ -597,3 +598,4 @@ func main() {
 		obj.WriteToFile("out.dcm")
 	}
 }
+*/

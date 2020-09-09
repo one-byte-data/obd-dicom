@@ -24,7 +24,7 @@ type DcmObj interface {
 	SetBigEndian(bigEndian bool)
 	GetTag(i int) DcmTag
 	SetTag(i int, tag DcmTag)
-  	InsertTag(i int, tag DcmTag)
+	InsertTag(i int, tag DcmTag)
 	DelTag(i int)
 	GetTags() []DcmTag
 	GetUShort(tag tags.Tag) uint16
@@ -164,7 +164,7 @@ func (obj *dcmObj) GetTag(i int) DcmTag {
 }
 
 func (obj *dcmObj) SetTag(i int, tag DcmTag) {
-	if i<=obj.TagCount() {
+	if i <= obj.TagCount() {
 		obj.Tags[i] = tag
 	}
 }

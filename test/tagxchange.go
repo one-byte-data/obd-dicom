@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
 )
 
 func GetTag(obj media.DcmObj, group uint16, element uint16) media.DcmTag {
@@ -114,7 +115,7 @@ func ApplyCondition(DICOMValue string, Condition string, Value string) bool {
 		}
 	}
 
-	// Condition Diffeent than
+	// Condition Different than
 	if Condition == "<>" {
 		return (DFUp != ValUp)
 	}
@@ -122,6 +123,7 @@ func ApplyCondition(DICOMValue string, Condition string, Value string) bool {
 	return (false)
 }
 
+/*
 func GetGroupElement (DICOMTag string) (uint16, uint16) {
 
 	group, err := strconv.ParseInt(strings.Split(DICOMTag, ",")[0], 16, 16)
@@ -133,6 +135,7 @@ func GetGroupElement (DICOMTag string) (uint16, uint16) {
 	}
 	return 0, 0
 }
+*/
 
 func CopyDCM(inobj media.DcmObj) media.DcmObj{
 	outobj:= media.NewEmptyDCMObj()
@@ -173,7 +176,7 @@ func MultipleReplace(inobj media.DcmObj, rule string) media.DcmObj{
 			components:=strings.Split(Cond[i], "|")
 			if len(components)==3 {
 				DICOMTag = components[0]
-				group, element = GetGroupElement(DICOMTag)
+				group, element = tags.GetGroupElement(DICOMTag)
 				DICOMValue = inobj.GetStringGE(group, element)
 				tag = GetTag(inobj, group, element)
 				if tag.Group!=0 {
@@ -196,7 +199,7 @@ func MultipleReplace(inobj media.DcmObj, rule string) media.DcmObj{
 				WithValue := components[1]
 				// Si existe lo modifico, si no existe
 				// Tengo que crearlo y agregarlo en un lugar adecuado.
-				out_group, out_element = GetGroupElement(DICOMTag)
+				out_group, out_element = tags.GetGroupElement(DICOMTag)
 				// Si group y element == 0 ERROR!!
 				if (out_group == 0) || (out_element == 0) {
 					log.Println("ERROR, Tag Name not found: " + DICOMTag)
@@ -205,7 +208,7 @@ func MultipleReplace(inobj media.DcmObj, rule string) media.DcmObj{
 				tag = GetTag(inobj, out_group, out_element)
 				// Si es un tag...
 				if strings.Index(WithValue, "\"") == -1 {
-					group, element = GetGroupElement(DICOMTag)
+					group, element = tags.GetGroupElement(DICOMTag)
 					WithValue = inobj.GetStringGE(group, element)
 				} else {
 					WithValue = strings.Split(WithValue, "\"")[1]
@@ -239,6 +242,11 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	out:=MultipleReplace(obj, "0010,0010|CONTAINS|A:0008,0050|\"CONTA\"")
-	out.WriteToFile("out.dcm")
+	rule:="PatientName|CONTAINS|A:AccessionNumber|\"CONTA\""
+	if ValidateRule(rule)==true {
+		out:=MultipleReplace(obj, rule)
+		out.WriteToFile("out.dcm")
+	} else {
+		log.Println("ERROR, Failed Rule Validation")
+	}
 }

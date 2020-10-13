@@ -66,7 +66,7 @@ func CheckModality(Modality string) bool{
 }
 
 func CheckOperator(Operator string) bool{
-	if (Operator=="=")||(Operator=="CONTAINS")||(Operator=="MatchLeft")||(Operator=="<>")||(Operator==">=")||(Operator=="<=") {
+	if (Operator=="=")||(Operator=="CONTAINS")||(Operator=="<>")||(Operator==">=")||(Operator=="<=") {
 		return true
 	}
 	return false
@@ -109,49 +109,38 @@ func ValidateValue(Value string, group uint16, element uint16) bool{
 	return flag
 }
 	
-func ValidateRule(rule string) bool {
+func ValidateRule(Conditions string, Replacements string) bool {
 	var flag bool
 	var group, element uint16
-	var Conditions, Replacements string
-
-	if len(rule) > 0 {
-		params:= strings.Split(rule, ":")
-		if len(params)>1 {
-			Conditions = params[0]
-			Replacements = params[1]
-		} else {
-			log.Println("ERROR, ValidateRule, not enough params")
-			return false
-		}
-		// First I verify that all conditions are met
-		flag=true
-		Cond := strings.Split(Conditions, "&")
-		for i:=0; i<len(Cond) && flag; i++ {
-			components:=strings.Split(Cond[i], "|")
-			if len(components)==3 {
-				group, element = tags.GetGroupElement(components[0])
-				if ValidateValue(components[2], group, element) {
-					flag=CheckOperator(components[1])
-				} else {
-					log.Println("ERROR, Condition["+string(i)+"] fails ValidateValue")
-					flag=false
-				}
+	
+	// First I verify that all conditions are met
+	flag=true
+	Cond := strings.Split(Conditions, "&")
+	for i:=0; i<len(Cond) && flag; i++ {
+		components:=strings.Split(Cond[i], "|")
+		if len(components)==3 {
+			group, element = tags.GetGroupElement(components[0])
+			if ValidateValue(components[2], group, element) {
+				flag=CheckOperator(components[1])
 			} else {
-				log.Println("ERROR, Condition["+string(i)+"] not enough components")
+				log.Println("ERROR, Condition["+string(i)+"] fails ValidateValue")
 				flag=false
 			}
+		} else {
+			log.Println("ERROR, Condition["+string(i)+"] not enough components")
+			flag=false
 		}
-		if flag {
-			Rep := strings.Split(Replacements, "&")
-			for i:=0; i<len(Rep); i++ {
-				components:=strings.Split(Rep[i], "|")
-				if len(components)==2 {
-					group, element = tags.GetGroupElement(components[0])
-					flag = ValidateValue(components[1], group, element)
-					if flag==false {
-						log.Println("ERROR, Replacement["+string(i)+"] fails ValidateValue")
-						break
-					}
+	}
+	if flag {
+		Rep := strings.Split(Replacements, "&")
+		for i:=0; i<len(Rep); i++ {
+			components:=strings.Split(Rep[i], "|")
+			if len(components)==2 {
+				group, element = tags.GetGroupElement(components[0])
+				flag = ValidateValue(components[1], group, element)
+				if flag==false {
+					log.Println("ERROR, Replacement["+string(i)+"] fails ValidateValue")
+					break
 				}
 			}
 		}

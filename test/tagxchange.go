@@ -123,20 +123,6 @@ func ApplyCondition(DICOMValue string, Condition string, Value string) bool {
 	return (false)
 }
 
-/*
-func GetGroupElement (DICOMTag string) (uint16, uint16) {
-
-	group, err := strconv.ParseInt(strings.Split(DICOMTag, ",")[0], 16, 16)
-	if err == nil {
-		element, err := strconv.ParseInt(strings.Split(DICOMTag, ",")[1], 16, 16)
-		if err == nil {
-			return uint16(group), uint16(element)
-		}
-	}
-	return 0, 0
-}
-*/
-
 func CopyDCM(inobj media.DcmObj) media.DcmObj{
 	outobj:= media.NewEmptyDCMObj()
 	outobj.SetExplicitVR(inobj.IsExplicitVR())
@@ -150,87 +136,78 @@ func CopyDCM(inobj media.DcmObj) media.DcmObj{
 	return outobj
 }
 
-func MultipleReplace(inobj media.DcmObj, rule string) media.DcmObj{
+func MultipleReplace(inobj media.DcmObj, Conditions string, Replacements string) media.DcmObj{
 	// Mutiple Rules have this syntax:
 	// if Cond1&Cond2&Cond3 then apply Rep1&Rep2
 	// There can be n Conditions and m Replacements.
 	var tag media.DcmTag
 	var group, element, out_group, out_element uint16
-	var Conditions, Replacements string
 	var DICOMTag, DICOMValue string
 
 	outobj := CopyDCM(inobj)
 
-	if len(rule) > 0 {
-		params:= strings.Split(rule, ":")
-		if len(params)>1 {
-			Conditions = params[0]
-			Replacements = params[1]
-		} else {
-			return outobj
-		}
-		// First I verify that all conditions are met
-		flag := true
-		Cond := strings.Split(Conditions, "&")
-		for i:=0; i<len(Cond) && flag; i++ {
-			components:=strings.Split(Cond[i], "|")
-			if len(components)==3 {
-				DICOMTag = components[0]
-				group, element = tags.GetGroupElement(DICOMTag)
-				DICOMValue = inobj.GetStringGE(group, element)
-				tag = GetTag(inobj, group, element)
-				if tag.Group!=0 {
-					if !ApplyCondition(DICOMValue, components[1], components[2]) {
-						flag = false
-					}
-				} else {
+	// First I verify that all conditions are met
+	flag := true
+	Cond := strings.Split(Conditions, "&")
+	for i:=0; i<len(Cond) && flag; i++ {
+		components:=strings.Split(Cond[i], "|")
+		if len(components)==3 {
+			DICOMTag = components[0]
+			group, element = tags.GetGroupElement(DICOMTag)
+			DICOMValue = inobj.GetStringGE(group, element)
+			tag = GetTag(inobj, group, element)
+			if tag.Group!=0 {
+				if !ApplyCondition(DICOMValue, components[1], components[2]) {
 					flag = false
 				}
 			} else {
-				flag=false
+				flag = false
 			}
+		} else {
+			flag=false
 		}
-		// If flag is still true do the replacements
-		if flag {
-			Rep := strings.Split(Replacements, "&")
-			for i:=0; i<len(Rep); i++ {
-				components:=strings.Split(Rep[i], "|")
-				DICOMTag = components[0]
-				WithValue := components[1]
-				// Si existe lo modifico, si no existe
-				// Tengo que crearlo y agregarlo en un lugar adecuado.
-				out_group, out_element = tags.GetGroupElement(DICOMTag)
-				// Si group y element == 0 ERROR!!
-				if (out_group == 0) || (out_element == 0) {
-					log.Println("ERROR, Tag Name not found: " + DICOMTag)
-					break
-				}
-				tag = GetTag(inobj, out_group, out_element)
-				// Si es un tag...
-				if strings.Index(WithValue, "\"") == -1 {
-					group, element = tags.GetGroupElement(DICOMTag)
-					WithValue = inobj.GetStringGE(group, element)
-				} else {
-					WithValue = strings.Split(WithValue, "\"")[1]
-				}
-				length := len(WithValue)
-				if length%2 != 0 {
-					WithValue = WithValue + " "
-					length++
-				}
-				if tag.Length != 0 {
-					tag.Data = nil
-				}
-				tag.Length = uint32(length)
-				tag.Data = make([]byte, tag.Length)
-				copy(tag.Data, WithValue)
-				if tag.Group == 0 {
-					//insert...
-					tag.Group = out_group
-					tag.Element = out_element
-				}
-				Insert(outobj, tag)
+	}
+
+	// If flag is still true do the replacements
+	if flag {
+		Rep := strings.Split(Replacements, "&")
+		for i:=0; i<len(Rep); i++ {
+			components:=strings.Split(Rep[i], "|")
+			DICOMTag = components[0]
+			WithValue := components[1]
+			// Si existe lo modifico, si no existe
+			// Tengo que crearlo y agregarlo en un lugar adecuado.
+			out_group, out_element = tags.GetGroupElement(DICOMTag)
+			// Si group y element == 0 ERROR!!
+			if (out_group == 0) || (out_element == 0) {
+				log.Println("ERROR, Tag Name not found: " + DICOMTag)
+				break
 			}
+			tag = GetTag(inobj, out_group, out_element)
+			// Si es un tag...
+			if strings.Index(WithValue, "\"") == -1 {
+				group, element = tags.GetGroupElement(DICOMTag)
+				WithValue = inobj.GetStringGE(group, element)
+			} else {
+				WithValue = strings.Split(WithValue, "\"")[1]
+			}
+			length := len(WithValue)
+			if length%2 != 0 {
+				WithValue = WithValue + " "
+				length++
+			}
+			if tag.Length != 0 {
+				tag.Data = nil
+			}
+			tag.Length = uint32(length)
+			tag.Data = make([]byte, tag.Length)
+			copy(tag.Data, WithValue)
+			if tag.Group == 0 {
+				//insert...
+				tag.Group = out_group
+				tag.Element = out_element
+			}
+			Insert(outobj, tag)
 		}
 	}
 	return outobj
@@ -242,9 +219,10 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	rule:="PatientName|CONTAINS|A:AccessionNumber|\"CONTA\""
-	if ValidateRule(rule)==true {
-		out:=MultipleReplace(obj, rule)
+	Conditions:="PatientName|CONTAINS|xyz"
+	Replacements:="AccessionNumber|\"CONTA\""
+	if ValidateRule(Conditions, Replacements)==true {
+		out:=MultipleReplace(obj, Conditions, Replacements)
 		out.WriteToFile("out.dcm")
 	} else {
 		log.Println("ERROR, Failed Rule Validation")

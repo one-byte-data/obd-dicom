@@ -30,12 +30,12 @@ func main() {
 	fmt.Println("Connected to MongoDB!")
 
 	// Do stuff
-	database:=client.Database("IOEngine")
-	collection:=database.Collection("TagMapper")
-	
-	NewRule:=models.TagMapper{
-		RuleName: "Test",
-		Condition: "PatientName|CONTAINS|xyz",
+	database := client.Database("IOEngine")
+	collection := database.Collection("TagMapper")
+
+	NewRule := models.TagMapper{
+		RuleName:    "Test",
+		Condition:   "PatientName|CONTAINS|xyz",
 		Replacement: "AccessionNumber|\"CONTA\"",
 	}
 
@@ -44,30 +44,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Test Rule had been inserted: ", insertResult.InsertedID)	
-	
-	filter:=bson.D{{"RuleName", "Test"}}
+	fmt.Println("Test Rule had been inserted: ", insertResult.InsertedID)
+
+	filter := bson.D{{"RuleName", "Test"}}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-    	log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	defer cursor.Close(context.TODO())
 	for cursor.Next(context.TODO()) {
-    	var rule bson.M
-    	if err = cursor.Decode(&rule); err != nil {
-        	log.Fatal(err)
-    	}
-    	fmt.Println(rule)
+		var rule bson.M
+		if err = cursor.Decode(&rule); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(rule)
 	}
 
-/*	
-	deleteResult, err := collection.DeleteMany(context.TODO(), filter)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Deleted %v documents in the tagMapper collection\n", deleteResult.DeletedCount)
-*/
+	/*
+		deleteResult, err := collection.DeleteMany(context.TODO(), filter)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Deleted %v documents in the tagMapper collection\n", deleteResult.DeletedCount)
+	*/
 	err = client.Disconnect(context.TODO())
 	if err != nil {
 		log.Fatal(err)

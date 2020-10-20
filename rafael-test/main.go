@@ -34,9 +34,9 @@ func main() {
 	collection := database.Collection("TagMapper")
 
 	NewRule := models.TagMapper{
-		RuleName:    "Test",
-		Condition:   "PatientName|CONTAINS|xyz",
-		Replacement: "AccessionNumber|\"CONTA\"",
+		RuleName:     "Test",
+		Conditions:   "PatientName|CONTAINS|xyz",
+		Replacements: "AccessionNumber|\"CONTA\"",
 	}
 
 	insertResult, err := collection.InsertOne(context.TODO(), NewRule)
@@ -46,7 +46,7 @@ func main() {
 
 	fmt.Println("Test Rule had been inserted: ", insertResult.InsertedID)
 
-	filter := bson.D{{"RuleName", "Test"}}
+	filter := bson.D{bson.E{Key: "RuleName", Value: "Test"}}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		log.Fatal(err)

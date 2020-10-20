@@ -19,6 +19,8 @@ git.onebytedata.com/OneByteDataPlatform/one-byte-module v0.0.0-20201019021707-9c
 git.onebytedata.com/OneByteDataPlatform/one-byte-module v0.0.0-20201019021707-9ca084b9dd6c/go.mod h1:iVOsqPpn/mbyAVMb4Rp5/aWrQuJfmVATU0fZISpijaI=
 git.onebytedata.com/OneByteDataPlatform/one-byte-module v0.0.0-20201019172036-0d50c3badadf h1:jPDT4ZIv0qNSlffAWj8PLW/VRFeMoOAsRB9yzEWOfNY=
 git.onebytedata.com/OneByteDataPlatform/one-byte-module v0.0.0-20201019172036-0d50c3badadf/go.mod h1:+fjwQNv9gj6+CXHNR3kr4LIuG43F1GuQRuh1BcQVd6c=
+git.onebytedata.com/OneByteDataPlatform/one-byte-module v0.0.0-20201020015849-4c568e172819 h1:L/E2+KNvh9xDWb8xnxBx4oBs8KaCQHYboRPzwTelrRQ=
+git.onebytedata.com/OneByteDataPlatform/one-byte-module v0.0.0-20201020015849-4c568e172819/go.mod h1:VxsBtGXnVT/VNeB2TtpRJWn95jp39Iq9k8ircJMQZ+8=
 github.com/Azure/go-autorest/autorest v0.9.0/go.mod h1:xyHB1BMZT0cuDHU7I0+g046+BFDTQ8rEZB0s4Yfa6bI=
 github.com/Azure/go-autorest/autorest v0.9.6/go.mod h1:/FALq9T/kS7b5J5qsQ+RSTUdAmGFqi0vUdVNNx8q630=
 github.com/Azure/go-autorest/autorest/adal v0.5.0/go.mod h1:8Z9fGy2MpX0PvDjB1pEgQTmVqjGhiHBW7RJJEciWzS0=
@@ -50,6 +52,8 @@ github.com/aws/aws-sdk-go v1.35.7 h1:FHMhVhyc/9jljgFAcGkQDYjpC9btM0B8VfkLBfctdNE
 github.com/aws/aws-sdk-go v1.35.7/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
 github.com/aws/aws-sdk-go v1.35.9 h1:b1HiUpdkFLJyoOQ7zas36YHzjNHH0ivHx/G5lWBeg+U=
 github.com/aws/aws-sdk-go v1.35.9/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
+github.com/aws/aws-sdk-go v1.35.10 h1:FsJtrOS7P+Qmq1rPTGgS/+qC1Y9eGuAJHvAZpZlhmb4=
+github.com/aws/aws-sdk-go v1.35.10/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=

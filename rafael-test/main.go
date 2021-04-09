@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"git.onebytedata.com/OneByteDataPlatform/one-byte-module/models"
+	"git.onebytedata.com/odb/one-byte-module/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

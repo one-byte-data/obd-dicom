@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/jpeglib"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uid"
+	"git.onebytedata.com/odb/go-dicom/jpeglib"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // LoadFromFile - Load from File into MemoryStream
@@ -118,31 +118,31 @@ func test16() {
 			obj.SetTransferSyntax(uid.JPEGLosslessNonHierarchical14)
 			index++
 			tag = media.DcmTag{
-				Group: 0xFFFE,
-				Element: 0xE000,
-				Length: 0,
-				VR: "DL",
-				Data: nil,
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    0,
+				VR:        "DL",
+				Data:      nil,
 				BigEndian: false,
 			}
 			obj.InsertTag(index, tag)
 			index++
 			tag = media.DcmTag{
-				Group: 0xFFFE,
-				Element: 0xE000,
-				Length: uint32(outSize),
-				VR: "DL",
-				Data: outData,
+				Group:     0xFFFE,
+				Element:   0xE000,
+				Length:    uint32(outSize),
+				VR:        "DL",
+				Data:      outData,
 				BigEndian: false,
 			}
 			obj.InsertTag(index, tag)
 			index++
 			tag = media.DcmTag{
-				Group: 0xFFFE,
-				Element: 0xE0DD,
-				Length: 0,
-				VR: "DL",
-				Data: nil,
+				Group:     0xFFFE,
+				Element:   0xE0DD,
+				Length:    0,
+				VR:        "DL",
+				Data:      nil,
 				BigEndian: false,
 			}
 			obj.InsertTag(index, tag)

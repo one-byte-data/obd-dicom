@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 	_ "github.com/mattn/go-sqlite3"
-
 )
 
 type DCMStudy struct {
@@ -117,7 +116,7 @@ func (study *DCMStudy) QueryResult(obj media.DcmObj) media.DcmObj {
 
 	for i := 0; i < len(obj.GetTags()); i++ {
 		tag = obj.GetTag(i)
-		added=true
+		added = true
 		switch tag.Group {
 		case 0x08:
 			switch tag.Element {
@@ -140,7 +139,7 @@ func (study *DCMStudy) QueryResult(obj media.DcmObj) media.DcmObj {
 				query.WriteStringGE(0x08, 0x1030, "LO", study.Description)
 				break
 			default:
-				added=false
+				added = false
 			}
 			break
 		case 0x10:
@@ -158,17 +157,17 @@ func (study *DCMStudy) QueryResult(obj media.DcmObj) media.DcmObj {
 				query.WriteStringGE(0x10, 0x40, "CS", study.PatientSex)
 				break
 			default:
-				added=false
+				added = false
 			}
 			break
 		default:
-				added=false
+			added = false
 		}
-		if (tag.Group==0x20)&&(tag.Element==0x0D) {
+		if (tag.Group == 0x20) && (tag.Element == 0x0D) {
 			query.WriteStringGE(0x20, 0x0d, "UI", study.StudyInstanceUID)
-			added=true
+			added = true
 		}
-		if added==false {
+		if added == false {
 			query.Add(tag)
 		}
 	}

@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // AAssociationAC AAssociationAC

@@ -3,11 +3,11 @@ package dimsec
 import (
 	"errors"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomcommand"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/dicomstatus"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/network"
+	"git.onebytedata.com/odb/go-dicom/network/dicomcommand"
+	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
+	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
 // CEchoReadRQ CEcho request read
@@ -28,7 +28,7 @@ func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) error {
 
 	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
-	DCO.WriteUint32(tags.CommandGroupLength, size) 
+	DCO.WriteUint32(tags.CommandGroupLength, size)
 	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
 	DCO.WriteUint16(tags.CommandField, dicomcommand.CEchoRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())

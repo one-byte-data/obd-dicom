@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/test/HL7Broker/hl7"
+	"git.onebytedata.com/odb/go-dicom/test/HL7Broker/hl7"
 )
 
 const (

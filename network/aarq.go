@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // AAssociationRQ - AAssociationRQ

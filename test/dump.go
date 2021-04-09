@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 func DumpDcm(obj media.DcmObj) {

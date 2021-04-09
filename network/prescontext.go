@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // PresentationContext - PresentationContext
@@ -17,8 +17,8 @@ type PresentationContext interface {
 	GetTransferSyntaxes() []UIDitem
 	Size() uint16
 	Write(rw *bufio.ReadWriter) error
-	Read(ms media.MemoryStream) (error)
-	ReadDynamic(ms media.MemoryStream) (error)
+	Read(ms media.MemoryStream) error
+	ReadDynamic(ms media.MemoryStream) error
 }
 
 type presentationContext struct {

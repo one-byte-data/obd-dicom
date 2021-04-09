@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	httpclient "git.onebytedata.com/OneByteDataPlatform/one-byte-module/clients/http-client"
-	"git.onebytedata.com/OneByteDataPlatform/one-byte-module/models"
-	"git.onebytedata.com/OneByteDataPlatform/one-byte-module/utils"
+	httpclient "git.onebytedata.com/odb/one-byte-module/clients/http-client"
+	"git.onebytedata.com/odb/one-byte-module/models"
+	"git.onebytedata.com/odb/one-byte-module/utils"
 )
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/DICOM/Dictionaries/DICOM%20Dictionary.xml"

@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uuids"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/uuids"
 )
 
 // GetFolderFiles get files in a folder

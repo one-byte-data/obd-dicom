@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/services"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/network"
+	"git.onebytedata.com/odb/go-dicom/services"
+	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
 var destination *network.Destination
@@ -21,14 +21,14 @@ func main() {
 	scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
 		called := request.GetCalledAE()
 		return calledAE == called
-		})
+	})
 
 	scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, obj media.DcmObj) []media.DcmObj {
 		// Make Query from query.
 		if queryLevel == "STUDY" {
 			var study DCMStudy
-			err, results:= study.Select(obj)
-			if err!= nil {
+			err, results := study.Select(obj)
+			if err != nil {
 				log.Println(err.Error())
 				return nil
 			}
@@ -36,14 +36,14 @@ func main() {
 		}
 		if queryLevel == "SERIES" {
 			var series DCMSeries
-			err, results:= series.Select(obj)
-			if err!= nil {
+			err, results := series.Select(obj)
+			if err != nil {
 				log.Println(err.Error())
 				return nil
 			}
 			return results
 		}
-	return nil
+		return nil
 	})
 
 	scp.SetOnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {

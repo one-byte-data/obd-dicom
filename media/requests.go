@@ -3,8 +3,8 @@ package media
 import (
 	"time"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uuids"
+	"git.onebytedata.com/odb/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/uuids"
 )
 
 // DefaultCFindRequest - Creates a default C-Find request

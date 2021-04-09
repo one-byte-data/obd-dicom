@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uid"
+	"git.onebytedata.com/odb/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // DcmObj - DICOM Object structure
@@ -460,7 +460,7 @@ func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue str
 	seq.ExplicitVR = obj.ExplicitVR
 
 	item.WriteString(tags.CodeValue, CodeValue)
-	item.WriteString(tags.CodingSchemeDesignator, "OneByteData")
+	item.WriteString(tags.CodingSchemeDesignator, "odb")
 	item.WriteString(tags.CodeMeaning, CodeMeaning)
 	tag.WriteSeq(0xFFFE, 0xE000, item)
 	seq.Add(tag)

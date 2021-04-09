@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/services"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/network"
+	"git.onebytedata.com/odb/go-dicom/services"
+	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
 var destination *network.Destination

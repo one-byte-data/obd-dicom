@@ -8,9 +8,9 @@ import (
 	"net"
 	"time"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/network/pdutype"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/uid"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/network/pdutype"
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // PDUService - struct for PDUService
@@ -299,7 +299,7 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	}
 
 	// Fixed MaxLength - 6 20200811
-	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength()-6
+	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength() - 6
 
 	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
 

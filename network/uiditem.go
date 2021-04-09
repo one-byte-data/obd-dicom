@@ -3,7 +3,7 @@ package network
 import (
 	"bufio"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // UIDitem - UIDitem

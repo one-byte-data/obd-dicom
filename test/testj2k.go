@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"git.onebytedata.com/odb/go-dicom/openjpeg"
 	"log"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/openjpeg"	
 )
 
 func testj2k() {

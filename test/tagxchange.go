@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
 func GetTag(obj media.DcmObj, group uint16, element uint16) media.DcmTag {
@@ -42,13 +42,13 @@ func Insert(obj media.DcmObj, intag media.DcmTag) {
 		if (sq == 0) && (tag.Length > 0) && (tag.Length != 0xFFFFFFFF) {
 			if (tag.Group == intag.Group) && (tag.Element == intag.Element) {
 				obj.SetTag(i, intag)
-				return		
+				return
 			}
-			if (tag.Group==intag.Group)&&(tag.Element>intag.Element) {
+			if (tag.Group == intag.Group) && (tag.Element > intag.Element) {
 				obj.InsertTag(i, intag)
 				return
 			}
-		   if tag.Group>intag.Group {
+			if tag.Group > intag.Group {
 				obj.InsertTag(i, intag)
 				return
 			}
@@ -88,9 +88,9 @@ func ApplyCondition(DICOMValue string, Condition string, Value string) bool {
 	// Condition Greater than
 	if Condition == ">=" {
 		field, err := strconv.ParseInt(DFUp, 10, 32)
-		if err==nil {
+		if err == nil {
 			val, err := strconv.ParseInt(ValUp, 10, 32)
-			if err==nil {
+			if err == nil {
 				return (field >= val)
 			} else {
 				return false
@@ -105,7 +105,7 @@ func ApplyCondition(DICOMValue string, Condition string, Value string) bool {
 		field, err := strconv.ParseInt(DFUp, 10, 32)
 		if err == nil {
 			val, err := strconv.ParseInt(ValUp, 10, 32)
-			if err== nil {
+			if err == nil {
 				return (field <= val)
 			} else {
 				return false
@@ -123,20 +123,20 @@ func ApplyCondition(DICOMValue string, Condition string, Value string) bool {
 	return (false)
 }
 
-func CopyDCM(inobj media.DcmObj) media.DcmObj{
-	outobj:= media.NewEmptyDCMObj()
+func CopyDCM(inobj media.DcmObj) media.DcmObj {
+	outobj := media.NewEmptyDCMObj()
 	outobj.SetExplicitVR(inobj.IsExplicitVR())
 	outobj.SetBigEndian(inobj.IsBigEndian())
 	outobj.SetTransferSyntax(inobj.GetTransferSyntax())
 	var tag media.DcmTag
-	for i:=0; i< inobj.TagCount(); i++ {
+	for i := 0; i < inobj.TagCount(); i++ {
 		tag = inobj.GetTag(i)
-		outobj.Add(tag)  
+		outobj.Add(tag)
 	}
 	return outobj
 }
 
-func MultipleReplace(inobj media.DcmObj, Conditions string, Replacements string) media.DcmObj{
+func MultipleReplace(inobj media.DcmObj, Conditions string, Replacements string) media.DcmObj {
 	// Mutiple Rules have this syntax:
 	// if Cond1&Cond2&Cond3 then apply Rep1&Rep2
 	// There can be n Conditions and m Replacements.
@@ -149,14 +149,14 @@ func MultipleReplace(inobj media.DcmObj, Conditions string, Replacements string)
 	// First I verify that all conditions are met
 	flag := true
 	Cond := strings.Split(Conditions, "&")
-	for i:=0; i<len(Cond) && flag; i++ {
-		components:=strings.Split(Cond[i], "|")
-		if len(components)==3 {
+	for i := 0; i < len(Cond) && flag; i++ {
+		components := strings.Split(Cond[i], "|")
+		if len(components) == 3 {
 			DICOMTag = components[0]
 			group, element = tags.GetGroupElement(DICOMTag)
 			DICOMValue = inobj.GetStringGE(group, element)
 			tag = GetTag(inobj, group, element)
-			if tag.Group!=0 {
+			if tag.Group != 0 {
 				if !ApplyCondition(DICOMValue, components[1], components[2]) {
 					flag = false
 				}
@@ -164,15 +164,15 @@ func MultipleReplace(inobj media.DcmObj, Conditions string, Replacements string)
 				flag = false
 			}
 		} else {
-			flag=false
+			flag = false
 		}
 	}
 
 	// If flag is still true do the replacements
 	if flag {
 		Rep := strings.Split(Replacements, "&")
-		for i:=0; i<len(Rep); i++ {
-			components:=strings.Split(Rep[i], "|")
+		for i := 0; i < len(Rep); i++ {
+			components := strings.Split(Rep[i], "|")
 			DICOMTag = components[0]
 			WithValue := components[1]
 			// Si existe lo modifico, si no existe
@@ -219,10 +219,10 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	Conditions:="PatientName|CONTAINS|xyz"
-	Replacements:="AccessionNumber|\"CONTA\""
-	if ValidateRule(Conditions, Replacements)==true {
-		out:=MultipleReplace(obj, Conditions, Replacements)
+	Conditions := "PatientName|CONTAINS|xyz"
+	Replacements := "AccessionNumber|\"CONTA\""
+	if ValidateRule(Conditions, Replacements) == true {
+		out := MultipleReplace(obj, Conditions, Replacements)
 		out.WriteToFile("out.dcm")
 	} else {
 		log.Println("ERROR, Failed Rule Validation")

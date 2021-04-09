@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // PDV - PDV

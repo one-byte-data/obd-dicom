@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"git.onebytedata.com/OneByteDataPlatform/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
 type dictionary struct {

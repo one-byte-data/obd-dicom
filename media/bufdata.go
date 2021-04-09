@@ -328,7 +328,7 @@ func (bd *bufData) WriteMeta(SOPClassUID string, SOPInstanceUID string, Transfer
 	// Implementation Class UID
 	bd.WriteStringTag(0x02, 0x12, "UI", "123456", explicitVR)
 	// Implementation Version Name
-	bd.WriteStringTag(0x02, 0x13, "SH", "OneByteData", explicitVR)
+	bd.WriteStringTag(0x02, 0x13, "SH", "odb", explicitVR)
 
 	// calculate group length and go Back to group size tag
 	ptr := bd.GetPosition()

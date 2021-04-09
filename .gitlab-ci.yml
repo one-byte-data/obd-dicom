@@ -44,14 +44,14 @@ build:
     expire_in: 30 days
 
 publish-build:
-  image: docker:dind
+  image: docker:19-dind
   stage: publish
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://localhost:2375
     DOCKER_DRIVER: overlay2
   services:
-    - docker:dind
+    - docker:19-dind
   only:
     - master
   cache:
@@ -65,14 +65,14 @@ publish-build:
     - docker push $TAG_BUILD
 
 publish-release:
-  image: docker:dind
+  image: docker:19-dind
   stage: publish
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://localhost:2375
     DOCKER_DRIVER: overlay2
   services:
-    - docker:dind
+    - docker:19-dind
   only:
     - tags
   cache:

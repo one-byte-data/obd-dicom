@@ -83,15 +83,19 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 		return nil, err
 	}
 
+	transferSyntax, err := bufdata.ReadMeta()
+	if err != nil {
+		return nil, err
+	}
+
 	obj := &dcmObj{
 		Tags:           make([]DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: transferSyntax,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          DcmTag{},
 	}
 
-	obj.TransferSyntax = bufdata.ReadMeta()
 	if len(obj.TransferSyntax) > 0 {
 		if obj.TransferSyntax != uid.ImplicitVRLittleEndian {
 			obj.ExplicitVR = true
@@ -108,19 +112,23 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 }
 
 // NewDCMObjFromBytes - Read from a DICOM bytes into a DICOM Object
-func NewDCMObjFromBytes(data []byte) DcmObj {
+func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
 	BigEndian := false
 	bufdata := NewBufDataFromBytes(data)
 
+	transferSyntax, err := bufdata.ReadMeta()
+	if err != nil {
+		return nil, err
+	}
+
 	obj := &dcmObj{
 		Tags:           make([]DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: transferSyntax,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          DcmTag{},
 	}
 
-	obj.TransferSyntax = bufdata.ReadMeta()
 	if len(obj.TransferSyntax) > 0 {
 		if obj.TransferSyntax == uid.ImplicitVRLittleEndian {
 			obj.ExplicitVR = false
@@ -134,7 +142,7 @@ func NewDCMObjFromBytes(data []byte) DcmObj {
 		bufdata.ReadObj(obj)
 	}
 
-	return obj
+	return obj, nil
 }
 
 func (obj *dcmObj) IsExplicitVR() bool {
@@ -405,13 +413,11 @@ func (obj *dcmObj) WriteUint32GE(group uint16, element uint16, vr string, val ui
 
 // WriteStringGE - Writes a String to a DICOM tag
 func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, content string) {
-	var length uint32
-
-	length = uint32(len(content))
+	length := uint32(len(content))
 	if length%2 == 1 {
 		length++
 		if vr == "UI" {
-			content = content + string(0)
+			content = content + fmt.Sprint(0)
 		} else {
 			content = content + " "
 		}

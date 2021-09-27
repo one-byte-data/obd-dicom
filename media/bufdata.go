@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
+	"fmt"
 )
 
 // BufData - is an interface to buffer manipulation class
@@ -26,7 +27,7 @@ type BufData interface {
 	ReadTag(explicitVR bool) (*DcmTag, error)
 	WriteTag(tag DcmTag, explicitVR bool)
 	WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool)
-	ReadMeta() string
+	ReadMeta() (string, error)
 	WriteMeta(SOPClassUID string, SOPInstanceUID string, TransferSyntax string)
 	ReadObj(obj DcmObj) bool
 	WriteObj(obj DcmObj)
@@ -206,7 +207,7 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 			tag.Length = uint32(length)
 		}
 	} else {
-		if internalVR == false {
+		if !internalVR {
 			tag.VR = GetDictionaryVR(tag.Group, tag.Element)
 		}
 		length, err := bd.ReadUint32()
@@ -248,13 +249,11 @@ func (bd *bufData) WriteTag(tag DcmTag, explicitVR bool) {
 
 // WriteStringTag - Writes a String to a DICOM tag
 func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool) {
-	var length uint32
-
-	length = uint32(len(content))
+	length := uint32(len(content))
 	if length%2 == 1 {
 		length++
 		if vr == "UI" {
-			content = content + string(0)
+			content = content + fmt.Sprint(0)
 		} else {
 			content = content + " "
 		}
@@ -271,12 +270,15 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 }
 
 // ReadMeta - Read Meta Header
-func (bd *bufData) ReadMeta() string {
+func (bd *bufData) ReadMeta() (string, error) {
 	TransferSyntax := ""
 	pos := 0
 
 	bd.SetPosition(128)
-	bs, _ := bd.MS.Read(4)
+	bs, err := bd.MS.Read(4)
+	if err != nil {
+		return "", err
+	}
 	if string(bs[:4]) == "DICM" {
 		fin := false
 		for (pos < bd.GetSize()) && (!fin) {
@@ -291,7 +293,7 @@ func (bd *bufData) ReadMeta() string {
 		}
 	}
 	bd.SetPosition(pos)
-	return TransferSyntax
+	return TransferSyntax, nil
 }
 
 // WriteMeta - Write Meta Header
@@ -345,7 +347,7 @@ func (bd *bufData) ReadObj(obj DcmObj) bool {
 
 	for bd.GetPosition() < bd.GetSize() {
 		if tag, err := bd.ReadTag(obj.IsExplicitVR()); err == nil {
-			if obj.IsExplicitVR() == false {
+			if !obj.IsExplicitVR() {
 				tag.VR = GetDictionaryVR(tag.Group, tag.Element)
 			}
 			obj.Add(*tag)

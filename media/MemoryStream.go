@@ -71,7 +71,7 @@ func NewMemoryStreamFromFile(fileName string) (MemoryStream, error) {
 
 func (ms *memoryStream) GetByte() (byte, error) {
 	if ms.Position >= ms.Size {
-		return 0, errors.New("No more data to read")
+		return 0, errors.New("no more data to read")
 	}
 	b := ms.Data[ms.Position]
 	ms.Position++
@@ -80,7 +80,7 @@ func (ms *memoryStream) GetByte() (byte, error) {
 
 func (ms *memoryStream) GetUint16() (uint16, error) {
 	if ms.Position+1 >= ms.Size {
-		return 0, errors.New("No more data to read")
+		return 0, errors.New("no more data to read")
 	}
 	b := make([]byte, 2)
 	copy(b, ms.Data[ms.Position:ms.Position+2])
@@ -90,7 +90,7 @@ func (ms *memoryStream) GetUint16() (uint16, error) {
 
 func (ms *memoryStream) GetUint32() (uint32, error) {
 	if ms.Position+3 >= ms.Size {
-		return 0, errors.New("No more data to read")
+		return 0, errors.New("no more data to read")
 	}
 	b := make([]byte, 4)
 	copy(b, ms.Data[ms.Position:ms.Position+4])
@@ -100,7 +100,7 @@ func (ms *memoryStream) GetUint32() (uint32, error) {
 
 func (ms *memoryStream) Get() (int, error) {
 	if ms.Position >= ms.Size {
-		return 0, errors.New("No more data to read")
+		return 0, errors.New("no more data to read")
 	}
 	b := ms.Data[ms.Position]
 	ms.Position++
@@ -109,7 +109,7 @@ func (ms *memoryStream) Get() (int, error) {
 
 func (ms *memoryStream) GetInt() (int, error) {
 	if ms.Position+3 >= ms.Size {
-		return 0, errors.New("No more data to read")
+		return 0, errors.New("no more data to read")
 	}
 	b := ms.Data[ms.Position : ms.Position+4]
 	ms.Position += 4
@@ -118,7 +118,7 @@ func (ms *memoryStream) GetInt() (int, error) {
 
 func (ms *memoryStream) ReadData(dst []byte) error {
 	if ms.Position+len(dst) > ms.Size {
-		return errors.New("No more data to read")
+		return errors.New("no more data to read")
 	}
 	copy(dst, ms.Data[ms.Position:ms.Position+len(dst)])
 	ms.Position += len(dst)

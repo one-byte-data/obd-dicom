@@ -5,12 +5,12 @@ go 1.17
 require (
 	git.onebytedata.com/odb/one-byte-module v0.0.0-20210921004211-a1a82a58a1e1
 	github.com/mattn/go-sqlite3 v1.14.8
-	go.mongodb.org/mongo-driver v1.7.2
+	go.mongodb.org/mongo-driver v1.7.3
 )
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/elastic/go-elasticsearch/v8 v8.0.0-20210916085751-c2fb55d91ba4 // indirect
+	github.com/elastic/go-elasticsearch/v8 v8.0.0-20211001143748-fd99a833e74f // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.7.4 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -33,7 +33,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210925032602-92d5a993a665 // indirect
+	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

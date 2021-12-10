@@ -123,11 +123,11 @@ func ValidateRule(Conditions string, Replacements string) bool {
 			if ValidateValue(components[2], group, element) {
 				flag = CheckOperator(components[1])
 			} else {
-				log.Println("ERROR, Condition[" + string(i) + "] fails ValidateValue")
+				log.Printf("ERROR, Condition[%d] fails ValidateValue\n", i)
 				flag = false
 			}
 		} else {
-			log.Println("ERROR, Condition[" + string(i) + "] not enough components")
+			log.Printf("ERROR, Condition[%d] not enough components\n", i)
 			flag = false
 		}
 	}
@@ -139,7 +139,7 @@ func ValidateRule(Conditions string, Replacements string) bool {
 				group, element = tags.GetGroupElement(components[0])
 				flag = ValidateValue(components[1], group, element)
 				if flag == false {
-					log.Println("ERROR, Replacement[" + string(i) + "] fails ValidateValue")
+					log.Printf("ERROR, Replacement[%d] fails ValidateValue\n", i)
 					break
 				}
 			}

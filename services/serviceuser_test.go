@@ -115,8 +115,6 @@ func Test_scu_StoreSCU(t *testing.T) {
 
 	type fields struct {
 		destination   *network.Destination
-		onCFindResult func(result media.DcmObj)
-		onCMoveResult func(result media.DcmObj)
 	}
 	type args struct {
 		FileName string

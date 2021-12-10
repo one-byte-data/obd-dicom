@@ -7,9 +7,7 @@ import (
 	"os"
 	"strings"
 
-	httpclient "git.onebytedata.com/odb/one-byte-module/clients/http-client"
-	"git.onebytedata.com/odb/one-byte-module/models"
-	"git.onebytedata.com/odb/one-byte-module/utils"
+	httpclient "git.onebytedata.com/odb/go-dicom/clients/http-client"
 )
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/DICOM/Dictionaries/DICOM%20Dictionary.xml"
@@ -39,7 +37,7 @@ func main() {
 }
 
 func downloadDictionary() []tag {
-	params := models.HTTPParams{
+	params := httpclient.HTTPParams{
 		URL: dictionaryURL,
 	}
 	client := httpclient.NewHTTPClient(params)
@@ -57,7 +55,7 @@ func downloadDictionary() []tag {
 }
 
 func writeDictionaryTags(tags []tag) {
-	if utils.FileExists(dictionaryTagsFile) {
+	if FileExists(dictionaryTagsFile) {
 		err := os.Remove(dictionaryTagsFile)
 		if err != nil {
 			log.Panic(err)
@@ -90,7 +88,7 @@ func writeDictionaryTags(tags []tag) {
 }
 
 func writeTagsFile(tags []tag) {
-	if utils.FileExists(tagsFileName) {
+	if FileExists(tagsFileName) {
 		err := os.Remove(tagsFileName)
 		if err != nil {
 			log.Panic(err)
@@ -121,4 +119,12 @@ func writeTagsFile(tags []tag) {
 
 	f.WriteString("}\n")
 	f.Sync()
+}
+
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }

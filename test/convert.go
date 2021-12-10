@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/binary"
-	"git.onebytedata.com/odb/go-dicom/jpeglib"
-	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/openjpeg"
 	"log"
 	"strconv"
 	"strings"
+
+	"git.onebytedata.com/odb/go-dicom/jpeglib"
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/openjpeg"
 )
 
 func SupportedTS(TransferSyntax string) bool {

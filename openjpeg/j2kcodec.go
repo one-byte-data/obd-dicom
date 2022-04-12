@@ -1,7 +1,7 @@
 package openjpeg
 
-// #cgo CFLAGS: -I j2klib/include -I j2klib/linux
-// #cgo LDFLAGS: -L j2klib/linux -llibopenjpeg.so.1.5.2
+// #cgo CFLAGS: -I j2klib/include -I j2klib/macos
+// #cgo LDFLAGS: -L j2klib/macos -lopenjpeg
 // #include "j2klib/decomj2k.c"
 // #include "j2klib/comj2k.c"
 import  "C"

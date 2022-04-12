@@ -1,10 +1,10 @@
 package jpeglib
 
-// #cgo CFLAGS: -Idcmjpeg/libijg12 -Idcmjpeg/win64
-// #cgo LDFLAGS: -Ldcmjpeg/win64 -lijg12
+// #cgo CFLAGS: -I dcmjpeg/libijg12 -I dcmjpeg/linux
+// #cgo LDFLAGS: -Ldcmjpeg/linux -lijg12
 // #include "dcmjpeg/dijg12.c"
 // #include "dcmjpeg/eijg12.c"
-import "C"
+import  "C"
 import (
 	"errors"
 	"unsafe"

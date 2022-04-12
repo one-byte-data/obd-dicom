@@ -57,12 +57,12 @@ func main() {
 		}
 		scp := services.NewSCP(*port)
 
-		scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
+		scp.OnAssociationRequest(func(request network.AAssociationRQ) bool {
 			called := request.GetCalledAE()
 			return *calledAE == called
 		})
 
-		scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj) []media.DcmObj {
+		scp.OnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj) []media.DcmObj {
 			query.DumpTags()
 			results := make([]media.DcmObj, 0)
 			for i := 0; i < 10; i++ {
@@ -71,11 +71,11 @@ func main() {
 			return results
 		})
 
-		scp.SetOnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
+		scp.OnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
 			query.DumpTags()
 		})
 
-		scp.SetOnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
+		scp.OnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
 			log.Printf("INFO, C-Store recieved %s", data.GetString(tags.SOPInstanceUID))
 			directory := filepath.Join(*datastore, data.GetString(tags.PatientID), data.GetString(tags.StudyInstanceUID), data.GetString(tags.SeriesInstanceUID))
 			os.MkdirAll(directory, 0755)

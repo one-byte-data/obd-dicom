@@ -1,10 +1,10 @@
 package openjpeg
 
-// #cgo CFLAGS: -Ij2klib/include -Ij2klib/win64
-// #cgo LDFLAGS: -Lj2klib/win64 -lopenjpeg.dll
+// #cgo CFLAGS: -I j2klib/include -I j2klib/linux
+// #cgo LDFLAGS: -L j2klib/linux -llibopenjpeg.so.1.5.2
 // #include "j2klib/decomj2k.c"
 // #include "j2klib/comj2k.c"
-import "C"
+import  "C"
 import (
 	"errors"
 	"unsafe"

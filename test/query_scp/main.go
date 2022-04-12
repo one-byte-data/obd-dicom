@@ -18,12 +18,12 @@ func main() {
 	port := 1040
 	scp := services.NewSCP(port)
 
-	scp.SetOnAssociationRequest(func(request network.AAssociationRQ) bool {
+	scp.OnAssociationRequest(func(request network.AAssociationRQ) bool {
 		called := request.GetCalledAE()
 		return calledAE == called
 	})
 
-	scp.SetOnCFindRequest(func(request network.AAssociationRQ, queryLevel string, obj media.DcmObj) []media.DcmObj {
+	scp.OnCFindRequest(func(request network.AAssociationRQ, queryLevel string, obj media.DcmObj) []media.DcmObj {
 		// Make Query from query.
 		if queryLevel == "STUDY" {
 			var study DCMStudy
@@ -46,11 +46,11 @@ func main() {
 		return nil
 	})
 
-	scp.SetOnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
+	scp.OnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
 		query.DumpTags()
 	})
 
-	scp.SetOnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
+	scp.OnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
 		log.Printf("INFO, C-Store received %s", data.GetString(tags.SOPInstanceUID))
 	})
 

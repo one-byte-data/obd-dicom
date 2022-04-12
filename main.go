@@ -88,7 +88,7 @@ func main() {
 			}
 		})
 
-		err := scp.StartServer()
+		err := scp.Start()
 		if err != nil {
 			log.Fatal(err)
 		}

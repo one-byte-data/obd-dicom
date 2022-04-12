@@ -23,6 +23,7 @@ test:
   stage: test
   script:
     - echo $SSH_SETUP | base64 --decode | bash
+    - go test ./...
 
 build:
   stage: build

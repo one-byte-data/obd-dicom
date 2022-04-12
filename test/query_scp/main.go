@@ -54,7 +54,7 @@ func main() {
 		log.Printf("INFO, C-Store received %s", data.GetString(tags.SOPInstanceUID))
 	})
 
-	err := scp.StartServer()
+	err := scp.Start()
 	if err != nil {
 		log.Fatal(err)
 	}

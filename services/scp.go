@@ -16,7 +16,8 @@ import (
 
 // SCP - Interface to scp
 type SCP interface {
-	StartServer() error
+	Start() error
+	Stop() error
 	OnAssociationRequest(f func(request network.AAssociationRQ) bool)
 	OnCFindRequest(f func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj)
 	OnCMoveRequest(f func(request network.AAssociationRQ, moveLevel string, data media.DcmObj))
@@ -25,8 +26,8 @@ type SCP interface {
 }
 
 type scp struct {
-	CalledAEs            []string
 	Port                 int
+	listener             net.Listener
 	onAssociationRequest func(request network.AAssociationRQ) bool
 	onCFindRequest       func(request network.AAssociationRQ, findLevel string, data media.DcmObj) []media.DcmObj
 	onCMoveRequest       func(request network.AAssociationRQ, moveLevel string, data media.DcmObj)
@@ -42,15 +43,15 @@ func NewSCP(port int) SCP {
 	}
 }
 
-func (s *scp) StartServer() error {
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", s.Port))
+func (s *scp) Start() error {
+	var err error
+	s.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", s.Port))
 	if err != nil {
 		return err
 	}
-	defer listen.Close()
 
 	for {
-		conn, err := listen.Accept()
+		conn, err := s.listener.Accept()
 		if err != nil {
 			log.Print(err)
 			continue
@@ -58,6 +59,10 @@ func (s *scp) StartServer() error {
 		log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
 		go s.handleConnection(conn)
 	}
+}
+
+func (s *scp) Stop() error {
+	return s.listener.Close()
 }
 
 func (s *scp) handleConnection(conn net.Conn) {

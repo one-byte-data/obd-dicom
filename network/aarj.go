@@ -72,7 +72,7 @@ func (aarj *aassociationRJ) Size() uint32 {
 func (aarj *aassociationRJ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	log.Printf("INFO, ASSOC-RJ: Reason %x\n", aarj.GetReason())
+	log.Printf("INFO, ASSOC-RJ: Reason: %s\n", aarj.GetReason())
 
 	bd.SetBigEndian(true)
 	aarj.Size()

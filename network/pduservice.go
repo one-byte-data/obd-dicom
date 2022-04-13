@@ -8,6 +8,7 @@ import (
 	"net"
 	"time"
 
+	"git.onebytedata.com/odb/go-dicom/imp"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network/pdutype"
 	"git.onebytedata.com/odb/go-dicom/uid"
@@ -100,8 +101,8 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 
 	pdu.readWriter = rw
 	pdu.AssocRQ.SetMaxSubLength(maxPduLength)
-	pdu.AssocRQ.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
-	pdu.AssocRQ.SetImpVersionName("One-Byte-Data")
+	pdu.AssocRQ.SetImpClassUID(imp.GetImpClassUID())
+	pdu.AssocRQ.SetImpVersionName(imp.GetImpVersion())
 
 	err = pdu.AssocRQ.Write(pdu.readWriter)
 	if err != nil {
@@ -384,8 +385,8 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 		UserInfo := NewUserInformation()
 
 		MaxSubLength.SetMaximumLength(maxPduLength)
-		UserInfo.SetImpClassUID("1.2.826.0.1.3680043.10.90.999")
-		UserInfo.SetImpVersionName("One-Byte-Data")
+		UserInfo.SetImpClassUID(imp.GetImpClassUID())
+		UserInfo.SetImpVersionName(imp.GetImpVersion())
 		UserInfo.SetMaxSubLength(MaxSubLength)
 		pdu.AssocAC.SetUserInformation(UserInfo)
 		return pdu.AssocAC.Write(rw)

@@ -12,7 +12,10 @@ func Test_scu_EchoSCU(t *testing.T) {
 	_, testSCP := StartSCP(t, 1040)
 
 	testSCP.OnAssociationRequest(func(request network.AAssociationRQ) bool {
-		return true
+		if request.GetCalledAE() == "TEST_SCP" {
+			return true
+		}
+		return false
 	})
 
 	media.InitDict()
@@ -30,7 +33,7 @@ func Test_scu_EchoSCU(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "C-Echo Success",
+			name: "Should have C-Echo Success",
 			fields: fields{
 				destination: &network.Destination{
 					Name:      "Test Destination",
@@ -38,15 +41,36 @@ func Test_scu_EchoSCU(t *testing.T) {
 					CallingAE: "TEST_SCU",
 					HostName:  "localhost",
 					Port:      1040,
-					IsCFind:   true,
-					IsCMove:   true,
-					IsCStore:  true,
+					IsCFind:   false,
+					IsCMove:   false,
+					IsCStore:  false,
 					IsTLS:     false,
 				},
 			},
 			args: args{
 				timeout: 0,
 			},
+			wantErr: false,
+		},
+		{
+			name: "Should not have C-Echo Success",
+			fields: fields{
+				destination: &network.Destination{
+					Name:      "Test Destination",
+					CalledAE:  "TEST_SCP2",
+					CallingAE: "TEST_SCU",
+					HostName:  "localhost",
+					Port:      1040,
+					IsCFind:   false,
+					IsCMove:   false,
+					IsCStore:  false,
+					IsTLS:     false,
+				},
+			},
+			args: args{
+				timeout: 0,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -63,7 +87,10 @@ func Test_scu_FindSCU(t *testing.T) {
 	_, testSCP := StartSCP(t, 1041)
 
 	testSCP.OnAssociationRequest(func(request network.AAssociationRQ) bool {
-		return true
+		if request.GetCalledAE() == "TEST_SCP" {
+			return true
+		}
+		return false
 	})
 
 	media.InitDict()
@@ -83,7 +110,7 @@ func Test_scu_FindSCU(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "C-Find All",
+			name: "Should C-Find All",
 			fields: fields{
 				destination: &network.Destination{
 					Name:      "Test Destination",
@@ -101,6 +128,7 @@ func Test_scu_FindSCU(t *testing.T) {
 				Query:   media.DefaultCFindRequest(),
 				timeout: 0,
 			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {

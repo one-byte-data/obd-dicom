@@ -3,7 +3,6 @@ package media
 import (
 	"encoding/xml"
 	"io/ioutil"
-	"log"
 	"strconv"
 
 	"git.onebytedata.com/odb/go-dicom/tags"
@@ -37,7 +36,7 @@ func FillTag(tag *DcmTag) {
 // GetDictionaryTag - get tag from Dictionary
 func GetDictionaryTag(group uint16, element uint16) *tags.Tag {
 	if codes == nil {
-		log.Fatal("Dictionary not initialized")
+		InitDict()
 	}
 	for i := 0; i < len(codes); i++ {
 		if (group == codes[i].Group) && (element == codes[i].Element) {
@@ -57,7 +56,7 @@ func GetDictionaryTag(group uint16, element uint16) *tags.Tag {
 // GetDictionaryVR - get info from Dictionary
 func GetDictionaryVR(group uint16, element uint16) string {
 	if codes == nil {
-		log.Fatal("Dictionary not initialized")
+		InitDict()
 	}
 	for i := 0; i < len(codes); i++ {
 		if (group == codes[i].Group) && (element == codes[i].Element) {

@@ -22,12 +22,9 @@ variables:
 test:
   stage: test
   script:
-    - apk add gcc g++ tiff-dev git bash
+    - apk add gcc g++ tiff-dev git bash build-base vim libtirpc-dev libtirpc procps imlib2 linux-headers make zlib-dev libpng-dev lcms2-dev
     - echo $SSH_SETUP | base64 -d | bash
-    - sed -i 's/darwin/linux/g' openjpeg/j2kcodec.go
-    - sed -i 's/darwin/linux/g' jpeglib/codec8.go
-    - sed -i 's/darwin/linux/g' jpeglib/codec12.go
-    - sed -i 's/darwin/linux/g' jpeglib/codec16.go
+    - sh changeLinux-amd64.sh
     - go test -p 1 ./...
 
 build:
@@ -37,11 +34,9 @@ build:
     - echo $SSH_SETUP | base64 -d | bash
     - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/amd64/obd-dicom
     - GOOS=darwin GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/arm64/obd-dicom
-    - sed -i 's/darwin/linux/g' openjpeg/j2kcodec.go
-    - sed -i 's/darwin/linux/g' jpeglib/codec8.go
-    - sed -i 's/darwin/linux/g' jpeglib/codec12.go
-    - sed -i 's/darwin/linux/g' jpeglib/codec16.go
+    - sh changeLinux-amd64.sh
     - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom
+    - sh changeLinux-arm64.sh
     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom
     - sed -i 's/linux/win64/g' openjpeg/j2kcodec.go
     - sed -i 's/linux/win64/g' jpeglib/codec8.go

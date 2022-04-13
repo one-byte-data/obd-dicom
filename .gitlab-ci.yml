@@ -22,7 +22,7 @@ variables:
 test:
   stage: test
   script:
-    - apk add gcc g++ tiff-dev git
+    - apk add gcc g++ tiff-dev git bash
     - echo $SSH_SETUP | base64 --decode | bash
     - sed -i 's/darwin/linux/g' openjpeg/j2kcodec.go
     - sed -i 's/darwin/linux/g' jpeglib/codec8.go
@@ -33,6 +33,7 @@ test:
 build:
   stage: build
   script:
+    - apk add gcc g++ tiff-dev git bash
     - echo $SSH_SETUP | base64 --decode | bash
     - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/amd64/obd-dicom
     - GOOS=darwin GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/arm64/obd-dicom

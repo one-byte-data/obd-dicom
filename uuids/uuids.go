@@ -3,6 +3,8 @@ package uuids
 import (
 	"hash/fnv"
 	"strconv"
+
+	"git.onebytedata.com/odb/go-dicom/imp"
 )
 
 func hash32(text string) uint32 {
@@ -12,7 +14,7 @@ func hash32(text string) uint32 {
 }
 
 func CreateStudyUID(patName string, patID string, accNum string, stDate string) string {
-	StudyUID := "1.2.826.0.1.3680043.10.90" // One Byte Data UID - 25 bytes
+	StudyUID := imp.GetImpClassUID()
 	value := int(hash32(patName + patID + accNum + stDate))
 	StudyUID = StudyUID + "." + strconv.Itoa(value) // 25 bytes + 11 bytes
 	return StudyUID

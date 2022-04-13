@@ -25,15 +25,15 @@ test-amd64:
   script:
     - apk add gcc g++
     - sh changeLinux-amd64.sh
-    - cd test && go test && cd ..
+    - go test ./...
 
-test-arm64:
-  stage: test
-  image: arm64v8/golang:alpine
-  script:
-    - apk add gcc g++
-    - sh changeLinux-arm64.sh
-    - cd test && go test && cd ..
+# test-arm64:
+#   stage: test
+#   image: arm64v8/golang:alpine
+#   script:
+#     - apk add gcc g++
+#     - sh changeLinux-arm64.sh
+#     - go test ./...
 
 build-amd64:
   stage: build
@@ -50,39 +50,39 @@ build-amd64:
       - build/linux/amd64/obd-dicom
     expire_in: 30 days
 
-build-arm64:
-  stage: build
-  image: arm64v8/golang:alpine
-  script:
-    - apk add gcc g++
-    - sh changeLinux-arm64.sh
-    - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom cmd/tools/main.go
-  cache:
-    key: ${CI_PIPELINE_ID}
-    paths:
-      - build
-  artifacts:
-    paths:
-      - build/linux/arm64/obd-dicom
-    expire_in: 30 days
+# build-arm64:
+#   stage: build
+#   image: arm64v8/golang:alpine
+#   script:
+#     - apk add gcc g++
+#     - sh changeLinux-arm64.sh
+#     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom cmd/tools/main.go
+#   cache:
+#     key: ${CI_PIPELINE_ID}
+#     paths:
+#       - build
+#   artifacts:
+#     paths:
+#       - build/linux/arm64/obd-dicom
+#     expire_in: 30 days
 
-build-windows:
-  stage: build
-  image: winamd64/golang:latest
-  script:
-    - sed -i 's/linux/win64/g' openjpeg/j2kcodec.go
-    - sed -i 's/linux/win64/g' jpeglib/codec8.go
-    - sed -i 's/linux/win64/g' jpeglib/codec12.go
-    - sed -i 's/linux/win64/g' jpeglib/codec16.go
-    - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/amd64/obd-dicom.exe cmd/tools/main.go
-  cache:
-    key: ${CI_PIPELINE_ID}
-    paths:
-      - build
-  artifacts:
-    paths:
-      - build/windows/amd64/obd-dicom.exe
-    expire_in: 30 days
+# build-windows:
+#   stage: build
+#   image: winamd64/golang:latest
+#   script:
+#     - sed -i 's/linux/win64/g' openjpeg/j2kcodec.go
+#     - sed -i 's/linux/win64/g' jpeglib/codec8.go
+#     - sed -i 's/linux/win64/g' jpeglib/codec12.go
+#     - sed -i 's/linux/win64/g' jpeglib/codec16.go
+#     - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/amd64/obd-dicom.exe cmd/tools/main.go
+#   cache:
+#     key: ${CI_PIPELINE_ID}
+#     paths:
+#       - build
+#   artifacts:
+#     paths:
+#       - build/windows/amd64/obd-dicom.exe
+#     expire_in: 30 days
 
 publish-build:
   image: docker:19-dind

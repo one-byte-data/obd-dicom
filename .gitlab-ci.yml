@@ -30,7 +30,7 @@ test:
 build:
   stage: build
   script:
-    - apk add gcc g++ tiff-dev git bash
+    - apk add gcc g++ tiff-dev git bash build-base vim libtirpc-dev libtirpc procps imlib2 linux-headers make zlib-dev libpng-dev lcms2-dev
     - echo $SSH_SETUP | base64 -d | bash
     - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/amd64/obd-dicom
     - GOOS=darwin GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/arm64/obd-dicom

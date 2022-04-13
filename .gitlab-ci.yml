@@ -19,25 +19,57 @@ variables:
   TAG_BUILD: $CI_REGISTRY_IMAGE:${CI_PIPELINE_ID}
   TAG_RELEASE: $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG}
 
-test:
+test-amd64:
   stage: test
+  image: golang:alpine
   script:
-    - apk add gcc g++ bash
-    - echo $SSH_SETUP | base64 -d | bash
+    - apk add gcc g++
     - sh changeLinux-amd64.sh
-    - go test -p 1 ./...
+    - cd test && go test && cd ..
 
-build:
+test-arm64:
+  stage: test
+  image: arm64v8/golang:alpine
+  script:
+    - apk add gcc g++
+    - sh changeLinux-arm64.sh
+    - cd test && go test && cd ..
+
+build-amd64:
   stage: build
   script:
-    - apk add gcc g++ bash
-    - echo $SSH_SETUP | base64 -d | bash
-    - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/amd64/obd-dicom
-    - GOOS=darwin GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/arm64/obd-dicom
+    - apk add gcc g++
     - sh changeLinux-amd64.sh
     - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom
+  cache:
+    key: ${CI_PIPELINE_ID}
+    paths:
+      - build
+  artifacts:
+    paths:
+      - build/linux/amd64/obd-dicom
+    expire_in: 30 days
+
+build-arm64:
+  stage: build
+  image: arm64v8/golang:alpine
+  script:
+    - apk add gcc g++
     - sh changeLinux-arm64.sh
     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom
+  cache:
+    key: ${CI_PIPELINE_ID}
+    paths:
+      - build
+  artifacts:
+    paths:
+      - build/linux/arm64/obd-dicom
+    expire_in: 30 days
+
+build-windows:
+  stage: build
+  image: winamd64/golang:latest
+  script:
     - sed -i 's/linux/win64/g' openjpeg/j2kcodec.go
     - sed -i 's/linux/win64/g' jpeglib/codec8.go
     - sed -i 's/linux/win64/g' jpeglib/codec12.go
@@ -49,10 +81,6 @@ build:
       - build
   artifacts:
     paths:
-      - build/linux/amd64/obd-dicom
-      - build/linux/arm64/obd-dicom
-      - build/macos/amd64/obd-dicom
-      - build/macos/arm64/obd-dicom
       - build/windows/amd64/obd-dicom.exe
     expire_in: 30 days
 

@@ -14,7 +14,7 @@ import (
 
 // DcmObj - DICOM Object structure
 type DcmObj interface {
-	Add(tag DcmTag)
+	Add(tag *DcmTag)
 	AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string)
 	AddSRText(text string)
 	DumpTags()
@@ -22,22 +22,22 @@ type DcmObj interface {
 	SetExplicitVR(explicit bool)
 	IsBigEndian() bool
 	SetBigEndian(bigEndian bool)
-	GetTag(i int) DcmTag
-	SetTag(i int, tag DcmTag)
-	InsertTag(i int, tag DcmTag)
+	GetTag(i int) *DcmTag
+	SetTag(i int, tag *DcmTag)
+	InsertTag(i int, tag *DcmTag)
 	DelTag(i int)
-	GetTags() []DcmTag
-	GetUShort(tag tags.Tag) uint16
-	GetUInt(tag tags.Tag) uint32
-	GetString(tag tags.Tag) string
+	GetTags() []*DcmTag
+	GetUShort(tag *tags.Tag) uint16
+	GetUInt(tag *tags.Tag) uint32
+	GetString(tag *tags.Tag) string
 	GetUShortGE(group uint16, element uint16) uint16
 	GetUIntGE(group uint16, element uint16) uint32
 	GetStringGE(group uint16, element uint16) string
-	WriteDate(tag tags.Tag, date time.Time)
-	WriteTime(tag tags.Tag, date time.Time)
-	WriteUint16(tag tags.Tag, val uint16)
-	WriteUint32(tag tags.Tag, val uint32)
-	WriteString(tag tags.Tag, content string)
+	WriteDate(tag *tags.Tag, date time.Time)
+	WriteTime(tag *tags.Tag, date time.Time)
+	WriteUint16(tag *tags.Tag, val uint16)
+	WriteUint32(tag *tags.Tag, val uint32)
+	WriteString(tag *tags.Tag, content string)
 	WriteUint16GE(group uint16, element uint16, vr string, val uint16)
 	WriteUint32GE(group uint16, element uint16, vr string, val uint32)
 	WriteStringGE(group uint16, element uint16, vr string, content string)
@@ -52,21 +52,21 @@ type DcmObj interface {
 }
 
 type dcmObj struct {
-	Tags           []DcmTag
+	Tags           []*DcmTag
 	TransferSyntax string
 	ExplicitVR     bool
 	BigEndian      bool
-	SQtag          DcmTag
+	SQtag          *DcmTag
 }
 
 // NewEmptyDCMObj - Create as an interface to a new empty dcmObj
 func NewEmptyDCMObj() DcmObj {
 	return &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: "",
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          &DcmTag{},
 	}
 }
 
@@ -89,11 +89,11 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 	}
 
 	obj := &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: transferSyntax,
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          &DcmTag{},
 	}
 
 	if len(obj.TransferSyntax) > 0 {
@@ -122,11 +122,11 @@ func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
 	}
 
 	obj := &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: transferSyntax,
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          &DcmTag{},
 	}
 
 	if len(obj.TransferSyntax) > 0 {
@@ -167,22 +167,22 @@ func (obj *dcmObj) TagCount() int {
 }
 
 // GetTag - return the Tag at position i
-func (obj *dcmObj) GetTag(i int) DcmTag {
+func (obj *dcmObj) GetTag(i int) *DcmTag {
 	return obj.Tags[i]
 }
 
-func (obj *dcmObj) SetTag(i int, tag DcmTag) {
+func (obj *dcmObj) SetTag(i int, tag *DcmTag) {
 	if i <= obj.TagCount() {
 		obj.Tags[i] = tag
 	}
 }
 
-func (obj *dcmObj) InsertTag(index int, tag DcmTag) {
+func (obj *dcmObj) InsertTag(index int, tag *DcmTag) {
 	obj.Tags = append(obj.Tags[:index+1], obj.Tags[index:]...)
 	obj.Tags[index] = tag
 }
 
-func (obj *dcmObj) GetTags() []DcmTag {
+func (obj *dcmObj) GetTags() []*DcmTag {
 	return obj.Tags
 }
 
@@ -228,14 +228,14 @@ func (obj *dcmObj) dumpSeq(indent int) {
 	}
 }
 
-func (obj *dcmObj) GetUShort(tag tags.Tag) uint16 {
+func (obj *dcmObj) GetUShort(tag *tags.Tag) uint16 {
 	return obj.GetUShortGE(tag.Group, tag.Element)
 }
 
 // GetUShortGE - return the Uint16 for this group & element
 func (obj *dcmObj) GetUShortGE(group uint16, element uint16) uint16 {
 	var i int
-	var tag DcmTag
+	var tag *DcmTag
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
 		tag = obj.GetTag(i)
@@ -257,14 +257,14 @@ func (obj *dcmObj) GetUShortGE(group uint16, element uint16) uint16 {
 	return 0
 }
 
-func (obj *dcmObj) GetUInt(tag tags.Tag) uint32 {
+func (obj *dcmObj) GetUInt(tag *tags.Tag) uint32 {
 	return obj.GetUIntGE(tag.Group, tag.Element)
 }
 
 // GetUIntGE - return the Uint32 for this group & element
 func (obj *dcmObj) GetUIntGE(group uint16, element uint16) uint32 {
 	var i int
-	var tag DcmTag
+	var tag *DcmTag
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
 		tag = obj.GetTag(i)
@@ -286,14 +286,14 @@ func (obj *dcmObj) GetUIntGE(group uint16, element uint16) uint32 {
 	return 0
 }
 
-func (obj *dcmObj) GetString(tag tags.Tag) string {
+func (obj *dcmObj) GetString(tag *tags.Tag) string {
 	return obj.GetStringGE(tag.Group, tag.Element)
 }
 
 // GetStringGE - return the String for this group & element
 func (obj *dcmObj) GetStringGE(group uint16, element uint16) string {
 	var i int
-	var tag DcmTag
+	var tag *DcmTag
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
 		tag = obj.GetTag(i)
@@ -316,7 +316,7 @@ func (obj *dcmObj) GetStringGE(group uint16, element uint16) string {
 }
 
 // Add - add a new DICOM Tag to a DICOM Object
-func (obj *dcmObj) Add(tag DcmTag) {
+func (obj *dcmObj) Add(tag *DcmTag) {
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -349,23 +349,23 @@ func (obj *dcmObj) WriteToFile(fileName string) error {
 	return bufdata.SaveToFile(fileName)
 }
 
-func (obj *dcmObj) WriteDate(tag tags.Tag, date time.Time) {
+func (obj *dcmObj) WriteDate(tag *tags.Tag, date time.Time) {
 	obj.WriteString(tag, date.Format("20060102"))
 }
 
-func (obj *dcmObj) WriteTime(tag tags.Tag, date time.Time) {
+func (obj *dcmObj) WriteTime(tag *tags.Tag, date time.Time) {
 	obj.WriteString(tag, date.Format("150405"))
 }
 
-func (obj *dcmObj) WriteUint16(tag tags.Tag, val uint16) {
+func (obj *dcmObj) WriteUint16(tag *tags.Tag, val uint16) {
 	obj.WriteUint16GE(tag.Group, tag.Element, tag.VR, val)
 }
 
-func (obj *dcmObj) WriteUint32(tag tags.Tag, val uint32) {
+func (obj *dcmObj) WriteUint32(tag *tags.Tag, val uint32) {
 	obj.WriteUint32GE(tag.Group, tag.Element, tag.VR, val)
 }
 
-func (obj *dcmObj) WriteString(tag tags.Tag, content string) {
+func (obj *dcmObj) WriteString(tag *tags.Tag, content string) {
 	obj.WriteStringGE(tag.Group, tag.Element, tag.VR, content)
 }
 
@@ -378,7 +378,7 @@ func (obj *dcmObj) WriteUint16GE(group uint16, element uint16, vr string, val ui
 		binary.LittleEndian.PutUint16(c, val)
 	}
 
-	tag := DcmTag{
+	tag := &DcmTag{
 		Group:     group,
 		Element:   element,
 		Length:    2,
@@ -386,7 +386,7 @@ func (obj *dcmObj) WriteUint16GE(group uint16, element uint16, vr string, val ui
 		Data:      c,
 		BigEndian: obj.BigEndian,
 	}
-	FillTag(&tag)
+	FillTag(tag)
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -399,7 +399,7 @@ func (obj *dcmObj) WriteUint32GE(group uint16, element uint16, vr string, val ui
 		binary.LittleEndian.PutUint32(c, val)
 	}
 
-	tag := DcmTag{
+	tag := &DcmTag{
 		Group:     group,
 		Element:   element,
 		Length:    4,
@@ -407,7 +407,7 @@ func (obj *dcmObj) WriteUint32GE(group uint16, element uint16, vr string, val ui
 		Data:      c,
 		BigEndian: obj.BigEndian,
 	}
-	FillTag(&tag)
+	FillTag(tag)
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -422,7 +422,7 @@ func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, conten
 			content = content + " "
 		}
 	}
-	tag := DcmTag{
+	tag := &DcmTag{
 		Group:     group,
 		Element:   element,
 		Length:    length,
@@ -430,7 +430,7 @@ func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, conten
 		Data:      []byte(content),
 		BigEndian: false,
 	}
-	FillTag(&tag)
+	FillTag(tag)
 	obj.Tags = append(obj.Tags, tag)
 }
 
@@ -445,20 +445,20 @@ func (obj *dcmObj) SetTransferSyntax(ts string) {
 // AddConceptNameSeq - Concept Name Sequence for DICOM SR
 func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string) {
 	item := &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: "",
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          new(DcmTag),
 	}
 	seq := &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: "",
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          new(DcmTag),
 	}
-	tag := DcmTag{}
+	tag := new(DcmTag)
 
 	item.BigEndian = obj.BigEndian
 	item.ExplicitVR = obj.ExplicitVR
@@ -477,20 +477,20 @@ func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue str
 // AddSRText - add Text to SR
 func (obj *dcmObj) AddSRText(text string) {
 	item := &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: "",
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          new(DcmTag),
 	}
 	seq := &dcmObj{
-		Tags:           make([]DcmTag, 0),
+		Tags:           make([]*DcmTag, 0),
 		TransferSyntax: "",
 		ExplicitVR:     false,
 		BigEndian:      false,
-		SQtag:          DcmTag{},
+		SQtag:          new(DcmTag),
 	}
-	tag := DcmTag{}
+	tag := new(DcmTag)
 
 	item.BigEndian = obj.BigEndian
 	item.ExplicitVR = obj.ExplicitVR
@@ -565,7 +565,7 @@ func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 		mstream.Append([]byte{0})
 	}
 	obj.WriteString(tags.DocumentTitle, fileName)
-	obj.Add(DcmTag{
+	obj.Add(&DcmTag{
 		Group:     0x42,
 		Element:   0x11,
 		Length:    size,

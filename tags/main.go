@@ -11,17 +11,17 @@ type Tag struct {
 }
 
 // GetTag - Get tag from group and element
-func GetTag(group uint16, element uint16) Tag {
+func GetTag(group uint16, element uint16) *Tag {
 	for _, tag := range tags {
 		if tag.Group == group && tag.Element == element {
 			return tag
 		}
 	}
-	return Tag{}
+	return &Tag{}
 }
 
 // GetTags - Get all tags
-func GetTags() []Tag {
+func GetTags() []*Tag {
 	return tags
 }
 

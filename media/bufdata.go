@@ -25,7 +25,7 @@ type BufData interface {
 	WriteUint32(value uint32)
 	WriteString(value string)
 	ReadTag(explicitVR bool) (*DcmTag, error)
-	WriteTag(tag DcmTag, explicitVR bool)
+	WriteTag(tag *DcmTag, explicitVR bool)
 	WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool)
 	ReadMeta() (string, error)
 	WriteMeta(SOPClassUID string, SOPInstanceUID string, TransferSyntax string)
@@ -228,7 +228,7 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 }
 
 // WriteTag - Write a single tag to stream
-func (bd *bufData) WriteTag(tag DcmTag, explicitVR bool) {
+func (bd *bufData) WriteTag(tag *DcmTag, explicitVR bool) {
 	bd.WriteUint16(tag.Group)
 	bd.WriteUint16(tag.Element)
 	if (tag.Group != 0x0000) && (tag.Group != 0xfffe) && (explicitVR) {
@@ -258,7 +258,7 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 			content = content + " "
 		}
 	}
-	tag := DcmTag{
+	tag := &DcmTag{
 		Group:     group,
 		Element:   element,
 		Length:    length,
@@ -301,11 +301,11 @@ func (bd *bufData) WriteMeta(SOPClassUID string, SOPInstanceUID string, Transfer
 	explicitVR := true
 	buffer := make([]byte, 128)
 	var largo uint32
-	var tag DcmTag
+	var tag *DcmTag
 
 	bd.MS.Write(buffer, 128)
 	bd.MS.Write([]byte("DICM"), 4)
-	tag = DcmTag{
+	tag = &DcmTag{
 		Group:     0x02,
 		Element:   0x00,
 		Length:    4,
@@ -313,7 +313,7 @@ func (bd *bufData) WriteMeta(SOPClassUID string, SOPInstanceUID string, Transfer
 		Data:      []byte{0, 0, 0, 0},
 		BigEndian: false}
 	bd.WriteTag(tag, explicitVR)
-	tag = DcmTag{
+	tag = &DcmTag{
 		Group:     0x02,
 		Element:   0x01,
 		Length:    2,
@@ -350,7 +350,7 @@ func (bd *bufData) ReadObj(obj DcmObj) bool {
 			if !obj.IsExplicitVR() {
 				tag.VR = GetDictionaryVR(tag.Group, tag.Element)
 			}
-			obj.Add(*tag)
+			obj.Add(tag)
 		}
 		flag = true
 	}

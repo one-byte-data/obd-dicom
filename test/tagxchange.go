@@ -9,9 +9,9 @@ import (
 	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
-func GetTag(obj media.DcmObj, group uint16, element uint16) media.DcmTag {
+func GetTag(obj media.DcmObj, group uint16, element uint16) *media.DcmTag {
 	var i int
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
 		tag = obj.GetTag(i)
@@ -30,9 +30,9 @@ func GetTag(obj media.DcmObj, group uint16, element uint16) media.DcmTag {
 	return tag
 }
 
-func Insert(obj media.DcmObj, intag media.DcmTag) {
+func Insert(obj media.DcmObj, intag *media.DcmTag) {
 	var i int
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
 		tag = obj.GetTag(i)
@@ -128,7 +128,7 @@ func CopyDCM(inobj media.DcmObj) media.DcmObj {
 	outobj.SetExplicitVR(inobj.IsExplicitVR())
 	outobj.SetBigEndian(inobj.IsBigEndian())
 	outobj.SetTransferSyntax(inobj.GetTransferSyntax())
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	for i := 0; i < inobj.TagCount(); i++ {
 		tag = inobj.GetTag(i)
 		outobj.Add(tag)
@@ -140,7 +140,7 @@ func MultipleReplace(inobj media.DcmObj, Conditions string, Replacements string)
 	// Mutiple Rules have this syntax:
 	// if Cond1&Cond2&Cond3 then apply Rep1&Rep2
 	// There can be n Conditions and m Replacements.
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	var group, element, out_group, out_element uint16
 	var DICOMTag, DICOMValue string
 

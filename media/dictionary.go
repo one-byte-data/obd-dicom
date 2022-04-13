@@ -23,7 +23,7 @@ type xmlTag struct {
 	Description string `xml:",chardata"`
 }
 
-var codes []tags.Tag
+var codes []*tags.Tag
 
 // FillTag - Populates with data from dictionary
 func FillTag(tag *DcmTag) {
@@ -41,7 +41,7 @@ func GetDictionaryTag(group uint16, element uint16) *tags.Tag {
 	}
 	for i := 0; i < len(codes); i++ {
 		if (group == codes[i].Group) && (element == codes[i].Element) {
-			return &codes[i]
+			return codes[i]
 		}
 	}
 	return &tags.Tag{
@@ -90,7 +90,7 @@ func loadPrivateDictionary() {
 			continue
 		}
 
-		codes = append(codes, tags.Tag{
+		codes = append(codes, &tags.Tag{
 			Group:       uint16(g),
 			Element:     uint16(e),
 			Name:        t.Name,

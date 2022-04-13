@@ -10,7 +10,7 @@ import (
 	httpclient "git.onebytedata.com/odb/go-dicom/clients/http-client"
 )
 
-const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/DICOM/Dictionaries/DICOM%20Dictionary.xml"
+const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"
 
 const dictionaryTagsFile string = "../tags/dicomtags.go"
 
@@ -74,7 +74,7 @@ func writeDictionaryTags(tags []tag) {
 			continue
 		}
 		f.WriteString(fmt.Sprintf("// %s - (%s,%s) %s\n", tag.Keyword, tag.Group, tag.Element, tag.Name))
-		f.WriteString(fmt.Sprintf("var %s = Tag{\n", tag.Keyword))
+		f.WriteString(fmt.Sprintf("var %s = &Tag{\n", tag.Keyword))
 		f.WriteString(fmt.Sprintf("  Group: 0x%s,\n", tag.Group))
 		f.WriteString(fmt.Sprintf("  Element: 0x%s,\n", tag.Element))
 		f.WriteString(fmt.Sprintf("  VR: \"%s\",\n", tag.VR))
@@ -101,7 +101,7 @@ func writeTagsFile(tags []tag) {
 	defer f.Close()
 
 	f.WriteString("package tags\n\n")
-	f.WriteString("var tags = []Tag{\n")
+	f.WriteString("var tags = []*Tag{\n")
 
 	for _, tag := range tags {
 		if strings.Contains(tag.Group, "x") || strings.Contains(tag.Element, "x") {

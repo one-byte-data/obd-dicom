@@ -116,7 +116,7 @@ func (tag *DcmTag) ReadSeq(ExplicitVR bool) DcmObj {
 		if !ExplicitVR {
 			temptag.VR = GetDictionaryVR(tag.Group, tag.Element)
 		}
-		seq.Add(*temptag)
+		seq.Add(temptag)
 	}
 	return seq
 }

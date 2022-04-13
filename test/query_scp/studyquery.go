@@ -26,7 +26,7 @@ type DCMStudy struct {
 }
 
 func (study *DCMStudy) Query(obj media.DcmObj) string {
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	var query, partial string
 	previous := false
 
@@ -110,7 +110,7 @@ func (study *DCMStudy) Query(obj media.DcmObj) string {
 
 func (study *DCMStudy) QueryResult(obj media.DcmObj) media.DcmObj {
 	var added bool
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	query := media.NewEmptyDCMObj()
 	query.SetTransferSyntax("1.2.840.10008.1.2")
 

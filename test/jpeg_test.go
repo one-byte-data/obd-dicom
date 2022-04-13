@@ -59,7 +59,7 @@ func SaveToFile(FileName string, buffer []byte) bool {
 // GetPixelData - Gets pixel data from DcmObj
 func GetPixelData(obj media.DcmObj, index *int) []uint8 {
 	var i int
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
 		tag = obj.GetTag(i)
@@ -117,7 +117,7 @@ func test16() {
 			obj.InsertTag(index, tag)
 			obj.SetTransferSyntax(uid.JPEGLosslessNonHierarchical14)
 			index++
-			tag = media.DcmTag{
+			tag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    0,
@@ -127,7 +127,7 @@ func test16() {
 			}
 			obj.InsertTag(index, tag)
 			index++
-			tag = media.DcmTag{
+			tag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    uint32(outSize),
@@ -137,7 +137,7 @@ func test16() {
 			}
 			obj.InsertTag(index, tag)
 			index++
-			tag = media.DcmTag{
+			tag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE0DD,
 				Length:    0,

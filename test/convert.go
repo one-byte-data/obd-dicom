@@ -106,7 +106,7 @@ func RLEdecode(in []byte, out []byte, length uint32, size uint32, PhotoInt strin
 }
 
 func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bitsa uint16, PhotoInt string) {
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	var j, offset, single uint32
 
 	single = size / frames
@@ -172,7 +172,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 }
 
 func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint16, bitss uint16, bitsa uint16, pixelrep uint16, planar uint16, frames uint32, outTS string) bool {
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	var offset, size, jpeg_size, j uint32
 	var JPEGData []byte
 	var JPEGBytes, index int
@@ -193,7 +193,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		}
 		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag{
+		newtag := &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE000,
 			Length:    0,
@@ -217,7 +217,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			} else {
 				jpeglib.EIJG16encode(img[offset/2:], cols, rows, 1, &JPEGData, &JPEGBytes, 0)
 			}
-			newtag = media.DcmTag{
+			newtag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    uint32(JPEGBytes),
@@ -229,7 +229,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			JPEGData = nil
 		}
 		index++
-		newtag = media.DcmTag{
+		newtag = &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE0DD,
 			Length:    0,
@@ -247,7 +247,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		}
 		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag{
+		newtag := &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE000,
 			Length:    0,
@@ -271,7 +271,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 					return false
 				}
 			}
-			newtag = media.DcmTag{
+			newtag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    uint32(JPEGBytes),
@@ -284,7 +284,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
 		}
 		index++
-		newtag = media.DcmTag{
+		newtag = &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE0DD,
 			Length:    0,
@@ -305,7 +305,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		}
 		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag{
+		newtag := &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE000,
 			Length:    0,
@@ -322,7 +322,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 				return false
 			}
 			jpeglib.EIJG12encode(img[offset/2:], cols, rows, 1, &JPEGData, &JPEGBytes, 0)
-			newtag = media.DcmTag{
+			newtag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    uint32(JPEGBytes),
@@ -335,7 +335,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
 		}
 		index++
-		newtag = media.DcmTag{
+		newtag = &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE0DD,
 			Length:    0,
@@ -353,7 +353,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		}
 		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag{
+		newtag := &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE000,
 			Length:    0,
@@ -371,7 +371,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			} else {
 				openjpeg.J2Kencode(img[offset:], cols, rows, 1, bitsa, &JPEGData, &JPEGBytes, 0)
 			}
-			newtag = media.DcmTag{
+			newtag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    uint32(JPEGBytes),
@@ -383,7 +383,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			JPEGData = nil
 		}
 		index++
-		newtag = media.DcmTag{
+		newtag = &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE0DD,
 			Length:    0,
@@ -401,7 +401,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 		}
 		obj.SetTag(index, tag)
 		index++
-		newtag := media.DcmTag{
+		newtag := &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE000,
 			Length:    0,
@@ -420,7 +420,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			} else {
 				openjpeg.J2Kencode(img[offset:], cols, rows, 1, bitsa, &JPEGData, &JPEGBytes, 10)
 			}
-			newtag = media.DcmTag{
+			newtag = &media.DcmTag{
 				Group:     0xFFFE,
 				Element:   0xE000,
 				Length:    uint32(JPEGBytes),
@@ -433,7 +433,7 @@ func Comp(obj media.DcmObj, i *int, img []byte, RGB bool, cols uint16, rows uint
 			jpeg_size = jpeg_size + uint32(JPEGBytes)
 		}
 		index++
-		newtag = media.DcmTag{
+		newtag = &media.DcmTag{
 			Group:     0xFFFE,
 			Element:   0xE0DD,
 			Length:    0,
@@ -464,7 +464,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	flag := false
 	//	ExplicitVROUT:=true
 	var i int
-	var tag media.DcmTag
+	tag := new(media.DcmTag)
 	var rows, cols, bitss, bitsa, planar, pixelrep uint16
 	var PhotoInt string
 	sq := 0

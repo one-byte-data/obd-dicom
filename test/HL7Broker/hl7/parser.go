@@ -2,9 +2,11 @@ package hl7
 
 // HL7 parser class
 import (
-	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/uuids"
 	"strings"
+
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/uid"
+	"git.onebytedata.com/odb/go-dicom/uuids"
 )
 
 var (
@@ -80,7 +82,7 @@ func SaveDICOMSR(fileName string) {
 
 	srobj.SetExplicitVR(true)
 	srobj.SetBigEndian(false)
-	srobj.SetTransferSyntax("1.2.840.10008.1.2.1")
+	srobj.SetTransferSyntax(uid.GetTransferSyntaxFromUID("1.2.840.10008.1.2.1"))
 	study.StudyInstanceUID = uuids.CreateStudyUID(study.PatientName, study.PatientID, study.AccessionNumber, study.ReportDate)
 	SeriesUID := uuids.CreateSeriesUID(study.StudyInstanceUID, "SR", "100")
 	InstanceUID := uuids.CreateInstanceUID(SeriesUID, "1")

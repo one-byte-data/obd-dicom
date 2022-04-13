@@ -2,9 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"git.onebytedata.com/odb/go-dicom/media"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
+
+	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/uid"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type DCMSeries struct {
@@ -85,7 +87,7 @@ func (series *DCMSeries) QueryResult(obj media.DcmObj) media.DcmObj {
 	var added bool
 	tag := new(media.DcmTag)
 	query := media.NewEmptyDCMObj()
-	query.SetTransferSyntax("1.2.840.10008.1.2")
+	query.SetTransferSyntax(uid.GetTransferSyntaxFromUID("1.2.840.10008.1.2"))
 
 	for i := 0; i < len(obj.GetTags()); i++ {
 		tag = obj.GetTag(i)

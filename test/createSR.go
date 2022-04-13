@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 func createSR() {
@@ -45,7 +46,7 @@ func createSR() {
 
 	srobj.SetExplicitVR(true)
 	srobj.SetBigEndian(false)
-	srobj.SetTransferSyntax("1.2.840.10008.1.2.1")
+	srobj.SetTransferSyntax(uid.GetTransferSyntaxFromUID("1.2.840.10008.1.2.1"))
 
 	study.AccessionNumber = "123456"
 	study.Description = "Complete Thorax"

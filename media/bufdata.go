@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // BufData - is an interface to buffer manipulation class
@@ -27,7 +29,7 @@ type BufData interface {
 	ReadTag(explicitVR bool) (*DcmTag, error)
 	WriteTag(tag *DcmTag, explicitVR bool)
 	WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool)
-	ReadMeta() (string, error)
+	ReadMeta() (*uid.SOPClass, error)
 	WriteMeta(SOPClassUID string, SOPInstanceUID string, TransferSyntax string)
 	ReadObj(obj DcmObj) bool
 	WriteObj(obj DcmObj)
@@ -270,14 +272,14 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 }
 
 // ReadMeta - Read Meta Header
-func (bd *bufData) ReadMeta() (string, error) {
-	TransferSyntax := ""
+func (bd *bufData) ReadMeta() (*uid.SOPClass, error) {
+	var TransferSyntax *uid.SOPClass
 	pos := 0
 
 	bd.SetPosition(128)
 	bs, err := bd.MS.Read(4)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if string(bs[:4]) == "DICM" {
 		fin := false
@@ -285,7 +287,7 @@ func (bd *bufData) ReadMeta() (string, error) {
 			pos = bd.GetPosition()
 			tag, _ := bd.ReadTag(true)
 			if (tag.Group == 0x02) && (tag.Element == 0x010) {
-				TransferSyntax = tag.GetString()
+				TransferSyntax = uid.GetTransferSyntaxFromUID(tag.GetString())
 			}
 			if tag.Group > 0x02 {
 				fin = true

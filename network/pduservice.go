@@ -16,7 +16,7 @@ import (
 
 // PDUService - struct for PDUService
 type PDUService interface {
-	GetTransferSyntaxUID(pcid byte) string
+	GetTransferSyntax(pcid byte) *uid.SOPClass
 	SetTimeout(timeout int)
 	Connect(IP string, Port string) error
 	Close()
@@ -74,13 +74,13 @@ func (pdu *pduService) SetConn(rw *bufio.ReadWriter) {
 	pdu.readWriter = rw
 }
 
-func (pdu *pduService) GetTransferSyntaxUID(pcid byte) string {
+func (pdu *pduService) GetTransferSyntax(pcid byte) *uid.SOPClass {
 	for _, pca := range pdu.AcceptedPresentationContexts {
 		if pca.GetPresentationContextID() == pcid {
-			return pca.GetTrnSyntax().UIDName
+			return uid.GetTransferSyntaxFromUID(pca.GetTrnSyntax().UIDName)
 		}
 	}
-	return ""
+	return nil
 }
 
 func (pdu *pduService) SetTimeout(timeout int) {
@@ -302,7 +302,12 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	// Fixed MaxLength - 6 20200811
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength() - 6
 
-	log.Printf("INFO, PDU-Service: %s --> %s", SOPClass, pdu.GetCallingAE())
+	sopName := ""
+	sopClass := uid.GetSOPClassFromUID(SOPClass)
+	if sopClass != nil {
+		sopName = sopClass.Name
+	}
+	log.Printf("INFO, PDU-Service: %s (%s) --> %s", SOPClass, sopName, pdu.GetCallingAE())
 
 	return pdu.Pdata.Write(pdu.readWriter)
 }
@@ -349,9 +354,19 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 	pdu.AssocAC.SetUserInformation(pdu.AssocRQ.GetUserInformation())
 
 	for _, PresContext := range pdu.AssocRQ.GetPresContexts() {
-		log.Printf("INFO, ASSOC-RQ: \tPresentation Context %s\n", PresContext.GetAbstractSyntax().UIDName)
+		sopName := ""
+		sopClass := uid.GetSOPClassFromUID(PresContext.GetAbstractSyntax().UIDName)
+		if sopClass != nil {
+			sopName = sopClass.Name
+		}
+		log.Printf("INFO, ASSOC-RQ: \tPresentation Context %s (%s)\n", PresContext.GetAbstractSyntax().UIDName, sopName)
 		for _, TransferSyn := range PresContext.GetTransferSyntaxes() {
-			log.Printf("INFO, ASSOC-RQ: \t\tTransfer Synxtax %s\n", TransferSyn.UIDName)
+			tsName := ""
+			transferSyntax := uid.GetTransferSyntaxFromUID(TransferSyn.UIDName)
+			if transferSyntax != nil {
+				tsName = transferSyntax.Name
+			}
+			log.Printf("INFO, ASSOC-RQ: \t\tTransfer Synxtax %s (%s)\n", TransferSyn.UIDName, tsName)
 		}
 
 		PresContextAccept := NewPresentationContextAccept()
@@ -402,16 +417,16 @@ func (pdu *pduService) parseDCMIntoRaw(DCO media.DcmObj) bool {
 }
 
 func (pdu *pduService) parseRawVRIntoDCM(DCO media.DcmObj) bool {
-	TrnSyntax := pdu.GetTransferSyntaxUID(pdu.Pdata.PresentationContextID)
-	if len(TrnSyntax) == 0 {
+	TrnSyntax := pdu.GetTransferSyntax(pdu.Pdata.PresentationContextID)
+	if TrnSyntax == nil {
 		log.Println("ERROR, pduservice::ParseRawVRIntoDCM - Transfer syntax length is 0")
 		return false
 	}
 	DCO.SetTransferSyntax(TrnSyntax)
-	if TrnSyntax == uid.ExplicitVRLittleEndian {
+	if TrnSyntax.UID == uid.ExplicitVRLittleEndian {
 		DCO.SetExplicitVR(true)
 	}
-	if TrnSyntax == uid.ExplicitVRBigEndian {
+	if TrnSyntax.UID == uid.ExplicitVRBigEndian {
 		DCO.SetBigEndian(true)
 	}
 	pdu.Pdata.Buffer.SetPosition(0)

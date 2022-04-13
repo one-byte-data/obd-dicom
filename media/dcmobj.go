@@ -41,8 +41,8 @@ type DcmObj interface {
 	WriteUint16GE(group uint16, element uint16, vr string, val uint16)
 	WriteUint32GE(group uint16, element uint16, vr string, val uint32)
 	WriteStringGE(group uint16, element uint16, vr string, content string)
-	GetTransferSyntax() string
-	SetTransferSyntax(ts string)
+	GetTransferSyntax() *uid.SOPClass
+	SetTransferSyntax(ts *uid.SOPClass)
 	TagCount() int
 	CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string)
 	CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string)
@@ -53,7 +53,7 @@ type DcmObj interface {
 
 type dcmObj struct {
 	Tags           []*DcmTag
-	TransferSyntax string
+	TransferSyntax *uid.SOPClass
 	ExplicitVR     bool
 	BigEndian      bool
 	SQtag          *DcmTag
@@ -63,7 +63,7 @@ type dcmObj struct {
 func NewEmptyDCMObj() DcmObj {
 	return &dcmObj{
 		Tags:           make([]*DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: nil,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          &DcmTag{},
@@ -96,11 +96,11 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 		SQtag:          &DcmTag{},
 	}
 
-	if len(obj.TransferSyntax) > 0 {
-		if obj.TransferSyntax != uid.ImplicitVRLittleEndian {
+	if obj.TransferSyntax != nil {
+		if obj.TransferSyntax != uid.GetTransferSyntaxFromUID(uid.ImplicitVRLittleEndian) {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == uid.ExplicitVRBigEndian {
+		if obj.TransferSyntax == uid.GetTransferSyntaxFromUID(uid.ExplicitVRBigEndian) {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -129,13 +129,13 @@ func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
 		SQtag:          &DcmTag{},
 	}
 
-	if len(obj.TransferSyntax) > 0 {
-		if obj.TransferSyntax == uid.ImplicitVRLittleEndian {
+	if obj.TransferSyntax != nil {
+		if obj.TransferSyntax == uid.GetTransferSyntaxFromUID(uid.ImplicitVRLittleEndian) {
 			obj.ExplicitVR = false
 		} else {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == uid.ExplicitVRBigEndian {
+		if obj.TransferSyntax == uid.GetTransferSyntaxFromUID(uid.ExplicitVRBigEndian) {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -323,12 +323,12 @@ func (obj *dcmObj) Add(tag *DcmTag) {
 func (obj *dcmObj) WriteToBytes() []byte {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax == uid.ExplicitVRBigEndian {
+	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
 	SOPInstanceUID := obj.GetStringGE(0x08, 0x18)
-	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax)
+	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax.UID)
 	bufdata.WriteObj(obj)
 	bufdata.SetPosition(0)
 	return bufdata.GetAllBytes()
@@ -338,12 +338,12 @@ func (obj *dcmObj) WriteToBytes() []byte {
 func (obj *dcmObj) WriteToFile(fileName string) error {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax == uid.ExplicitVRBigEndian {
+	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
 	SOPInstanceUID := obj.GetStringGE(0x08, 0x18)
-	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax)
+	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax.UID)
 	bufdata.WriteObj(obj)
 	bufdata.SetPosition(0)
 	return bufdata.SaveToFile(fileName)
@@ -434,11 +434,11 @@ func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, conten
 	obj.Tags = append(obj.Tags, tag)
 }
 
-func (obj *dcmObj) GetTransferSyntax() string {
+func (obj *dcmObj) GetTransferSyntax() *uid.SOPClass {
 	return obj.TransferSyntax
 }
 
-func (obj *dcmObj) SetTransferSyntax(ts string) {
+func (obj *dcmObj) SetTransferSyntax(ts *uid.SOPClass) {
 	obj.TransferSyntax = ts
 }
 
@@ -446,14 +446,14 @@ func (obj *dcmObj) SetTransferSyntax(ts string) {
 func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue string, CodeMeaning string) {
 	item := &dcmObj{
 		Tags:           make([]*DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: nil,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          new(DcmTag),
 	}
 	seq := &dcmObj{
 		Tags:           make([]*DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: nil,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          new(DcmTag),
@@ -478,14 +478,14 @@ func (obj *dcmObj) AddConceptNameSeq(group uint16, element uint16, CodeValue str
 func (obj *dcmObj) AddSRText(text string) {
 	item := &dcmObj{
 		Tags:           make([]*DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: nil,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          new(DcmTag),
 	}
 	seq := &dcmObj{
 		Tags:           make([]*DcmTag, 0),
-		TransferSyntax: "",
+		TransferSyntax: nil,
 		ExplicitVR:     false,
 		BigEndian:      false,
 		SQtag:          new(DcmTag),

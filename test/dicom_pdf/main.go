@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/uid"
 	"git.onebytedata.com/odb/go-dicom/uuids"
 )
 
@@ -37,7 +38,7 @@ func ConvertPDF(DCMFile string, PDFFile string) bool {
 	study.GetInfo(obj)
 	pdfobj.SetExplicitVR(true)
 	pdfobj.SetBigEndian(false)
-	pdfobj.SetTransferSyntax("1.2.840.10008.1.2.1")
+	pdfobj.SetTransferSyntax(uid.GetTransferSyntaxFromUID("1.2.840.10008.1.2.1"))
 	RootUID := uuids.CreateStudyUID(study.PatientName, study.PatientID, study.AccessionNumber, study.StudyDate)
 	SeriesUID := uuids.CreateSeriesUID(RootUID, study.Modality, "300")
 	InstanceUID := uuids.CreateInstanceUID(RootUID, "1")

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"git.onebytedata.com/odb/go-dicom/media"
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // PresentationContextAccept accepted presentation context
@@ -102,8 +103,18 @@ func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 	bd.WriteByte(pc.Result)
 	bd.WriteByte(pc.Reserved4)
 
-	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s\n", pc.GetAbstractSyntax().UIDName)
-	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s\n", pc.GetTrnSyntax().UIDName)
+	sopName := ""
+	tsName := ""
+	sopClass := uid.GetSOPClassFromUID(pc.GetAbstractSyntax().UIDName)
+	if sopClass != nil {
+		sopName = sopClass.Name
+	}
+	transferSyntax := uid.GetTransferSyntaxFromUID(pc.GetTrnSyntax().UIDName)
+	if transferSyntax != nil {
+		tsName = transferSyntax.Name
+	}
+	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s (%s)\n", pc.GetAbstractSyntax().UIDName, sopName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s (%s)\n", pc.GetTrnSyntax().UIDName, tsName)
 
 	if err = bd.Send(rw); err == nil {
 		return pc.TrnSyntax.Write(rw)

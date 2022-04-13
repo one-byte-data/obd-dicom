@@ -186,9 +186,9 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 	if PCID == 0 {
 		return -1, errors.New("ERROR, serviceuser::WriteStoreRQ, PCID==0")
 	}
-	TrnSyntOUT := pdu.GetTransferSyntaxUID(PCID)
+	TrnSyntOUT := pdu.GetTransferSyntax(PCID)
 
-	if len(TrnSyntOUT) == 0 {
+	if TrnSyntOUT == nil {
 		return -1, errors.New("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
 	}
 
@@ -202,10 +202,10 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		DDO.SetTransferSyntax(TrnSyntOUT)
 		DDO.SetExplicitVR(true)
 		DDO.SetBigEndian(false)
-		if TrnSyntOUT == uid.ImplicitVRLittleEndian {
+		if TrnSyntOUT.UID == uid.ImplicitVRLittleEndian {
 			DDO.SetExplicitVR(false)
 		}
-		if TrnSyntOUT == uid.ExplicitVRBigEndian {
+		if TrnSyntOUT.UID == uid.ExplicitVRBigEndian {
 			DDO.SetBigEndian(true)
 		}
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)

@@ -9,6 +9,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/jpeglib"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/openjpeg"
+	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 func SupportedTS(TransferSyntax string) bool {
@@ -112,7 +113,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 	single = size / frames
 	// DE-Compression
 	obj.DelTag(i + 1) // Delete offset table.
-	if obj.GetTransferSyntax() == "1.2.840.10008.1.2.5" {
+	if obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.5" {
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag = obj.GetTag(i + 1)
@@ -120,7 +121,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if (obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.70") || (obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.57") {
+	} else if (obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.70") || (obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.57") {
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag = obj.GetTag(i + 1)
@@ -132,7 +133,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.50" {
+	} else if obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.50" {
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag = obj.GetTag(i + 1)
@@ -144,7 +145,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.51" {
+	} else if obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.51" {
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag = obj.GetTag(i + 1)
@@ -152,7 +153,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.90" {
+	} else if obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.90" {
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag = obj.GetTag(i + 1)
@@ -160,7 +161,7 @@ func Decomp(obj media.DcmObj, i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.91" {
+	} else if obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.91" {
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag = obj.GetTag(i + 1)
@@ -475,14 +476,14 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 	if len(outTS) == 0 {
 		return true
 	}
-	if obj.GetTransferSyntax() == outTS {
+	if obj.GetTransferSyntax().UID == outTS {
 		return true
 	}
 	// We don't process MPEG2 or MPEG4
-	if (obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.100") || (obj.GetTransferSyntax() == "1.2.840.10008.1.2.4.102") {
+	if (obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.100") || (obj.GetTransferSyntax().UID == "1.2.840.10008.1.2.4.102") {
 		return true
 	}
-	if !SupportedTS(obj.GetTransferSyntax()) {
+	if !SupportedTS(obj.GetTransferSyntax().UID) {
 		return false
 	}
 	if !SupportedTS(outTS) {
@@ -582,7 +583,7 @@ func ConvertTS(obj media.DcmObj, outTS string) bool {
 		}
 	}
 	if flag {
-		obj.SetTransferSyntax(outTS)
+		obj.SetTransferSyntax(uid.GetTransferSyntaxFromUID(outTS))
 	}
 	return flag
 }

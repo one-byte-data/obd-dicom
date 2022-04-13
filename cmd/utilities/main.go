@@ -7,12 +7,12 @@ import (
 	"os"
 	"strings"
 
-	httpclient "git.onebytedata.com/odb/go-dicom/clients/http-client"
+	httpclient "git.onebytedata.com/odb/go-dicom/clients/http_client"
 )
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"
 
-const dictionaryTagsFile string = "../../tags/dicomtags.go"
+const dictionaryTagsFile string = "../../tags/dicom-tags.go"
 
 const tagsFileName string = "../../tags/tags.go"
 

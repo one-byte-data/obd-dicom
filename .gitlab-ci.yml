@@ -24,7 +24,6 @@ test-amd64:
   image: golang:alpine
   script:
     - apk add gcc g++
-    - sh changeLinux-amd64.sh
     - go test ./...
 
 # test-arm64:
@@ -32,14 +31,12 @@ test-amd64:
 #   image: arm64v8/golang:alpine
 #   script:
 #     - apk add gcc g++
-#     - sh changeLinux-arm64.sh
 #     - go test ./...
 
 build-amd64:
   stage: build
   script:
     - apk add gcc g++
-    - sh changeLinux-amd64.sh
     - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom cmd/tools/main.go
   cache:
     key: ${CI_PIPELINE_ID}
@@ -55,7 +52,6 @@ build-amd64:
 #   image: arm64v8/golang:alpine
 #   script:
 #     - apk add gcc g++
-#     - sh changeLinux-arm64.sh
 #     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom cmd/tools/main.go
 #   cache:
 #     key: ${CI_PIPELINE_ID}

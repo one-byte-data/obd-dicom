@@ -1,7 +1,7 @@
 package openjpeg
 
-// #cgo CFLAGS: -I j2klib/include -I j2klib/darwin
-// #cgo LDFLAGS: -L j2klib/darwin -lopenjpeg
+// #cgo CFLAGS: -I j2klib/include -I j2klib/win64
+// #cgo LDFLAGS: -L j2klib/win64 -lopenjpeg
 // #include "j2klib/decomj2k.c"
 // #include "j2klib/comj2k.c"
 import  "C"

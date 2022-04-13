@@ -1,7 +1,7 @@
 package jpeglib
 
-// #cgo CFLAGS: -I dcmjpeg/libijg16 -I dcmjpeg/darwin
-// #cgo LDFLAGS: -L dcmjpeg/darwin -lijg16
+// #cgo CFLAGS: -I dcmjpeg/libijg16 -I dcmjpeg/linux_arm64
+// #cgo LDFLAGS: -L dcmjpeg/linux_arm64 -lijg16
 // #include "dcmjpeg/dijg16.c"
 // #include "dcmjpeg/eijg16.c"
 import  "C"

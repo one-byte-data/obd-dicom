@@ -1,7 +1,7 @@
 package jpeglib
 
-// #cgo CFLAGS: -I dcmjpeg/libijg12 -I dcmjpeg/macos
-// #cgo LDFLAGS: -Ldcmjpeg/macos -lijg12
+// #cgo CFLAGS: -I dcmjpeg/libijg12 -I dcmjpeg/darwin
+// #cgo LDFLAGS: -L dcmjpeg/darwin -lijg12
 // #include "dcmjpeg/dijg12.c"
 // #include "dcmjpeg/eijg12.c"
 import  "C"

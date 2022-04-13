@@ -23,25 +23,40 @@ test:
   stage: test
   script:
     - echo $SSH_SETUP | base64 --decode | bash
-    - go test ./...
+    - sed -i '' 's/darwin/linux/g' openjpeg/j2kcodec.go
+    - sed -i '' 's/darwin/linux/g' jpeglib/codec8.go
+    - sed -i '' 's/darwin/linux/g' jpeglib/codec12.go
+    - sed -i '' 's/darwin/linux/g' jpeglib/codec16.go
+    - go test -p 1 ./...
 
 build:
   stage: build
   script:
     - echo $SSH_SETUP | base64 --decode | bash
-    - CGO_ENABLED="0" GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/docker/obd-dicom
-    - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/obd-dicom
-    - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/obd-dicom
-    - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/obd-dicom.exe
+    - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/amd64/obd-dicom
+    - GOOS=darwin GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/arm64/obd-dicom
+    - sed -i '' 's/darwin/linux/g' openjpeg/j2kcodec.go
+    - sed -i '' 's/darwin/linux/g' jpeglib/codec8.go
+    - sed -i '' 's/darwin/linux/g' jpeglib/codec12.go
+    - sed -i '' 's/darwin/linux/g' jpeglib/codec16.go
+    - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom
+    - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom
+    - sed -i '' 's/linux/windows/g' openjpeg/j2kcodec.go
+    - sed -i '' 's/linux/windows/g' jpeglib/codec8.go
+    - sed -i '' 's/linux/windows/g' jpeglib/codec12.go
+    - sed -i '' 's/linux/windows/g' jpeglib/codec16.go
+    - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/amd64/obd-dicom.exe
   cache:
     key: ${CI_PIPELINE_ID}
     paths:
       - build
   artifacts:
     paths:
-      - build/linux/obd-dicom
-      - build/macos/obd-dicom
-      - build/windows/obd-dicom.exe
+      - build/linux/amd64/obd-dicom
+      - build/linux/arm64/obd-dicom
+      - build/macos/amd64/obd-dicom
+      - build/macos/arm64/obd-dicom
+      - build/windows/amd64/obd-dicom.exe
     expire_in: 30 days
 
 publish-build:

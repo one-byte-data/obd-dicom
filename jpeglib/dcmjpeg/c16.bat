@@ -1,1 +1,0 @@
-gcc eijg16.c -Ilibijg16 -Iwin64 -Lwin64 -lijg16

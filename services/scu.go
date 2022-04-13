@@ -40,11 +40,11 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, uid.VerificationSOPClass, timeout)
+	err := d.openAssociation(pdu, uid.VerificationSOPClass.UID, timeout)
 	if err != nil {
 		return err
 	}
-	err = dimsec.CEchoWriteRQ(pdu, uid.VerificationSOPClass)
+	err = dimsec.CEchoWriteRQ(pdu, uid.VerificationSOPClass.UID)
 	if err != nil {
 		return err
 	}
@@ -62,11 +62,11 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelFIND
 
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, SOPClassUID, timeout)
+	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
 	if err != nil {
 		return results, status, err
 	}
-	err = dimsec.CFindWriteRQ(pdu, Query, SOPClassUID)
+	err = dimsec.CFindWriteRQ(pdu, Query, SOPClassUID.UID)
 	if err != nil {
 		return results, status, err
 	}
@@ -96,11 +96,11 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, err
 	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelMOVE
 
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, SOPClassUID, timeout)
+	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
 	if err != nil {
 		return -1, err
 	}
-	err = dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID, destAET)
+	err = dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID.UID, destAET)
 	if err != nil {
 		return -1, err
 	}
@@ -172,8 +172,8 @@ func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, tim
 	network.Resetuniq()
 	PresContext := network.NewPresentationContext()
 	PresContext.SetAbstractSyntax(AbstractSyntax)
-	PresContext.AddTransferSyntax(uid.ImplicitVRLittleEndian)
-	PresContext.AddTransferSyntax(uid.ExplicitVRLittleEndian)
+	PresContext.AddTransferSyntax(uid.ImplicitVRLittleEndian.UID)
+	PresContext.AddTransferSyntax(uid.ExplicitVRLittleEndian.UID)
 	pdu.AddPresContexts(PresContext)
 
 	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))
@@ -202,10 +202,10 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		DDO.SetTransferSyntax(TrnSyntOUT)
 		DDO.SetExplicitVR(true)
 		DDO.SetBigEndian(false)
-		if TrnSyntOUT.UID == uid.ImplicitVRLittleEndian {
+		if TrnSyntOUT.UID == uid.ImplicitVRLittleEndian.UID {
 			DDO.SetExplicitVR(false)
 		}
-		if TrnSyntOUT.UID == uid.ExplicitVRBigEndian {
+		if TrnSyntOUT.UID == uid.ExplicitVRBigEndian.UID {
 			DDO.SetBigEndian(true)
 		}
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)

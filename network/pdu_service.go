@@ -320,13 +320,13 @@ func (pdu *pduService) interogateAAssociateAC() bool {
 		if presContextAccept.GetResult() == 0 {
 			pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, presContextAccept)
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == uid.ExplicitVRLittleEndian {
+				if presContextAccept.GetTrnSyntax().UIDName == uid.ExplicitVRLittleEndian.UID {
 					TS = presContextAccept.GetTrnSyntax().UIDName
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
 			}
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == uid.ImplicitVRLittleEndian {
+				if presContextAccept.GetTrnSyntax().UIDName == uid.ImplicitVRLittleEndian.UID {
 					TS = presContextAccept.GetTrnSyntax().UIDName
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
@@ -375,13 +375,13 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 		PresContextAccept.SetAbstractSyntax(PresContext.GetAbstractSyntax().UIDName)
 		TS := ""
 		for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-			if TrnSyntax.UIDName == uid.ExplicitVRLittleEndian {
+			if TrnSyntax.UIDName == uid.ExplicitVRLittleEndian.UID {
 				TS = TrnSyntax.UIDName
 			}
 		}
 		if TS == "" {
 			for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-				if TrnSyntax.UIDName == uid.ImplicitVRLittleEndian {
+				if TrnSyntax.UIDName == uid.ImplicitVRLittleEndian.UID {
 					TS = TrnSyntax.UIDName
 				}
 			}
@@ -423,10 +423,10 @@ func (pdu *pduService) parseRawVRIntoDCM(DCO media.DcmObj) bool {
 		return false
 	}
 	DCO.SetTransferSyntax(TrnSyntax)
-	if TrnSyntax.UID == uid.ExplicitVRLittleEndian {
+	if TrnSyntax.UID == uid.ExplicitVRLittleEndian.UID {
 		DCO.SetExplicitVR(true)
 	}
-	if TrnSyntax.UID == uid.ExplicitVRBigEndian {
+	if TrnSyntax.UID == uid.ExplicitVRBigEndian.UID {
 		DCO.SetBigEndian(true)
 	}
 	pdu.Pdata.Buffer.SetPosition(0)

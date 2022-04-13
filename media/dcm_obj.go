@@ -97,10 +97,10 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 	}
 
 	if obj.TransferSyntax != nil {
-		if obj.TransferSyntax != uid.GetTransferSyntaxFromUID(uid.ImplicitVRLittleEndian) {
+		if obj.TransferSyntax != uid.ImplicitVRLittleEndian {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == uid.GetTransferSyntaxFromUID(uid.ExplicitVRBigEndian) {
+		if obj.TransferSyntax == uid.ExplicitVRBigEndian {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -130,12 +130,12 @@ func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
 	}
 
 	if obj.TransferSyntax != nil {
-		if obj.TransferSyntax == uid.GetTransferSyntaxFromUID(uid.ImplicitVRLittleEndian) {
+		if obj.TransferSyntax == uid.ImplicitVRLittleEndian {
 			obj.ExplicitVR = false
 		} else {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == uid.GetTransferSyntaxFromUID(uid.ExplicitVRBigEndian) {
+		if obj.TransferSyntax == uid.ExplicitVRBigEndian {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -323,7 +323,7 @@ func (obj *dcmObj) Add(tag *DcmTag) {
 func (obj *dcmObj) WriteToBytes() []byte {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian {
+	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian.UID {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
@@ -338,7 +338,7 @@ func (obj *dcmObj) WriteToBytes() []byte {
 func (obj *dcmObj) WriteToFile(fileName string) error {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian {
+	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian.UID {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)

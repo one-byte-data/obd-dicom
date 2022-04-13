@@ -96,7 +96,7 @@ func test16() {
 	}
 
 	// Need an uncompressed image
-	if obj.GetTransferSyntax().UID == uid.ExplicitVRLittleEndian {
+	if obj.GetTransferSyntax().UID == uid.ExplicitVRLittleEndian.UID {
 		var index int
 		width := obj.GetUShort(tags.Rows)
 		height := obj.GetUShort(tags.Columns)
@@ -115,7 +115,7 @@ func test16() {
 			tag.VR = "OB"
 			tag.Data = nil
 			obj.InsertTag(index, tag)
-			obj.SetTransferSyntax(uid.GetTransferSyntaxFromUID(uid.JPEGLosslessNonHierarchical14))
+			obj.SetTransferSyntax(uid.JPEGLosslessNonHierarchical14)
 			index++
 			tag = &media.DcmTag{
 				Group:     0xFFFE,

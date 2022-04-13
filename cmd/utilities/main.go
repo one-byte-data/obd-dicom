@@ -16,9 +16,14 @@ const dictionaryTagsFile string = "../../tags/dicom-tags.go"
 
 const tagsFileName string = "../../tags/tags.go"
 
+const sopClassesFile string = "../../uid/sop_classes.go"
+
+const transferSyntaxesFile string = "../../uid/transfer_syntaxes.go"
+
 type dictionary struct {
 	XMLName xml.Name `xml:"dictionary"`
 	Tags    []tag    `xml:"tag"`
+	UIDs    []uid    `xml:"uid"`
 }
 
 type tag struct {
@@ -30,13 +35,20 @@ type tag struct {
 	Name    string `xml:",chardata"`
 }
 
+type uid struct {
+	UID     string `xml:"uid,attr"`
+	Keyword string `xml:"keyword,attr"`
+	Type    string `xml:"type,attr"`
+	Name    string `xml:",chardata"`
+}
+
 func main() {
-	tags := downloadDictionary()
+	tags, _ := downloadDictionary()
 	writeTagsFile(tags)
 	writeDictionaryTags(tags)
 }
 
-func downloadDictionary() []tag {
+func downloadDictionary() ([]tag, []uid) {
 	params := httpclient.HTTPParams{
 		URL: dictionaryURL,
 	}
@@ -51,7 +63,7 @@ func downloadDictionary() []tag {
 	if err != nil {
 		log.Panic(err)
 	}
-	return dict.Tags
+	return dict.Tags, dict.UIDs
 }
 
 func writeDictionaryTags(tags []tag) {
@@ -118,6 +130,32 @@ func writeTagsFile(tags []tag) {
 	}
 
 	f.WriteString("}\n")
+	f.Sync()
+}
+
+func writeSOPClassesFile(uids []uid) {
+	if FileExists(sopClassesFile) {
+		err := os.Remove(sopClassesFile)
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	f, err := os.Create(tagsFileName)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer f.Close()
+
+	f.WriteString("package uid\n\n")
+
+	for _, uid := range uids {
+		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
+		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
+		f.WriteString("  },\n")
+	}
+
 	f.Sync()
 }
 

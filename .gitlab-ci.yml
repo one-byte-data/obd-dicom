@@ -23,10 +23,10 @@ test:
   stage: test
   script:
     - echo $SSH_SETUP | base64 --decode | bash
-    - sed -i '' 's/darwin/linux/g' openjpeg/j2kcodec.go
-    - sed -i '' 's/darwin/linux/g' jpeglib/codec8.go
-    - sed -i '' 's/darwin/linux/g' jpeglib/codec12.go
-    - sed -i '' 's/darwin/linux/g' jpeglib/codec16.go
+    - sed -i 's/darwin/linux/g' openjpeg/j2kcodec.go
+    - sed -i 's/darwin/linux/g' jpeglib/codec8.go
+    - sed -i 's/darwin/linux/g' jpeglib/codec12.go
+    - sed -i 's/darwin/linux/g' jpeglib/codec16.go
     - go test -p 1 ./...
 
 build:
@@ -35,16 +35,16 @@ build:
     - echo $SSH_SETUP | base64 --decode | bash
     - GOOS=darwin GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/amd64/obd-dicom
     - GOOS=darwin GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/macos/arm64/obd-dicom
-    - sed -i '' 's/darwin/linux/g' openjpeg/j2kcodec.go
-    - sed -i '' 's/darwin/linux/g' jpeglib/codec8.go
-    - sed -i '' 's/darwin/linux/g' jpeglib/codec12.go
-    - sed -i '' 's/darwin/linux/g' jpeglib/codec16.go
+    - sed -i 's/darwin/linux/g' openjpeg/j2kcodec.go
+    - sed -i 's/darwin/linux/g' jpeglib/codec8.go
+    - sed -i 's/darwin/linux/g' jpeglib/codec12.go
+    - sed -i 's/darwin/linux/g' jpeglib/codec16.go
     - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom
     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom
-    - sed -i '' 's/linux/windows/g' openjpeg/j2kcodec.go
-    - sed -i '' 's/linux/windows/g' jpeglib/codec8.go
-    - sed -i '' 's/linux/windows/g' jpeglib/codec12.go
-    - sed -i '' 's/linux/windows/g' jpeglib/codec16.go
+    - sed -i 's/linux/windows/g' openjpeg/j2kcodec.go
+    - sed -i 's/linux/windows/g' jpeglib/codec8.go
+    - sed -i 's/linux/windows/g' jpeglib/codec12.go
+    - sed -i 's/linux/windows/g' jpeglib/codec16.go
     - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/amd64/obd-dicom.exe
   cache:
     key: ${CI_PIPELINE_ID}

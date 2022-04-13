@@ -9,8 +9,7 @@ import (
 )
 
 func Test_scu_EchoSCU(t *testing.T) {
-	stopServer, testSCP := StartSCP(t, 1040)
-	defer stopServer(t)
+	_, testSCP := StartSCP(t, 1040)
 
 	testSCP.OnAssociationRequest(func(request network.AAssociationRQ) bool {
 		return true
@@ -61,8 +60,7 @@ func Test_scu_EchoSCU(t *testing.T) {
 }
 
 func Test_scu_FindSCU(t *testing.T) {
-	stopServer, testSCP := StartSCP(t, 1040)
-	defer stopServer(t)
+	_, testSCP := StartSCP(t, 1041)
 
 	testSCP.OnAssociationRequest(func(request network.AAssociationRQ) bool {
 		return true
@@ -92,7 +90,7 @@ func Test_scu_FindSCU(t *testing.T) {
 					CalledAE:  "TEST_SCP",
 					CallingAE: "TEST_SCU",
 					HostName:  "localhost",
-					Port:      1040,
+					Port:      1041,
 					IsCFind:   true,
 					IsCMove:   true,
 					IsCStore:  true,

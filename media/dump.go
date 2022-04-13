@@ -1,13 +1,11 @@
-package main
+package media
 
 import (
 	"fmt"
 	"strconv"
-
-	"git.onebytedata.com/odb/go-dicom/media"
 )
 
-func DumpDcm(obj media.DcmObj) {
+func DumpDicom(obj DcmObj) {
 	sq := 0
 
 	for i := 0; i < obj.TagCount(); i++ {
@@ -24,7 +22,7 @@ func DumpDcm(obj media.DcmObj) {
 					val = strconv.Itoa(int(tag.GetUInt()))
 				} else if tag.VR == "SQ" {
 					seq := tag.ReadSeq(obj.IsExplicitVR())
-					DumpDcm(seq)
+					DumpDicom(seq)
 				} else {
 					if tag.Length < 256 {
 						val = tag.GetString()
@@ -44,14 +42,3 @@ func DumpDcm(obj media.DcmObj) {
 		}
 	}
 }
-
-/*
-func main() {
-	media.InitDict()
-	obj, err := media.NewDCMObjFromFile("test.dcm")
-	if err != nil {
-		return
-	}
-	DumpDcm(obj)
-}
-*/

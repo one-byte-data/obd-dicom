@@ -12,9 +12,9 @@ import (
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"
 
-const dictionaryTagsFile string = "../tags/dicomtags.go"
+const dictionaryTagsFile string = "../../tags/dicomtags.go"
 
-const tagsFileName string = "../tags/tags.go"
+const tagsFileName string = "../../tags/tags.go"
 
 type dictionary struct {
 	XMLName xml.Name `xml:"dictionary"`

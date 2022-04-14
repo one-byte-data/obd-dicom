@@ -16,11 +16,12 @@ func TestGetSOPClassFromName(t *testing.T) {
 	}{
 		{
 			name: "Should get Verification SOP class",
-			args: args{name: "VerificationSOPClass"},
+			args: args{name: "Verification"},
 			want: &SOPClass{
 				UID:         "1.2.840.10008.1.1",
-				Name:        "VerificationSOPClass",
+				Name:        "Verification",
 				Description: "Verification SOP Class",
+				Type:        "SOP Class",
 			},
 		},
 		{
@@ -52,8 +53,9 @@ func TestGetSOPClassFromUID(t *testing.T) {
 			args: args{uid: "1.2.840.10008.1.1"},
 			want: &SOPClass{
 				UID:         "1.2.840.10008.1.1",
-				Name:        "VerificationSOPClass",
+				Name:        "Verification",
 				Description: "Verification SOP Class",
+				Type:        "SOP Class",
 			},
 		},
 		{
@@ -86,7 +88,8 @@ func TestGetTransferSyntaxFromName(t *testing.T) {
 			want: &SOPClass{
 				UID:         "1.2.840.10008.1.2",
 				Name:        "ImplicitVRLittleEndian",
-				Description: "Implicit VR - Little Endian",
+				Description: "Implicit VR Little Endian: Default Transfer Syntax for DICOM",
+				Type:        "Transfer Syntax",
 			},
 		},
 		{
@@ -119,7 +122,8 @@ func TestGetTransferSyntaxFromUID(t *testing.T) {
 			want: &SOPClass{
 				UID:         "1.2.840.10008.1.2",
 				Name:        "ImplicitVRLittleEndian",
-				Description: "Implicit VR - Little Endian",
+				Description: "Implicit VR Little Endian: Default Transfer Syntax for DICOM",
+				Type:        "Transfer Syntax",
 			},
 		},
 		{

@@ -40,11 +40,11 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, uid.VerificationSOPClass.UID, timeout)
+	err := d.openAssociation(pdu, uid.Verification.UID, timeout)
 	if err != nil {
 		return err
 	}
-	err = dimsec.CEchoWriteRQ(pdu, uid.VerificationSOPClass.UID)
+	err = dimsec.CEchoWriteRQ(pdu, uid.Verification.UID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (d *scu) EchoSCU(timeout int) error {
 func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 	results := 0
 	status := 1
-	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelFIND
+	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelFind
 
 	pdu := network.NewPDUService()
 	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
@@ -93,7 +93,7 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, error) {
 	var pending int
 	status := dicomstatus.Pending
-	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelMOVE
+	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelMove
 
 	pdu := network.NewPDUService()
 	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)

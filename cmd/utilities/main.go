@@ -12,7 +12,7 @@ import (
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"
 
-const dictionaryTagsFile string = "../../tags/dicom-tags.go"
+const dictionaryTagsFile string = "../../tags/dicom_tags.go"
 
 const tagsFileName string = "../../tags/tags.go"
 
@@ -43,9 +43,12 @@ type uid struct {
 }
 
 func main() {
-	tags, _ := downloadDictionary()
+	tags, uids := downloadDictionary()
 	writeTagsFile(tags)
 	writeDictionaryTags(tags)
+
+	writeSOPClassesFile(uids)
+	writeTransferSyntaxesFile(uids)
 }
 
 func downloadDictionary() ([]tag, []uid) {
@@ -85,7 +88,6 @@ func writeDictionaryTags(tags []tag) {
 		if strings.Contains(tag.Group, "x") || strings.Contains(tag.Element, "x") {
 			continue
 		}
-		f.WriteString(fmt.Sprintf("// %s - (%s,%s) %s\n", tag.Keyword, tag.Group, tag.Element, tag.Name))
 		f.WriteString(fmt.Sprintf("var %s = &Tag{\n", tag.Keyword))
 		f.WriteString(fmt.Sprintf("  Group: 0x%s,\n", tag.Group))
 		f.WriteString(fmt.Sprintf("  Element: 0x%s,\n", tag.Element))
@@ -93,7 +95,7 @@ func writeDictionaryTags(tags []tag) {
 		f.WriteString(fmt.Sprintf("  VM: \"%s\",\n", tag.VM))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", tag.Keyword))
 		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", tag.Name))
-		f.WriteString("}\n")
+		f.WriteString("}\n\n")
 	}
 
 	f.Sync()
@@ -140,7 +142,7 @@ func writeSOPClassesFile(uids []uid) {
 			log.Panic(err)
 		}
 	}
-	f, err := os.Create(tagsFileName)
+	f, err := os.Create(sopClassesFile)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -148,14 +150,64 @@ func writeSOPClassesFile(uids []uid) {
 
 	f.WriteString("package uid\n\n")
 
+	sopClasses := make([]string, 0)
+
 	for _, uid := range uids {
+		if uid.Type != "SOP Class" {
+			continue
+		}
+		sopClasses = append(sopClasses, uid.Keyword)
 		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
-		f.WriteString("  },\n")
+		f.WriteString(fmt.Sprintf("  Type: \"%s\",\n", uid.Type))
+		f.WriteString("}\n\n")
 	}
 
+	f.WriteString("var SOPClasses = []*SOPClass{\n")
+	for _, sopClass := range sopClasses {
+		f.WriteString(fmt.Sprintf("  %s,\n", sopClass))
+	}
+	f.WriteString("}\n")
+	f.Sync()
+}
+
+func writeTransferSyntaxesFile(uids []uid) {
+	if FileExists(transferSyntaxesFile) {
+		err := os.Remove(transferSyntaxesFile)
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	f, err := os.Create(transferSyntaxesFile)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer f.Close()
+
+	f.WriteString("package uid\n\n")
+
+	sopClasses := make([]string, 0)
+
+	for _, uid := range uids {
+		if uid.Type != "Transfer Syntax" {
+			continue
+		}
+		sopClasses = append(sopClasses, uid.Keyword)
+		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
+		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
+		f.WriteString(fmt.Sprintf("  Type: \"%s\",\n", uid.Type))
+		f.WriteString("}\n\n")
+	}
+
+	f.WriteString("var TransferSyntaxes = []*SOPClass{\n")
+	for _, sopClass := range sopClasses {
+		f.WriteString(fmt.Sprintf("  %s,\n", sopClass))
+	}
+	f.WriteString("}\n")
 	f.Sync()
 }
 

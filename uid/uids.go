@@ -4,6 +4,7 @@ type SOPClass struct {
 	UID         string
 	Name        string
 	Description string
+	Type        string
 }
 
 func GetSOPClassFromName(name string) *SOPClass {

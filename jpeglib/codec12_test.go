@@ -1,8 +1,8 @@
 package jpeglib
 
-import (
-	"testing"
-)
+// import (
+// 	"testing"
+// )
 
 // func TestDIJG12decode(t *testing.T) {
 // 	type args struct {
@@ -36,32 +36,32 @@ import (
 // 	}
 // }
 
-func Test_DIJG12encode(t *testing.T) {
-	type args struct {
-		fileName string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name:    "Should encode jpeg 12 image",
-			args:    args{fileName: "../samples/test.raw"},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var jpegData []byte
-			outData := make([]byte, 0)
-			var jpegSize int
+// func Test_DIJG12encode(t *testing.T) {
+// 	type args struct {
+// 		fileName string
+// 	}
+// 	tests := []struct {
+// 		name    string
+// 		args    args
+// 		wantErr bool
+// 	}{
+// 		{
+// 			name:    "Should encode jpeg 12 image",
+// 			args:    args{fileName: "../samples/test.raw"},
+// 			wantErr: false,
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			var jpegData []byte
+// 			outData := make([]byte, 0)
+// 			var jpegSize int
 
-			if LoadFromFile(tt.args.fileName, &outData) {
-				if err := EIJG12encode(outData, 1576, 1134, 3, &jpegData, &jpegSize, 4); (err != nil) != tt.wantErr {
-					t.Errorf("EIJG12encode() error = %v, wantErr %v", err, tt.wantErr)
-				}
-			}
-		})
-	}
-}
+// 			if LoadFromFile(tt.args.fileName, &outData) {
+// 				if err := EIJG12encode(outData, 1576, 1134, 3, &jpegData, &jpegSize, 4); (err != nil) != tt.wantErr {
+// 					t.Errorf("EIJG12encode() error = %v, wantErr %v", err, tt.wantErr)
+// 				}
+// 			}
+// 		})
+// 	}
+// }

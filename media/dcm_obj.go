@@ -11,6 +11,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
 	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
+	"git.onebytedata.com/odb/go-dicom/transcoder"
 )
 
 // DcmObj - DICOM Object structure
@@ -44,6 +45,7 @@ type DcmObj interface {
 	WriteStringGE(group uint16, element uint16, vr string, content string)
 	GetTransferSyntax() *transfersyntax.TransferSyntax
 	SetTransferSyntax(ts *transfersyntax.TransferSyntax)
+	ChangeTransferSynx(ts *transfersyntax.TransferSyntax) error
 	TagCount() int
 	CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string)
 	CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string)
@@ -441,6 +443,23 @@ func (obj *dcmObj) GetTransferSyntax() *transfersyntax.TransferSyntax {
 
 func (obj *dcmObj) SetTransferSyntax(ts *transfersyntax.TransferSyntax) {
 	obj.TransferSyntax = ts
+}
+
+func (obj *dcmObj) ChangeTransferSynx(ts *transfersyntax.TransferSyntax) error {
+	if obj.TransferSyntax.UID == transfersyntax.JPEG2000.UID || obj.TransferSyntax.UID == transfersyntax.JPEG2000Lossless.UID {
+		newData := make([]byte, 0)
+		newSize := 0
+
+		width := obj.GetUShort(tags.Columns)
+		height := obj.GetUShort(tags.Rows)
+		sample := obj.GetUShort(tags.SamplesPerPixel)
+		pixelData := make([]byte, 0)
+
+		if err := transcoder.TranscodeJ2kToJpeg8(pixelData, width, height, sample, 0, &newData, &newSize); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // AddConceptNameSeq - Concept Name Sequence for DICOM SR

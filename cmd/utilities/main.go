@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	httpclient "git.onebytedata.com/odb/go-dicom/clients/http_client"
+	"git.onebytedata.com/odb/go-dicom/clients/httpclient"
 )
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"

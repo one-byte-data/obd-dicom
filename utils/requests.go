@@ -3,8 +3,8 @@ package utils
 import (
 	"time"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/tags"
 	"git.onebytedata.com/odb/go-dicom/uuids"
 )
 

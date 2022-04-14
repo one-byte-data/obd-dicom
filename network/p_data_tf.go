@@ -7,13 +7,6 @@ import (
 	"git.onebytedata.com/odb/go-dicom/media"
 )
 
-// PDV - PDV
-type PDV struct {
-	Length                uint32
-	PresentationContextID byte
-	MsgHeader             byte
-}
-
 // PDataTF - PDataTF
 type PDataTF struct {
 	ItemType              byte

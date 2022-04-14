@@ -1,11 +1,22 @@
 package database
 
-import "git.onebytedata.com/odb/go-dicom/media"
+import (
+	"database/sql"
+
+	"git.onebytedata.com/odb/go-dicom/media"
+
+	_ "github.com/mattn/go-sqlite3"
+)
 
 type SQLite struct {
 }
 
-func NewSQLiteDatabase() Database {
+func NewSQLiteDatabase(dbFileName string) Database {
+	_, err := sql.Open("sqlite3", dbFileName)
+	if err != nil {
+		panic(err)
+	}
+
 	return &SQLite{}
 }
 

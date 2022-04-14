@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"log"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
+	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // PresentationContextAccept accepted presentation context
@@ -14,9 +15,9 @@ type PresentationContextAccept interface {
 	SetPresentationContextID(id byte)
 	GetResult() byte
 	SetResult(result byte)
-	GetTrnSyntax() UIDitem
+	GetTrnSyntax() UIDItem
 	Size() uint16
-	GetAbstractSyntax() UIDitem
+	GetAbstractSyntax() UIDItem
 	SetAbstractSyntax(Abst string)
 	SetTransferSyntax(Tran string)
 	Write(rw *bufio.ReadWriter) (err error)
@@ -32,8 +33,8 @@ type presentationContextAccept struct {
 	Reserved2             byte
 	Result                byte
 	Reserved4             byte
-	AbsSyntax             UIDitem
-	TrnSyntax             UIDitem
+	AbsSyntax             uidItem
+	TrnSyntax             uidItem
 }
 
 // NewPresentationContextAccept creates a PresentationContextAccept
@@ -61,33 +62,33 @@ func (pc *presentationContextAccept) SetResult(result byte) {
 	pc.Result = result
 }
 
-func (pc *presentationContextAccept) GetTrnSyntax() UIDitem {
-	return pc.TrnSyntax
+func (pc *presentationContextAccept) GetTrnSyntax() UIDItem {
+	return &pc.TrnSyntax
 }
 
 // Size gets the size of presentation
 func (pc *presentationContextAccept) Size() uint16 {
 	pc.Length = 4
-	pc.Length += pc.TrnSyntax.Size()
+	pc.Length += pc.TrnSyntax.GetSize()
 	return pc.Length + 4
 }
 
-func (pc *presentationContextAccept) GetAbstractSyntax() UIDitem {
-	return pc.AbsSyntax
+func (pc *presentationContextAccept) GetAbstractSyntax() UIDItem {
+	return &pc.AbsSyntax
 }
 
 func (pc *presentationContextAccept) SetAbstractSyntax(Abst string) {
-	pc.AbsSyntax.ItemType = 0x30
-	pc.AbsSyntax.Reserved1 = 0x00
-	pc.AbsSyntax.UIDName = Abst
-	pc.AbsSyntax.Length = uint16(len(Abst))
+	pc.AbsSyntax.SetType(0x30)
+	pc.AbsSyntax.SetReserved(0x00)
+	pc.AbsSyntax.SetUID(Abst)
+	pc.AbsSyntax.SetLength(uint16(len(Abst)))
 }
 
 func (pc *presentationContextAccept) SetTransferSyntax(Tran string) {
-	pc.TrnSyntax.ItemType = 0x40
-	pc.TrnSyntax.Reserved1 = 0
-	pc.TrnSyntax.UIDName = Tran
-	pc.TrnSyntax.Length = uint16(len(Tran))
+	pc.TrnSyntax.SetType(0x40)
+	pc.TrnSyntax.SetReserved(0)
+	pc.TrnSyntax.SetUID(Tran)
+	pc.TrnSyntax.SetLength(uint16(len(Tran)))
 }
 
 func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
@@ -105,16 +106,16 @@ func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 
 	sopName := ""
 	tsName := ""
-	sopClass := uid.GetSOPClassFromUID(pc.GetAbstractSyntax().UIDName)
+	sopClass := sopclass.GetSOPClassFromUID(pc.GetAbstractSyntax().GetUID())
 	if sopClass != nil {
 		sopName = sopClass.Name
 	}
-	transferSyntax := uid.GetTransferSyntaxFromUID(pc.GetTrnSyntax().UIDName)
+	transferSyntax := transfersyntax.GetTransferSyntaxFromUID(pc.GetTrnSyntax().GetUID())
 	if transferSyntax != nil {
 		tsName = transferSyntax.Name
 	}
-	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s (%s)\n", pc.GetAbstractSyntax().UIDName, sopName)
-	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s (%s)\n", pc.GetTrnSyntax().UIDName, tsName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s (%s)\n", pc.GetAbstractSyntax().GetUID(), sopName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s (%s)\n", pc.GetTrnSyntax().GetUID(), tsName)
 
 	if err = bd.Send(rw); err == nil {
 		return pc.TrnSyntax.Write(rw)

@@ -3,9 +3,9 @@ package services
 import (
 	"testing"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
-	"git.onebytedata.com/odb/go-dicom/tags"
 	"git.onebytedata.com/odb/go-dicom/utils"
 )
 

@@ -7,13 +7,14 @@ import (
 	"log"
 	"strconv"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
 	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // AAssociationAC AAssociationAC
 type AAssociationAC interface {
-	GetAppContext() UIDitem
-	SetAppContext(context UIDitem)
+	GetAppContext() UIDItem
+	SetAppContext(context UIDItem)
 	SetCallingAE(AET string)
 	SetCalledAE(AET string)
 	AddPresContextAccept(context PresentationContextAccept)
@@ -37,7 +38,7 @@ type aassociationAC struct {
 	CallingAE          [16]byte
 	CalledAE           [16]byte
 	Reserved3          [32]byte
-	AppContext         UIDitem
+	AppContext         UIDItem
 	PresContextAccepts []PresentationContextAccept
 	UserInfo           UserInformation
 }
@@ -49,22 +50,22 @@ func NewAAssociationAC() AAssociationAC {
 		Reserved1:       0x00,
 		ProtocolVersion: 0x01,
 		Reserved2:       0x00,
-		AppContext: UIDitem{
-			ItemType:  0x10,
-			Reserved1: 0x00,
-			UIDName:   "1.2.840.10008.3.1.1.1",
-			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
+		AppContext: &uidItem{
+			itemType:  0x10,
+			reserved1: 0x00,
+			uid:       sopclass.DICOMApplicationContext.UID,
+			length:    uint16(len(sopclass.DICOMApplicationContext.UID)),
 		},
 		PresContextAccepts: make([]PresentationContextAccept, 0),
 		UserInfo:           NewUserInformation(),
 	}
 }
 
-func (aaac *aassociationAC) GetAppContext() UIDitem {
+func (aaac *aassociationAC) GetAppContext() UIDItem {
 	return aaac.AppContext
 }
 
-func (aaac *aassociationAC) SetAppContext(context UIDitem) {
+func (aaac *aassociationAC) SetAppContext(context UIDItem) {
 	aaac.AppContext = context
 }
 
@@ -102,7 +103,7 @@ func (aaac *aassociationAC) SetMaxSubLength(length uint32) {
 
 func (aaac *aassociationAC) Size() uint32 {
 	aaac.Length = 4 + 16 + 16 + 32
-	aaac.Length += uint32(aaac.AppContext.Size())
+	aaac.Length += uint32(aaac.AppContext.GetSize())
 
 	for _, PresContextAccept := range aaac.PresContextAccepts {
 		aaac.Length += uint32(PresContextAccept.Size())
@@ -119,8 +120,8 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 
 	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
 	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
-	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().UIDName)
-	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().UIDName)
+	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().GetUID())
+	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().GetUID())
 
 	bd.SetBigEndian(true)
 	aaac.Size()
@@ -187,7 +188,7 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 		switch TempByte {
 		case 0x10:
 			aaac.AppContext.ReadDynamic(ms)
-			Count = Count - int(aaac.AppContext.Size())
+			Count = Count - int(aaac.AppContext.GetSize())
 			break
 		case 0x21:
 			PresContextAccept := NewPresentationContextAccept()
@@ -207,8 +208,8 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 
 	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
 	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
-	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.GetUserInformation().GetImpClass().UIDName)
-	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.GetUserInformation().GetImpVersion().UIDName)
+	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.GetUserInformation().GetImpClass().GetUID())
+	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.GetUserInformation().GetImpVersion().GetUID())
 
 	if Count == 0 {
 		return nil

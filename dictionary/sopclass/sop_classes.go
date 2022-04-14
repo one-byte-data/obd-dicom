@@ -1,4 +1,4 @@
-package uid
+package sopclass
 
 // Verification - (1.2.840.10008.1.1) Verification SOP Class
 var Verification = &SOPClass{
@@ -54,6 +54,14 @@ var SubstanceAdministrationLogging = &SOPClass{
 	Name:        "SubstanceAdministrationLogging",
 	Description: "Substance Administration Logging SOP Class",
 	Type:        "SOP Class",
+}
+
+// DICOMApplicationContext - (1.2.840.10008.3.1.1.1) DICOM Application Context Name
+var DICOMApplicationContext = &SOPClass{
+	UID:         "1.2.840.10008.3.1.1.1",
+	Name:        "DICOMApplicationContext",
+	Description: "DICOM Application Context Name",
+	Type:        "Application Context Name",
 }
 
 // DetachedPatientManagement - (1.2.840.10008.3.1.2.1.1) Detached Patient Management SOP Class (Retired)
@@ -2304,6 +2312,7 @@ var sopClasses = []*SOPClass{
 	StorageCommitmentPullModel,
 	ProceduralEventLogging,
 	SubstanceAdministrationLogging,
+	DICOMApplicationContext,
 	DetachedPatientManagement,
 	DetachedVisitManagement,
 	DetachedStudyManagement,

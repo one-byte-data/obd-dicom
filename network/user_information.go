@@ -15,9 +15,9 @@ type UserInformation interface {
 	GetMaxSubLength() MaximumSubLength
 	SetMaxSubLength(length MaximumSubLength)
 	Size() uint16
-	GetImpClass() UIDitem
+	GetImpClass() UIDItem
 	SetImpClassUID(name string)
-	GetImpVersion() UIDitem
+	GetImpVersion() UIDItem
 	SetImpVersionName(name string)
 	Write(rw *bufio.ReadWriter) (err error)
 	Read(ms media.MemoryStream) (err error)
@@ -32,8 +32,8 @@ type userInformation struct {
 	MaxSubLength    MaximumSubLength
 	AsyncOpWindow   AsyncOperationWindow
 	SCPSCURole      RoleSelect
-	ImpClass        UIDitem
-	ImpVersion      UIDitem
+	ImpClass        uidItem
+	ImpVersion      uidItem
 }
 
 // NewUserInformation - NewUserInformation
@@ -64,31 +64,31 @@ func (ui *userInformation) SetMaxSubLength(length MaximumSubLength) {
 
 func (ui *userInformation) Size() uint16 {
 	ui.Length = ui.MaxSubLength.Size()
-	ui.Length += ui.ImpClass.Size()
-	ui.Length += ui.ImpVersion.Size()
+	ui.Length += ui.ImpClass.GetSize()
+	ui.Length += ui.ImpVersion.GetSize()
 	return ui.Length + 4
 }
 
-func (ui *userInformation) GetImpClass() UIDitem {
-	return ui.ImpClass
+func (ui *userInformation) GetImpClass() UIDItem {
+	return &ui.ImpClass
 }
 
 func (ui *userInformation) SetImpClassUID(name string) {
-	ui.ImpClass.ItemType = 0x52
-	ui.ImpClass.Reserved1 = 0x00
-	ui.ImpClass.UIDName = name
-	ui.ImpClass.Length = uint16(len(name))
+	ui.ImpClass.SetReserved(0x52)
+	ui.ImpClass.SetReserved(0x00)
+	ui.ImpClass.SetUID(name)
+	ui.ImpClass.SetLength(uint16(len(name)))
 }
 
-func (ui *userInformation) GetImpVersion() UIDitem {
-	return ui.ImpVersion
+func (ui *userInformation) GetImpVersion() UIDItem {
+	return &ui.ImpVersion
 }
 
 func (ui *userInformation) SetImpVersionName(name string) {
-	ui.ImpVersion.ItemType = 0x55
-	ui.ImpVersion.Reserved1 = 0x00
-	ui.ImpVersion.UIDName = name
-	ui.ImpVersion.Length = uint16(len(name))
+	ui.ImpVersion.SetType(0x55)
+	ui.ImpVersion.SetReserved(0x00)
+	ui.ImpVersion.SetUID(name)
+	ui.ImpVersion.SetLength(uint16(len(name)))
 }
 
 func (ui *userInformation) Write(rw *bufio.ReadWriter) (err error) {
@@ -141,7 +141,7 @@ func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
 			break
 		case 0x52:
 			ui.ImpClass.ReadDynamic(ms)
-			Count = Count - int(ui.ImpClass.Size())
+			Count = Count - int(ui.ImpClass.GetSize())
 			break
 		case 0x53:
 			ui.AsyncOpWindow.ReadDynamic(ms)
@@ -154,7 +154,7 @@ func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
 			break
 		case 0x55:
 			ui.ImpVersion.ReadDynamic(ms)
-			Count = Count - int(ui.ImpVersion.Size())
+			Count = Count - int(ui.ImpVersion.GetSize())
 			break
 		default:
 			ui.UserInfoBaggage = uint32(Count)

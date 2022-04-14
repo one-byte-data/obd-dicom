@@ -8,13 +8,14 @@ import (
 	"strconv"
 	"strings"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
 	"git.onebytedata.com/odb/go-dicom/media"
 )
 
 // AAssociationRQ - AAssociationRQ
 type AAssociationRQ interface {
-	GetAppContext() UIDitem
-	SetAppContext(context UIDitem)
+	GetAppContext() UIDItem
+	SetAppContext(context UIDItem)
 	GetCallingAE() string
 	SetCallingAE(AET string)
 	GetCalledAE() string
@@ -24,7 +25,7 @@ type AAssociationRQ interface {
 	SetUserInformation(userInfo UserInformation)
 	GetMaxSubLength() uint32
 	SetMaxSubLength(length uint32)
-	GetImpClass() UIDitem
+	GetImpClass() UIDItem
 	SetImpClassUID(uid string)
 	SetImpVersionName(name string)
 	Size() uint32
@@ -42,7 +43,7 @@ type aassociationRQ struct {
 	CallingAE       [16]byte // 16 bytes transfered
 	CalledAE        [16]byte // 16 bytes transfered
 	Reserved3       [32]byte
-	AppContext      UIDitem
+	AppContext      UIDItem
 	PresContexts    []PresentationContext
 	UserInfo        UserInformation
 }
@@ -54,22 +55,22 @@ func NewAAssociationRQ() AAssociationRQ {
 		Reserved1:       0x00,
 		ProtocolVersion: 0x01,
 		Reserved2:       0x00,
-		AppContext: UIDitem{
-			ItemType:  0x10,
-			Reserved1: 0x00,
-			UIDName:   "1.2.840.10008.3.1.1.1",
-			Length:    uint16(len("1.2.840.10008.3.1.1.1")),
+		AppContext: &uidItem{
+			itemType:  0x10,
+			reserved1: 0x00,
+			uid:       sopclass.DICOMApplicationContext.UID,
+			length:    uint16(len(sopclass.DICOMApplicationContext.UID)),
 		},
 		PresContexts: make([]PresentationContext, 0),
 		UserInfo:     NewUserInformation(),
 	}
 }
 
-func (aarq *aassociationRQ) GetAppContext() UIDitem {
+func (aarq *aassociationRQ) GetAppContext() UIDItem {
 	return aarq.AppContext
 }
 
-func (aarq *aassociationRQ) SetAppContext(context UIDitem) {
+func (aarq *aassociationRQ) SetAppContext(context UIDItem) {
 	aarq.AppContext = context
 }
 
@@ -111,7 +112,7 @@ func (aarq *aassociationRQ) SetMaxSubLength(length uint32) {
 	aarq.UserInfo.GetMaxSubLength().SetMaximumLength(length)
 }
 
-func (aarq *aassociationRQ) GetImpClass() UIDitem {
+func (aarq *aassociationRQ) GetImpClass() UIDItem {
 	return aarq.UserInfo.GetImpClass()
 }
 
@@ -125,7 +126,7 @@ func (aarq *aassociationRQ) SetImpVersionName(name string) {
 
 func (aarq *aassociationRQ) Size() uint32 {
 	aarq.Length = 4 + 16 + 16 + 32
-	aarq.Length += uint32(aarq.AppContext.Size())
+	aarq.Length += uint32(aarq.AppContext.GetSize())
 
 	for _, PresContext := range aarq.PresContexts {
 		aarq.Length += uint32(PresContext.Size())
@@ -140,8 +141,8 @@ func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 
 	log.Printf("INFO, ASSOC-RQ: CalledAE - %s\n", aarq.CalledAE)
 	log.Printf("INFO, ASSOC-RQ: CallingAE - %s\n", aarq.CallingAE)
-	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().UIDName)
-	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().UIDName)
+	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().GetUID())
+	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().GetUID())
 
 	bd.SetBigEndian(true)
 	aarq.Size()
@@ -191,9 +192,9 @@ func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
 
 		switch TempByte {
 		case 0x10:
-			aarq.AppContext.ItemType = TempByte
+			aarq.AppContext.SetType(TempByte)
 			aarq.AppContext.ReadDynamic(ms)
-			Count = Count - int(aarq.AppContext.Size())
+			Count = Count - int(aarq.AppContext.GetSize())
 			break
 		case 0x20:
 			PresContext := NewPresentationContext()
@@ -213,8 +214,8 @@ func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
 
 	log.Printf("INFO, ASSOC-RQ: CalledAE - %s\n", aarq.CalledAE)
 	log.Printf("INFO, ASSOC-RQ: CallingAE - %s\n", aarq.CallingAE)
-	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().UIDName)
-	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().UIDName)
+	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().GetUID())
+	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().GetUID())
 
 	if Count == 0 {
 		return nil

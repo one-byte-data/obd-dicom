@@ -8,8 +8,9 @@ import (
 	"os"
 	"time"
 
-	"git.onebytedata.com/odb/go-dicom/tags"
-	"git.onebytedata.com/odb/go-dicom/uid"
+	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
+	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
+	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 )
 
 // DcmObj - DICOM Object structure
@@ -41,8 +42,8 @@ type DcmObj interface {
 	WriteUint16GE(group uint16, element uint16, vr string, val uint16)
 	WriteUint32GE(group uint16, element uint16, vr string, val uint32)
 	WriteStringGE(group uint16, element uint16, vr string, content string)
-	GetTransferSyntax() *uid.SOPClass
-	SetTransferSyntax(ts *uid.SOPClass)
+	GetTransferSyntax() *transfersyntax.TransferSyntax
+	SetTransferSyntax(ts *transfersyntax.TransferSyntax)
 	TagCount() int
 	CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string)
 	CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string)
@@ -53,7 +54,7 @@ type DcmObj interface {
 
 type dcmObj struct {
 	Tags           []*DcmTag
-	TransferSyntax *uid.SOPClass
+	TransferSyntax *transfersyntax.TransferSyntax
 	ExplicitVR     bool
 	BigEndian      bool
 	SQtag          *DcmTag
@@ -97,10 +98,10 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 	}
 
 	if obj.TransferSyntax != nil {
-		if obj.TransferSyntax != uid.ImplicitVRLittleEndian {
+		if obj.TransferSyntax != transfersyntax.ImplicitVRLittleEndian {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == uid.ExplicitVRBigEndian {
+		if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -130,12 +131,12 @@ func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
 	}
 
 	if obj.TransferSyntax != nil {
-		if obj.TransferSyntax == uid.ImplicitVRLittleEndian {
+		if obj.TransferSyntax == transfersyntax.ImplicitVRLittleEndian {
 			obj.ExplicitVR = false
 		} else {
 			obj.ExplicitVR = true
 		}
-		if obj.TransferSyntax == uid.ExplicitVRBigEndian {
+		if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
 			BigEndian = true
 		}
 		bufdata.SetBigEndian(BigEndian)
@@ -323,7 +324,7 @@ func (obj *dcmObj) Add(tag *DcmTag) {
 func (obj *dcmObj) WriteToBytes() []byte {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian.UID {
+	if obj.TransferSyntax.UID == transfersyntax.ExplicitVRBigEndian.UID {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
@@ -338,7 +339,7 @@ func (obj *dcmObj) WriteToBytes() []byte {
 func (obj *dcmObj) WriteToFile(fileName string) error {
 	bufdata := NewEmptyBufData()
 
-	if obj.TransferSyntax.UID == uid.ExplicitVRBigEndian.UID {
+	if obj.TransferSyntax.UID == transfersyntax.ExplicitVRBigEndian.UID {
 		bufdata.SetBigEndian(true)
 	}
 	SOPClassUID := obj.GetStringGE(0x08, 0x16)
@@ -434,11 +435,11 @@ func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, conten
 	obj.Tags = append(obj.Tags, tag)
 }
 
-func (obj *dcmObj) GetTransferSyntax() *uid.SOPClass {
+func (obj *dcmObj) GetTransferSyntax() *transfersyntax.TransferSyntax {
 	return obj.TransferSyntax
 }
 
-func (obj *dcmObj) SetTransferSyntax(ts *uid.SOPClass) {
+func (obj *dcmObj) SetTransferSyntax(ts *transfersyntax.TransferSyntax) {
 	obj.TransferSyntax = ts
 }
 
@@ -511,7 +512,7 @@ func (obj *dcmObj) AddSRText(text string) {
 func (obj *dcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string) {
 	obj.WriteString(tags.InstanceCreationDate, time.Now().Format("20060102"))
 	obj.WriteString(tags.InstanceCreationTime, time.Now().Format("150405"))
-	obj.WriteString(tags.SOPClassUID, uid.BasicTextSRStorage.UID)
+	obj.WriteString(tags.SOPClassUID, sopclass.BasicTextSRStorage.UID)
 	obj.WriteString(tags.SOPInstanceUID, SOPInstanceUID)
 	obj.WriteString(tags.AccessionNumber, study.AccessionNumber)
 	obj.WriteString(tags.Modality, "SR")
@@ -540,7 +541,7 @@ func (obj *dcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanc
 func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string) {
 	obj.WriteString(tags.InstanceCreationDate, time.Now().Format("20060102"))
 	obj.WriteString(tags.InstanceCreationTime, time.Now().Format("150405"))
-	obj.WriteString(tags.SOPClassUID, uid.EncapsulatedPDFStorage.UID)
+	obj.WriteString(tags.SOPClassUID, sopclass.EncapsulatedPDFStorage.UID)
 	obj.WriteString(tags.SOPInstanceUID, SOPInstanceUID)
 	obj.WriteString(tags.AccessionNumber, study.AccessionNumber)
 	obj.WriteString(tags.Modality, "OT")

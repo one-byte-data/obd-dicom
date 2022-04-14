@@ -12,11 +12,11 @@ import (
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"
 
-const dictionaryTagsFile string = "../../tags/dicom_tags.go"
+const dicomTagsFile string = "../../dictionary/tags/dicom_tags.go"
 
-const sopClassesFile string = "../../uid/sop_classes.go"
+const sopClassesFile string = "../../dictionary/sopclass/sop_classes.go"
 
-const transferSyntaxesFile string = "../../uid/transfer_syntaxes.go"
+const transferSyntaxesFile string = "../../dictionary/transfersyntax/transfer_syntaxes.go"
 
 type dictionary struct {
 	XMLName xml.Name `xml:"dictionary"`
@@ -42,8 +42,7 @@ type uid struct {
 
 func main() {
 	tags, uids := downloadDictionary()
-	writeDictionaryTags(tags)
-
+	writeDicomTags(tags)
 	writeSOPClassesFile(uids)
 	writeTransferSyntaxesFile(uids)
 }
@@ -66,14 +65,14 @@ func downloadDictionary() ([]tag, []uid) {
 	return dict.Tags, dict.UIDs
 }
 
-func writeDictionaryTags(tags []tag) {
-	if FileExists(dictionaryTagsFile) {
-		err := os.Remove(dictionaryTagsFile)
+func writeDicomTags(tags []tag) {
+	if FileExists(dicomTagsFile) {
+		err := os.Remove(dicomTagsFile)
 		if err != nil {
 			log.Panic(err)
 		}
 	}
-	f, err := os.Create(dictionaryTagsFile)
+	f, err := os.Create(dicomTagsFile)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -121,12 +120,12 @@ func writeSOPClassesFile(uids []uid) {
 	}
 	defer f.Close()
 
-	f.WriteString("package uid\n\n")
+	f.WriteString("package sopclass\n\n")
 
 	sopClasses := make([]string, 0)
 
 	for _, uid := range uids {
-		if uid.Type != "SOP Class" {
+		if uid.Type != "SOP Class" && uid.Type != "Application Context Name" {
 			continue
 		}
 		sopClasses = append(sopClasses, uid.Keyword)
@@ -160,17 +159,17 @@ func writeTransferSyntaxesFile(uids []uid) {
 	}
 	defer f.Close()
 
-	f.WriteString("package uid\n\n")
+	f.WriteString("package transfersyntax\n\n")
 
-	sopClasses := make([]string, 0)
+	transferSyntaxes := make([]string, 0)
 
 	for _, uid := range uids {
 		if uid.Type != "Transfer Syntax" {
 			continue
 		}
-		sopClasses = append(sopClasses, uid.Keyword)
+		transferSyntaxes = append(transferSyntaxes, uid.Keyword)
 		f.WriteString(fmt.Sprintf("// %s - (%s) %s\n", uid.Keyword, uid.UID, uid.Name))
-		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("var %s = &TransferSyntax{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
@@ -178,9 +177,9 @@ func writeTransferSyntaxesFile(uids []uid) {
 		f.WriteString("}\n\n")
 	}
 
-	f.WriteString("var transferSyntaxes = []*SOPClass{\n")
-	for _, sopClass := range sopClasses {
-		f.WriteString(fmt.Sprintf("  %s,\n", sopClass))
+	f.WriteString("var transferSyntaxes = []*TransferSyntax{\n")
+	for _, ts := range transferSyntaxes {
+		f.WriteString(fmt.Sprintf("  %s,\n", ts))
 	}
 	f.WriteString("}\n")
 	f.Sync()

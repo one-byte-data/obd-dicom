@@ -6,12 +6,12 @@ import (
 	"log"
 	"net"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/dimsec"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/network/dicomcommand"
 	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
-	"git.onebytedata.com/odb/go-dicom/tags"
 )
 
 // SCP - Interface to scp

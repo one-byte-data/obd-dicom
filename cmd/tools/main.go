@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/services"
-	"git.onebytedata.com/odb/go-dicom/tags"
 	"git.onebytedata.com/odb/go-dicom/utils"
 )
 

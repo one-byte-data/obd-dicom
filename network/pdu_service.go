@@ -8,15 +8,16 @@ import (
 	"net"
 	"time"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
+	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 	"git.onebytedata.com/odb/go-dicom/imp"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network/pdutype"
-	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // PDUService - struct for PDUService
 type PDUService interface {
-	GetTransferSyntax(pcid byte) *uid.SOPClass
+	GetTransferSyntax(pcid byte) *transfersyntax.TransferSyntax
 	SetTimeout(timeout int)
 	Connect(IP string, Port string) error
 	Close()
@@ -74,10 +75,10 @@ func (pdu *pduService) SetConn(rw *bufio.ReadWriter) {
 	pdu.readWriter = rw
 }
 
-func (pdu *pduService) GetTransferSyntax(pcid byte) *uid.SOPClass {
+func (pdu *pduService) GetTransferSyntax(pcid byte) *transfersyntax.TransferSyntax {
 	for _, pca := range pdu.AcceptedPresentationContexts {
 		if pca.GetPresentationContextID() == pcid {
-			return uid.GetTransferSyntaxFromUID(pca.GetTrnSyntax().UIDName)
+			return transfersyntax.GetTransferSyntaxFromUID(pca.GetTrnSyntax().GetUID())
 		}
 	}
 	return nil
@@ -303,7 +304,7 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength() - 6
 
 	sopName := ""
-	sopClass := uid.GetSOPClassFromUID(SOPClass)
+	sopClass := sopclass.GetSOPClassFromUID(SOPClass)
 	if sopClass != nil {
 		sopName = sopClass.Name
 	}
@@ -320,14 +321,14 @@ func (pdu *pduService) interogateAAssociateAC() bool {
 		if presContextAccept.GetResult() == 0 {
 			pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, presContextAccept)
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == uid.ExplicitVRLittleEndian.UID {
-					TS = presContextAccept.GetTrnSyntax().UIDName
+				if presContextAccept.GetTrnSyntax().GetUID() == transfersyntax.ExplicitVRLittleEndian.UID {
+					TS = presContextAccept.GetTrnSyntax().GetUID()
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
 			}
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().UIDName == uid.ImplicitVRLittleEndian.UID {
-					TS = presContextAccept.GetTrnSyntax().UIDName
+				if presContextAccept.GetTrnSyntax().GetUID() == transfersyntax.ImplicitVRLittleEndian.UID {
+					TS = presContextAccept.GetTrnSyntax().GetUID()
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
 			}
@@ -355,34 +356,34 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 
 	for _, PresContext := range pdu.AssocRQ.GetPresContexts() {
 		sopName := ""
-		sopClass := uid.GetSOPClassFromUID(PresContext.GetAbstractSyntax().UIDName)
+		sopClass := sopclass.GetSOPClassFromUID(PresContext.GetAbstractSyntax().GetUID())
 		if sopClass != nil {
 			sopName = sopClass.Name
 		}
-		log.Printf("INFO, ASSOC-RQ: \tPresentation Context %s (%s)\n", PresContext.GetAbstractSyntax().UIDName, sopName)
+		log.Printf("INFO, ASSOC-RQ: \tPresentation Context %s (%s)\n", PresContext.GetAbstractSyntax().GetUID(), sopName)
 		for _, TransferSyn := range PresContext.GetTransferSyntaxes() {
 			tsName := ""
-			transferSyntax := uid.GetTransferSyntaxFromUID(TransferSyn.UIDName)
+			transferSyntax := transfersyntax.GetTransferSyntaxFromUID(TransferSyn.GetUID())
 			if transferSyntax != nil {
 				tsName = transferSyntax.Name
 			}
-			log.Printf("INFO, ASSOC-RQ: \t\tTransfer Synxtax %s (%s)\n", TransferSyn.UIDName, tsName)
+			log.Printf("INFO, ASSOC-RQ: \t\tTransfer Synxtax %s (%s)\n", TransferSyn.GetUID(), tsName)
 		}
 
 		PresContextAccept := NewPresentationContextAccept()
 		PresContextAccept.SetResult(4)
 		PresContextAccept.SetTransferSyntax("")
-		PresContextAccept.SetAbstractSyntax(PresContext.GetAbstractSyntax().UIDName)
+		PresContextAccept.SetAbstractSyntax(PresContext.GetAbstractSyntax().GetUID())
 		TS := ""
 		for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-			if TrnSyntax.UIDName == uid.ExplicitVRLittleEndian.UID {
-				TS = TrnSyntax.UIDName
+			if TrnSyntax.GetUID() == transfersyntax.ExplicitVRLittleEndian.UID {
+				TS = TrnSyntax.GetUID()
 			}
 		}
 		if TS == "" {
 			for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-				if TrnSyntax.UIDName == uid.ImplicitVRLittleEndian.UID {
-					TS = TrnSyntax.UIDName
+				if TrnSyntax.GetUID() == transfersyntax.ImplicitVRLittleEndian.UID {
+					TS = TrnSyntax.GetUID()
 				}
 			}
 		}
@@ -423,10 +424,10 @@ func (pdu *pduService) parseRawVRIntoDCM(DCO media.DcmObj) bool {
 		return false
 	}
 	DCO.SetTransferSyntax(TrnSyntax)
-	if TrnSyntax.UID == uid.ExplicitVRLittleEndian.UID {
+	if TrnSyntax.UID == transfersyntax.ExplicitVRLittleEndian.UID {
 		DCO.SetExplicitVR(true)
 	}
-	if TrnSyntax.UID == uid.ExplicitVRBigEndian.UID {
+	if TrnSyntax.UID == transfersyntax.ExplicitVRBigEndian.UID {
 		DCO.SetBigEndian(true)
 	}
 	pdu.Pdata.Buffer.SetPosition(0)

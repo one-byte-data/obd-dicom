@@ -5,12 +5,13 @@ import (
 	"log"
 	"strconv"
 
+	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
+	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
+	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 	"git.onebytedata.com/odb/go-dicom/dimsec"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
-	"git.onebytedata.com/odb/go-dicom/tags"
-	"git.onebytedata.com/odb/go-dicom/uid"
 )
 
 // SCU - inteface to a scu
@@ -40,11 +41,11 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, uid.Verification.UID, timeout)
+	err := d.openAssociation(pdu, sopclass.Verification.UID, timeout)
 	if err != nil {
 		return err
 	}
-	err = dimsec.CEchoWriteRQ(pdu, uid.Verification.UID)
+	err = dimsec.CEchoWriteRQ(pdu, sopclass.Verification.UID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (d *scu) EchoSCU(timeout int) error {
 func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 	results := 0
 	status := 1
-	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelFind
+	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelFind
 
 	pdu := network.NewPDUService()
 	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
@@ -93,7 +94,7 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, int, error) {
 func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (int, error) {
 	var pending int
 	status := dicomstatus.Pending
-	SOPClassUID := uid.StudyRootQueryRetrieveInformationModelMove
+	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelMove
 
 	pdu := network.NewPDUService()
 	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
@@ -172,8 +173,8 @@ func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, tim
 	network.Resetuniq()
 	PresContext := network.NewPresentationContext()
 	PresContext.SetAbstractSyntax(AbstractSyntax)
-	PresContext.AddTransferSyntax(uid.ImplicitVRLittleEndian.UID)
-	PresContext.AddTransferSyntax(uid.ExplicitVRLittleEndian.UID)
+	PresContext.AddTransferSyntax(transfersyntax.ImplicitVRLittleEndian.UID)
+	PresContext.AddTransferSyntax(transfersyntax.ExplicitVRLittleEndian.UID)
 	pdu.AddPresContexts(PresContext)
 
 	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))
@@ -202,10 +203,10 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		DDO.SetTransferSyntax(TrnSyntOUT)
 		DDO.SetExplicitVR(true)
 		DDO.SetBigEndian(false)
-		if TrnSyntOUT.UID == uid.ImplicitVRLittleEndian.UID {
+		if TrnSyntOUT.UID == transfersyntax.ImplicitVRLittleEndian.UID {
 			DDO.SetExplicitVR(false)
 		}
-		if TrnSyntOUT.UID == uid.ExplicitVRBigEndian.UID {
+		if TrnSyntOUT.UID == transfersyntax.ExplicitVRBigEndian.UID {
 			DDO.SetBigEndian(true)
 		}
 		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)

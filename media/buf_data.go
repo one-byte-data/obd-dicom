@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.onebytedata.com/odb/go-dicom/uid"
+	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 )
 
 // BufData - is an interface to buffer manipulation class
@@ -29,7 +29,7 @@ type BufData interface {
 	ReadTag(explicitVR bool) (*DcmTag, error)
 	WriteTag(tag *DcmTag, explicitVR bool)
 	WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool)
-	ReadMeta() (*uid.SOPClass, error)
+	ReadMeta() (*transfersyntax.TransferSyntax, error)
 	WriteMeta(SOPClassUID string, SOPInstanceUID string, TransferSyntax string)
 	ReadObj(obj DcmObj) bool
 	WriteObj(obj DcmObj)
@@ -272,8 +272,8 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 }
 
 // ReadMeta - Read Meta Header
-func (bd *bufData) ReadMeta() (*uid.SOPClass, error) {
-	var TransferSyntax *uid.SOPClass
+func (bd *bufData) ReadMeta() (*transfersyntax.TransferSyntax, error) {
+	var TransferSyntax *transfersyntax.TransferSyntax
 	pos := 0
 
 	bd.SetPosition(128)
@@ -287,7 +287,7 @@ func (bd *bufData) ReadMeta() (*uid.SOPClass, error) {
 			pos = bd.GetPosition()
 			tag, _ := bd.ReadTag(true)
 			if (tag.Group == 0x02) && (tag.Element == 0x010) {
-				TransferSyntax = uid.GetTransferSyntaxFromUID(tag.GetString())
+				TransferSyntax = transfersyntax.GetTransferSyntaxFromUID(tag.GetString())
 			}
 			if tag.Group > 0x02 {
 				fin = true

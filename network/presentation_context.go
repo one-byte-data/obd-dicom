@@ -11,10 +11,10 @@ import (
 type PresentationContext interface {
 	GetPresentationContextID() byte
 	SetPresentationContextID(id byte)
-	GetAbstractSyntax() UIDitem
+	GetAbstractSyntax() UIDItem
 	SetAbstractSyntax(Abst string)
 	AddTransferSyntax(Tran string)
-	GetTransferSyntaxes() []UIDitem
+	GetTransferSyntaxes() []UIDItem
 	Size() uint16
 	Write(rw *bufio.ReadWriter) error
 	Read(ms media.MemoryStream) error
@@ -29,8 +29,8 @@ type presentationContext struct {
 	Reserved2             byte
 	Reserved3             byte
 	Reserved4             byte
-	AbsSyntax             UIDitem
-	TrnSyntaxs            []UIDitem
+	AbsSyntax             uidItem
+	TrnSyntaxs            []UIDItem
 }
 
 // NewPresentationContext - NewPresentationContext
@@ -49,31 +49,31 @@ func (pc *presentationContext) SetPresentationContextID(id byte) {
 	pc.PresentationContextID = id
 }
 
-func (pc *presentationContext) GetAbstractSyntax() UIDitem {
-	return pc.AbsSyntax
+func (pc *presentationContext) GetAbstractSyntax() UIDItem {
+	return &pc.AbsSyntax
 }
 
 func (pc *presentationContext) SetAbstractSyntax(Abst string) {
-	pc.AbsSyntax.ItemType = 0x30
-	pc.AbsSyntax.Reserved1 = 0x00
-	pc.AbsSyntax.UIDName = Abst
-	pc.AbsSyntax.Length = uint16(len(Abst))
+	pc.AbsSyntax.SetType(0x30)
+	pc.AbsSyntax.SetReserved(0x00)
+	pc.AbsSyntax.SetUID(Abst)
+	pc.AbsSyntax.SetLength(uint16(len(Abst)))
 }
 
 func (pc *presentationContext) AddTransferSyntax(Tran string) {
 	TrnSyntax := NewUIDitem(Tran, 0x40)
-	pc.TrnSyntaxs = append(pc.TrnSyntaxs, *TrnSyntax)
+	pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
 }
 
-func (pc *presentationContext) GetTransferSyntaxes() []UIDitem {
+func (pc *presentationContext) GetTransferSyntaxes() []UIDItem {
 	return pc.TrnSyntaxs
 }
 
 func (pc *presentationContext) Size() uint16 {
 	pc.Length = 4
-	pc.Length += pc.AbsSyntax.Size()
+	pc.Length += pc.AbsSyntax.GetSize()
 	for _, TrnSyntax := range pc.TrnSyntaxs {
-		pc.Length += TrnSyntax.Size()
+		pc.Length += TrnSyntax.GetSize()
 	}
 	return pc.Length + 4
 }
@@ -143,13 +143,13 @@ func (pc *presentationContext) ReadDynamic(ms media.MemoryStream) (err error) {
 
 	pc.AbsSyntax.Read(ms)
 
-	Count := pc.Length - 4 - pc.AbsSyntax.Size()
+	Count := pc.Length - 4 - pc.AbsSyntax.GetSize()
 	for Count > 0 {
-		var TrnSyntax UIDitem
+		var TrnSyntax uidItem
 		TrnSyntax.Read(ms)
-		Count = Count - TrnSyntax.Size()
-		if TrnSyntax.Size() > 0 {
-			pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
+		Count = Count - TrnSyntax.GetSize()
+		if TrnSyntax.GetSize() > 0 {
+			pc.TrnSyntaxs = append(pc.TrnSyntaxs, &TrnSyntax)
 		}
 	}
 

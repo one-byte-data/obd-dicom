@@ -1,1 +1,0 @@
-gcc comj2k.c -Iinclude -Iwin64 -Lwin64 -lopenjpeg.dll

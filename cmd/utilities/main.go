@@ -12,6 +12,8 @@ import (
 
 const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dicom/development/FO-DICOM.Core/Dictionaries/DICOM%20Dictionary.xml"
 
+const codingSchemesFile string = "../../dictionary/codingscheme/coding_schemes.go"
+
 const dicomTagsFile string = "../../dictionary/tags/dicom_tags.go"
 
 const sopClassesFile string = "../../dictionary/sopclass/sop_classes.go"
@@ -42,6 +44,7 @@ type uid struct {
 
 func main() {
 	tags, uids := downloadDictionary()
+	writeCopdingSchemesFile(uids)
 	writeDicomTags(tags)
 	writeSOPClassesFile(uids)
 	writeTransferSyntaxesFile(uids)
@@ -63,6 +66,45 @@ func downloadDictionary() ([]tag, []uid) {
 		log.Panic(err)
 	}
 	return dict.Tags, dict.UIDs
+}
+
+func writeCopdingSchemesFile(uids []uid) {
+	if FileExists(codingSchemesFile) {
+		err := os.Remove(codingSchemesFile)
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	f, err := os.Create(codingSchemesFile)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer f.Close()
+
+	f.WriteString("package codingscheme\n\n")
+
+	codingSchemes := make([]string, 0)
+
+	for _, uid := range uids {
+		if uid.Type != "Coding Scheme" {
+			continue
+		}
+		codingSchemes = append(codingSchemes, uid.Keyword)
+		f.WriteString(fmt.Sprintf("// %s - (%s) %s\n", uid.Keyword, uid.UID, uid.Name))
+		f.WriteString(fmt.Sprintf("var %s = &CodingScheme{\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
+		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
+		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
+		f.WriteString(fmt.Sprintf("  Type: \"%s\",\n", uid.Type))
+		f.WriteString("}\n\n")
+	}
+
+	f.WriteString("var codingSchemes = []*CodingScheme{\n")
+	for _, cs := range codingSchemes {
+		f.WriteString(fmt.Sprintf("  %s,\n", cs))
+	}
+	f.WriteString("}\n")
+	f.Sync()
 }
 
 func writeDicomTags(tags []tag) {

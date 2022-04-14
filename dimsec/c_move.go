@@ -7,6 +7,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/network/dicomcommand"
+	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/odb/go-dicom/network/priority"
 )
 
@@ -49,27 +50,27 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 }
 
 // CMoveReadRSP CMove response read
-func CMoveReadRSP(pdu network.PDUService, pending *int) (media.DcmObj, int, error) {
-	status := -1
-
+func CMoveReadRSP(pdu network.PDUService, pending *int) (media.DcmObj, uint16, error) {
+	status := dicomstatus.FailureUnableToProcess
 	dco, err := pdu.NextPDU()
 	if err != nil {
-		return nil, status, err
+		return nil, dicomstatus.FailureUnableToProcess, err
 	}
-	// Is this a C-Find RSP?
+
 	if dco.GetUShort(tags.CommandField) == dicomcommand.CMoveResponse {
 		if dco.GetUShort(tags.CommandDataSetType) != 0x0101 {
 			ddo, err := pdu.NextPDU()
 			if err != nil {
-				return nil, status, err
+				return nil, dicomstatus.FailureUnableToProcess, err
 			}
-			status = int(dco.GetUShort(tags.Status))
+			status = dco.GetUShort(tags.Status)
 			*pending = int(dco.GetUShort(tags.NumberOfRemainingSuboperations))
 			return ddo, status, nil
 		}
-		status = int(dco.GetUShort(tags.Status))
+		status = dco.GetUShort(tags.Status)
 		*pending = -1
 	}
+
 	return nil, status, nil
 }
 

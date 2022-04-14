@@ -29,7 +29,7 @@ type uidItem struct {
 	uid       string
 }
 
-func NewUIDitem(uid string, itemType byte) UIDItem {
+func NewUIDItem(uid string, itemType byte) UIDItem {
 	return &uidItem{
 		itemType: itemType,
 		uid:      uid,

@@ -10,6 +10,15 @@ type Tag struct {
 	Description string
 }
 
+func GetTagFromName(name string) *Tag {
+	for _, tag := range tags {
+		if tag.Name == name {
+			return tag
+		}
+	}
+	return &Tag{}
+}
+
 // GetTag - Get tag from group and element
 func GetTag(group uint16, element uint16) *Tag {
 	for _, tag := range tags {

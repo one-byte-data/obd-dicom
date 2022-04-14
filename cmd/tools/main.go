@@ -10,6 +10,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
+	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/odb/go-dicom/services"
 	"git.onebytedata.com/odb/go-dicom/utils"
 )
@@ -63,20 +64,21 @@ func main() {
 			return *calledAE == called
 		})
 
-		scp.OnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj) []media.DcmObj {
+		scp.OnCFindRequest(func(request network.AAssociationRQ, queryLevel string, query media.DcmObj) ([]media.DcmObj, uint16) {
 			query.DumpTags()
 			results := make([]media.DcmObj, 0)
 			for i := 0; i < 10; i++ {
 				results = append(results, utils.GenerateCFindRequest())
 			}
-			return results
+			return results, dicomstatus.Success
 		})
 
-		scp.OnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) {
+		scp.OnCMoveRequest(func(request network.AAssociationRQ, moveLevel string, query media.DcmObj) uint16 {
 			query.DumpTags()
+			return dicomstatus.Success
 		})
 
-		scp.OnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) {
+		scp.OnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) uint16 {
 			log.Printf("INFO, C-Store recieved %s", data.GetString(tags.SOPInstanceUID))
 			directory := filepath.Join(*datastore, data.GetString(tags.PatientID), data.GetString(tags.StudyInstanceUID), data.GetString(tags.SeriesInstanceUID))
 			os.MkdirAll(directory, 0755)
@@ -87,6 +89,7 @@ func main() {
 			if err != nil {
 				log.Printf("ERROR: There was an error saving %s : %s", path, err.Error())
 			}
+			return dicomstatus.Success
 		})
 
 		err := scp.Start()

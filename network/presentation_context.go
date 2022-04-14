@@ -61,7 +61,7 @@ func (pc *presentationContext) SetAbstractSyntax(Abst string) {
 }
 
 func (pc *presentationContext) AddTransferSyntax(Tran string) {
-	TrnSyntax := NewUIDitem(Tran, 0x40)
+	TrnSyntax := NewUIDItem(Tran, 0x40)
 	pc.TrnSyntaxs = append(pc.TrnSyntaxs, TrnSyntax)
 }
 

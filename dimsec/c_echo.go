@@ -11,7 +11,7 @@ import (
 )
 
 // CEchoReadRQ CEcho request read
-func CEchoReadRQ(pdu network.PDUService, DCO media.DcmObj) bool {
+func CEchoReadRQ(DCO media.DcmObj) bool {
 	return DCO.GetUShort(tags.CommandField) == dicomcommand.CEchoRequest
 }
 

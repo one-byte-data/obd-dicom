@@ -6,6 +6,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
+	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/odb/go-dicom/utils"
 )
 
@@ -94,6 +95,10 @@ func Test_scu_FindSCU(t *testing.T) {
 		return false
 	})
 
+	testSCP.OnCFindRequest(func(request network.AAssociationRQ, findLevel string, data media.DcmObj) ([]media.DcmObj, uint16) {
+		return make([]media.DcmObj, 0), dicomstatus.Success
+	})
+
 	media.InitDict()
 
 	type fields struct {
@@ -107,7 +112,7 @@ func Test_scu_FindSCU(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    int
+		want    uint16
 		wantErr bool
 	}{
 		{
@@ -139,6 +144,7 @@ func Test_scu_FindSCU(t *testing.T) {
 			d.SetOnCFindResult(func(result media.DcmObj) {
 				result.DumpTags()
 			})
+
 			_, status, err := d.FindSCU(tt.args.Query, tt.args.timeout)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("scu.FindSCU() error = %v, wantErr %v", err, tt.wantErr)
@@ -151,52 +157,67 @@ func Test_scu_FindSCU(t *testing.T) {
 	}
 }
 
-// func Test_scu_StoreSCU(t *testing.T) {
-// 	media.InitDict()
+func Test_scu_StoreSCU(t *testing.T) {
+	_, testSCP := StartSCP(t, 1042)
 
-// 	type fields struct {
-// 		destination *network.Destination
-// 	}
-// 	type args struct {
-// 		FileName string
-// 		timeout  int
-// 	}
-// 	tests := []struct {
-// 		name    string
-// 		fields  fields
-// 		args    args
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "C-Store All",
-// 			fields: fields{
-// 				destination: &network.Destination{
-// 					Name:      "Test Destination",
-// 					CalledAE:  "TEST_SCP",
-// 					CallingAE: "TEST_SCU",
-// 					HostName:  "localhost",
-// 					Port:      1040,
-// 					IsCFind:   true,
-// 					IsCMove:   true,
-// 					IsCStore:  true,
-// 					IsTLS:     false,
-// 				},
-// 			},
-// 			args: args{
-// 				FileName: "../test/test2.dcm",
-// 				timeout:  0,
-// 			},
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			d := NewSCU(tt.fields.destination)
-// 			if err := d.StoreSCU(tt.args.FileName, tt.args.timeout); (err != nil) != tt.wantErr {
-// 				t.Errorf("scu.StoreSCU() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 		})
-// 	}
-// }
+	testSCP.OnAssociationRequest(func(request network.AAssociationRQ) bool {
+		if request.GetCalledAE() == "TEST_SCP" {
+			return true
+		}
+		return false
+	})
+
+	testSCP.OnCStoreRequest(func(request network.AAssociationRQ, data media.DcmObj) uint16 {
+		data.DumpTags()
+		return dicomstatus.Success
+	})
+
+	media.InitDict()
+
+	type fields struct {
+		destination *network.Destination
+	}
+	type args struct {
+		FileName string
+		timeout  int
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Should store DICOM file",
+			fields: fields{
+				destination: &network.Destination{
+					Name:      "Test Destination",
+					CalledAE:  "TEST_SCP",
+					CallingAE: "TEST_SCU",
+					HostName:  "localhost",
+					Port:      1042,
+					IsCFind:   true,
+					IsCMove:   true,
+					IsCStore:  true,
+					IsTLS:     false,
+				},
+			},
+			args: args{
+				FileName: "../samples/test.dcm",
+				timeout:  0,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := NewSCU(tt.fields.destination)
+			if err := d.StoreSCU(tt.args.FileName, tt.args.timeout); (err != nil) != tt.wantErr {
+				t.Errorf("scu.StoreSCU() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 
 func StartSCP(t testing.TB, port int) (func(t testing.TB), SCP) {
 	testSCP := NewSCP(port)

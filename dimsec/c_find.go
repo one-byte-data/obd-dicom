@@ -7,6 +7,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/network/dicomcommand"
+	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/odb/go-dicom/network/priority"
 )
 
@@ -43,12 +44,10 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 }
 
 // CFindReadRSP CFind response read
-func CFindReadRSP(pdu network.PDUService) (media.DcmObj, int, error) {
-	status := -1
-
+func CFindReadRSP(pdu network.PDUService) (media.DcmObj, uint16, error) {
 	dco, err := pdu.NextPDU()
 	if err != nil {
-		return nil, status, err
+		return nil, dicomstatus.FailureUnableToProcess, err
 	}
 
 	// Is this a C-Find RSP?
@@ -56,13 +55,13 @@ func CFindReadRSP(pdu network.PDUService) (media.DcmObj, int, error) {
 		if dco.GetUShort(tags.CommandDataSetType) != 0x0101 {
 			ddo, err := pdu.NextPDU()
 			if err != nil {
-				return nil, status, err
+				return nil, dicomstatus.FailureUnableToProcess, err
 			}
-			return ddo, int(dco.GetUShort(tags.Status)), nil
+			return ddo, dco.GetUShort(tags.Status), nil
 		}
-		return nil, int(dco.GetUShort(tags.Status)), nil
+		return nil, dco.GetUShort(tags.Status), nil
 	}
-	return nil, status, errors.New("ERROR, CFindReadRSP, unknown error")
+	return nil, dicomstatus.FailureUnableToProcess, errors.New("ERROR, CFindReadRSP, unknown error")
 }
 
 // CFindWriteRSP CFind response write

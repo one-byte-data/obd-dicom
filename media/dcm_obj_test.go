@@ -17,7 +17,7 @@ func TestNewDCMObjFromFile(t *testing.T) {
 	}{
 		{
 			name:    "Should load DICOM file",
-			args:    args{fileName: "../test/images/test.dcm"},
+			args:    args{fileName: "../samples/test.dcm"},
 			wantErr: false,
 		},
 	}

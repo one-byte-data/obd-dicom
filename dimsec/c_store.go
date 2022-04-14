@@ -7,6 +7,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/network/dicomcommand"
+	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
 	"git.onebytedata.com/odb/go-dicom/network/priority"
 )
 
@@ -54,16 +55,16 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 }
 
 // CStoreReadRSP CStore response read
-func CStoreReadRSP(pdu network.PDUService) (int, error) {
+func CStoreReadRSP(pdu network.PDUService) (uint16, error) {
 	dco, err := pdu.NextPDU()
 	if err != nil {
-		return -1, err
+		return dicomstatus.FailureUnableToProcess, err
 	}
 	// Is this a C-Store RSP?
 	if dco.GetUShort(tags.CommandField) == dicomcommand.CStoreResponse {
-		return int(dco.GetUShort(tags.Status)), nil
+		return dco.GetUShort(tags.Status), nil
 	}
-	return -1, errors.New("ERROR, CStoreReadRSP, unknown error")
+	return dicomstatus.FailureUnableToProcess, errors.New("ERROR, CStoreReadRSP, unknown error")
 }
 
 // CStoreWriteRSP CStore response write

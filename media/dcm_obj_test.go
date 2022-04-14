@@ -28,7 +28,7 @@ func TestNewDCMObjFromFile(t *testing.T) {
 				t.Errorf("NewDCMObjFromFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			DumpDicom(dcmObj)
+			dcmObj.DumpTags()
 		})
 	}
 }

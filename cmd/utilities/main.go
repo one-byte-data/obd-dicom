@@ -14,8 +14,6 @@ const dictionaryURL string = "https://raw.githubusercontent.com/fo-dicom/fo-dico
 
 const dictionaryTagsFile string = "../../tags/dicom_tags.go"
 
-const tagsFileName string = "../../tags/tags.go"
-
 const sopClassesFile string = "../../uid/sop_classes.go"
 
 const transferSyntaxesFile string = "../../uid/transfer_syntaxes.go"
@@ -44,7 +42,6 @@ type uid struct {
 
 func main() {
 	tags, uids := downloadDictionary()
-	writeTagsFile(tags)
 	writeDictionaryTags(tags)
 
 	writeSOPClassesFile(uids)
@@ -84,10 +81,14 @@ func writeDictionaryTags(tags []tag) {
 
 	f.WriteString("package tags\n\n")
 
+	dicomTags := make([]string, 0)
+
 	for _, tag := range tags {
 		if strings.Contains(tag.Group, "x") || strings.Contains(tag.Element, "x") {
 			continue
 		}
+		dicomTags = append(dicomTags, tag.Keyword)
+		f.WriteString(fmt.Sprintf("// %s - (%s,%s) %s\n", tag.Keyword, tag.Group, tag.Element, tag.Name))
 		f.WriteString(fmt.Sprintf("var %s = &Tag{\n", tag.Keyword))
 		f.WriteString(fmt.Sprintf("  Group: 0x%s,\n", tag.Group))
 		f.WriteString(fmt.Sprintf("  Element: 0x%s,\n", tag.Element))
@@ -98,40 +99,12 @@ func writeDictionaryTags(tags []tag) {
 		f.WriteString("}\n\n")
 	}
 
-	f.Sync()
-}
-
-func writeTagsFile(tags []tag) {
-	if FileExists(tagsFileName) {
-		err := os.Remove(tagsFileName)
-		if err != nil {
-			log.Panic(err)
-		}
-	}
-	f, err := os.Create(tagsFileName)
-	if err != nil {
-		log.Panic(err)
-	}
-	defer f.Close()
-
-	f.WriteString("package tags\n\n")
 	f.WriteString("var tags = []*Tag{\n")
-
-	for _, tag := range tags {
-		if strings.Contains(tag.Group, "x") || strings.Contains(tag.Element, "x") {
-			continue
-		}
-		f.WriteString("  {\n")
-		f.WriteString(fmt.Sprintf("    Name: \"%s\",\n", tag.Keyword))
-		f.WriteString(fmt.Sprintf("    Description: \"%s\",\n", tag.Name))
-		f.WriteString(fmt.Sprintf("    Group: 0x%s,\n", tag.Group))
-		f.WriteString(fmt.Sprintf("    Element: 0x%s,\n", tag.Element))
-		f.WriteString(fmt.Sprintf("    VR: \"%s\",\n", tag.VR))
-		f.WriteString(fmt.Sprintf("    VM: \"%s\",\n", tag.VM))
-		f.WriteString("  },\n")
+	for _, tag := range dicomTags {
+		f.WriteString(fmt.Sprintf("  %s,\n", tag))
 	}
-
 	f.WriteString("}\n")
+
 	f.Sync()
 }
 
@@ -157,6 +130,7 @@ func writeSOPClassesFile(uids []uid) {
 			continue
 		}
 		sopClasses = append(sopClasses, uid.Keyword)
+		f.WriteString(fmt.Sprintf("// %s - (%s) %s\n", uid.Keyword, uid.UID, uid.Name))
 		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
@@ -165,7 +139,7 @@ func writeSOPClassesFile(uids []uid) {
 		f.WriteString("}\n\n")
 	}
 
-	f.WriteString("var SOPClasses = []*SOPClass{\n")
+	f.WriteString("var sopClasses = []*SOPClass{\n")
 	for _, sopClass := range sopClasses {
 		f.WriteString(fmt.Sprintf("  %s,\n", sopClass))
 	}
@@ -195,6 +169,7 @@ func writeTransferSyntaxesFile(uids []uid) {
 			continue
 		}
 		sopClasses = append(sopClasses, uid.Keyword)
+		f.WriteString(fmt.Sprintf("// %s - (%s) %s\n", uid.Keyword, uid.UID, uid.Name))
 		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
@@ -203,7 +178,7 @@ func writeTransferSyntaxesFile(uids []uid) {
 		f.WriteString("}\n\n")
 	}
 
-	f.WriteString("var TransferSyntaxes = []*SOPClass{\n")
+	f.WriteString("var transferSyntaxes = []*SOPClass{\n")
 	for _, sopClass := range sopClasses {
 		f.WriteString(fmt.Sprintf("  %s,\n", sopClass))
 	}

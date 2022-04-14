@@ -11,6 +11,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/services"
 	"git.onebytedata.com/odb/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/utils"
 )
 
 var destination *network.Destination
@@ -66,7 +67,7 @@ func main() {
 			query.DumpTags()
 			results := make([]media.DcmObj, 0)
 			for i := 0; i < 10; i++ {
-				results = append(results, media.GenerateCFindRequest())
+				results = append(results, utils.GenerateCFindRequest())
 			}
 			return results
 		})
@@ -116,7 +117,7 @@ func main() {
 		log.Println("CEcho was successful")
 	}
 	if *cfind {
-		request := media.DefaultCFindRequest()
+		request := utils.DefaultCFindRequest()
 		scu := services.NewSCU(destination)
 		scu.SetOnCFindResult(func(result media.DcmObj) {
 			log.Printf("Found study %s\n", result.GetString(tags.StudyInstanceUID))
@@ -151,7 +152,7 @@ func main() {
 			log.Fatalln("studyuid is required for a C-Move")
 		}
 
-		request := media.DefaultCMoveRequest(*studyUID)
+		request := utils.DefaultCMoveRequest(*studyUID)
 
 		scu := services.NewSCU(destination)
 		_, err := scu.MoveSCU(*destinationAE, request, 0)

@@ -1,15 +1,16 @@
-package media
+package utils
 
 import (
 	"time"
 
+	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/tags"
 	"git.onebytedata.com/odb/go-dicom/uuids"
 )
 
 // DefaultCFindRequest - Creates a default C-Find request
-func DefaultCFindRequest() DcmObj {
-	query := NewEmptyDCMObj()
+func DefaultCFindRequest() media.DcmObj {
+	query := media.NewEmptyDCMObj()
 	query.WriteString(tags.StudyDate, "")
 	query.WriteString(tags.StudyTime, "")
 	query.WriteString(tags.AccessionNumber, "")
@@ -28,8 +29,8 @@ func DefaultCFindRequest() DcmObj {
 }
 
 // DefaultCMoveRequest - Creates a default C-Move request
-func DefaultCMoveRequest(studyUID string) DcmObj {
-	query := NewEmptyDCMObj()
+func DefaultCMoveRequest(studyUID string) media.DcmObj {
+	query := media.NewEmptyDCMObj()
 	query.WriteString(tags.StudyDate, "")
 	query.WriteString(tags.StudyTime, "")
 	query.WriteString(tags.AccessionNumber, "")
@@ -45,9 +46,9 @@ func DefaultCMoveRequest(studyUID string) DcmObj {
 }
 
 // GenerateCFindRequest - Generates C-Find request
-func GenerateCFindRequest() DcmObj {
+func GenerateCFindRequest() media.DcmObj {
 	studyUID := uuids.CreateStudyUID("FAKE^PATIENT", "123456789", "AC1234", time.Now().Format("20060102"))
-	query := NewEmptyDCMObj()
+	query := media.NewEmptyDCMObj()
 	query.WriteDate(tags.StudyDate, time.Now())
 	query.WriteDate(tags.StudyTime, time.Now())
 	query.WriteString(tags.AccessionNumber, "AC1234")

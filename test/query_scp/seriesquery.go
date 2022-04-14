@@ -87,7 +87,7 @@ func (series *DCMSeries) QueryResult(obj media.DcmObj) media.DcmObj {
 	var added bool
 	tag := new(media.DcmTag)
 	query := media.NewEmptyDCMObj()
-	query.SetTransferSyntax(uid.GetTransferSyntaxFromUID("1.2.840.10008.1.2"))
+	query.SetTransferSyntax(uid.ImplicitVRLittleEndian)
 
 	for i := 0; i < len(obj.GetTags()); i++ {
 		tag = obj.GetTag(i)

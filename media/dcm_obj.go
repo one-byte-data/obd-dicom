@@ -511,7 +511,7 @@ func (obj *dcmObj) AddSRText(text string) {
 func (obj *dcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string) {
 	obj.WriteString(tags.InstanceCreationDate, time.Now().Format("20060102"))
 	obj.WriteString(tags.InstanceCreationTime, time.Now().Format("150405"))
-	obj.WriteString(tags.SOPClassUID, "1.2.840.10008.5.1.4.1.1.88.11")
+	obj.WriteString(tags.SOPClassUID, uid.BasicTextSRStorage.UID)
 	obj.WriteString(tags.SOPInstanceUID, SOPInstanceUID)
 	obj.WriteString(tags.AccessionNumber, study.AccessionNumber)
 	obj.WriteString(tags.Modality, "SR")
@@ -540,7 +540,7 @@ func (obj *dcmObj) CreateSR(study DCMStudy, SeriesInstanceUID string, SOPInstanc
 func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstanceUID string, fileName string) {
 	obj.WriteString(tags.InstanceCreationDate, time.Now().Format("20060102"))
 	obj.WriteString(tags.InstanceCreationTime, time.Now().Format("150405"))
-	obj.WriteString(tags.SOPClassUID, "1.2.840.10008.5.1.4.1.1.104.1")
+	obj.WriteString(tags.SOPClassUID, uid.EncapsulatedPDFStorage.UID)
 	obj.WriteString(tags.SOPInstanceUID, SOPInstanceUID)
 	obj.WriteString(tags.AccessionNumber, study.AccessionNumber)
 	obj.WriteString(tags.Modality, "OT")

@@ -6,6 +6,7 @@ import (
 	"git.onebytedata.com/odb/go-dicom/media"
 	"git.onebytedata.com/odb/go-dicom/network"
 	"git.onebytedata.com/odb/go-dicom/tags"
+	"git.onebytedata.com/odb/go-dicom/utils"
 )
 
 func Test_scu_EchoSCU(t *testing.T) {
@@ -125,7 +126,7 @@ func Test_scu_FindSCU(t *testing.T) {
 				},
 			},
 			args: args{
-				Query:   media.DefaultCFindRequest(),
+				Query:   utils.DefaultCFindRequest(),
 				timeout: 0,
 			},
 			wantErr: false,

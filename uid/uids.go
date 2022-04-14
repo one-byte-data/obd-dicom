@@ -8,12 +8,12 @@ type SOPClass struct {
 }
 
 func GetSOPClassFromName(name string) *SOPClass {
-	for _, sop := range SOPClasses {
+	for _, sop := range sopClasses {
 		if sop.Name == name {
 			return sop
 		}
 	}
-	for _, sop := range TransferSyntaxes {
+	for _, sop := range transferSyntaxes {
 		if sop.Name == name {
 			return sop
 		}
@@ -22,12 +22,12 @@ func GetSOPClassFromName(name string) *SOPClass {
 }
 
 func GetSOPClassFromUID(uid string) *SOPClass {
-	for _, sop := range SOPClasses {
+	for _, sop := range sopClasses {
 		if sop.UID == uid {
 			return sop
 		}
 	}
-	for _, sop := range TransferSyntaxes {
+	for _, sop := range transferSyntaxes {
 		if sop.UID == uid {
 			return sop
 		}
@@ -36,7 +36,7 @@ func GetSOPClassFromUID(uid string) *SOPClass {
 }
 
 func GetTransferSyntaxFromName(name string) *SOPClass {
-	for _, sop := range TransferSyntaxes {
+	for _, sop := range transferSyntaxes {
 		if sop.Name == name {
 			return sop
 		}
@@ -45,7 +45,7 @@ func GetTransferSyntaxFromName(name string) *SOPClass {
 }
 
 func GetTransferSyntaxFromUID(uid string) *SOPClass {
-	for _, sop := range TransferSyntaxes {
+	for _, sop := range transferSyntaxes {
 		if sop.UID == uid {
 			return sop
 		}

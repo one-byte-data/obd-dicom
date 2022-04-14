@@ -12,18 +12,20 @@ type implementation struct {
 
 var imp Implementation
 
-func SetDefaultImplementation() {
+func SetDefaultImplementation() Implementation {
 	imp = &implementation{
 		classUID: "1.2.826.0.1.3680043.10.90.999",
 		version:  "One-Byte-Data",
 	}
+	return imp
 }
 
-func SetImplementation(classUID string, version string) {
+func SetImplementation(classUID string, version string) Implementation {
 	imp = &implementation{
 		classUID: classUID,
 		version:  version,
 	}
+	return imp
 }
 
 func GetImpClassUID() string {
@@ -42,18 +44,18 @@ func GetImpVersion() string {
 
 func (i *implementation) GetClassUID() string {
 	if i.classUID == "" {
-		i.setDefault()
+		imp := SetDefaultImplementation()
+		i.classUID = imp.GetClassUID()
+		i.version = imp.GetVersion()
 	}
 	return i.classUID
 }
 
 func (i *implementation) GetVersion() string {
 	if i.classUID == "" {
-		i.setDefault()
+		imp := SetDefaultImplementation()
+		i.classUID = imp.GetClassUID()
+		i.version = imp.GetVersion()
 	}
 	return i.version
-}
-
-func (i *implementation) setDefault() {
-	SetDefaultImplementation()
 }

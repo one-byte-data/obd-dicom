@@ -90,7 +90,7 @@ publish-build:
   services:
     - docker:19-dind
   only:
-    - master
+    - main
   cache:
     key: ${CI_PIPELINE_ID}
     paths:

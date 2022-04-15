@@ -38,6 +38,7 @@ build-amd64:
   script:
     - apk add gcc g++
     - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
+    - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/compare cmd/compare/main.go
   cache:
     key: ${CI_PIPELINE_ID}
     paths:
@@ -45,6 +46,7 @@ build-amd64:
   artifacts:
     paths:
       - build/linux/amd64/obd-dicom
+      - build/linux/amd64/compare
     expire_in: 30 days
 
 # build-arm64:

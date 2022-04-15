@@ -37,7 +37,7 @@ build-amd64:
   stage: build
   script:
     - apk add gcc g++
-    - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom cmd/tools/main.go
+    - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
   cache:
     key: ${CI_PIPELINE_ID}
     paths:
@@ -52,7 +52,7 @@ build-amd64:
 #   image: arm64v8/golang:alpine
 #   script:
 #     - apk add gcc g++
-#     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom cmd/tools/main.go
+#     - GOOS=linux GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/linux/arm64/obd-dicom cmd/odb-dicom/main.go
 #   cache:
 #     key: ${CI_PIPELINE_ID}
 #     paths:
@@ -70,7 +70,7 @@ build-amd64:
 #     - sed -i 's/linux/win64/g' jpeglib/codec8.go
 #     - sed -i 's/linux/win64/g' jpeglib/codec12.go
 #     - sed -i 's/linux/win64/g' jpeglib/codec16.go
-#     - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/amd64/obd-dicom.exe cmd/tools/main.go
+#     - GOOS=windows GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${CI_PIPELINE_ID}" -o build/windows/amd64/obd-dicom.exe cmd/odb-dicom/main.go
 #   cache:
 #     key: ${CI_PIPELINE_ID}
 #     paths:

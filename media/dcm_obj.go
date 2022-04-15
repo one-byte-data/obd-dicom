@@ -30,6 +30,7 @@ type DcmObj interface {
 	GetPixelData(frame int) ([]byte, error)
 	GetTagAt(i int) *DcmTag
 	GetTag(tag *tags.Tag) *DcmTag
+	GetTagGE(group uint16, element uint16) *DcmTag
 	SetTag(i int, tag *DcmTag)
 	InsertTag(i int, tag *DcmTag)
 	DelTag(i int)
@@ -187,6 +188,15 @@ func (obj *dcmObj) GetTagAt(i int) *DcmTag {
 func (obj *dcmObj) GetTag(tag *tags.Tag) *DcmTag {
 	for _, t := range obj.Tags {
 		if t.Group == tag.Group && t.Element == tag.Element {
+			return t
+		}
+	}
+	return nil
+}
+
+func (obj *dcmObj) GetTagGE(group uint16, element uint16) *DcmTag {
+	for _, t := range obj.Tags {
+		if t.Group == group && t.Element == element {
 			return t
 		}
 	}

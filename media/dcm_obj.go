@@ -1011,7 +1011,8 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	single = size / frames
 
 	obj.DelTag(i + 1) // Delete offset table.
-	if obj.TransferSyntax.UID == transfersyntax.RLELossless.UID {
+	switch obj.TransferSyntax.UID {
+	case transfersyntax.RLELossless.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag := obj.GetTag(i + 1)
@@ -1021,7 +1022,8 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if (obj.TransferSyntax.UID == transfersyntax.JPEGLosslessSV1.UID) || (obj.TransferSyntax.UID == transfersyntax.JPEGLossless.UID) {
+	case transfersyntax.JPEGLosslessSV1.UID:
+	case transfersyntax.JPEGLossless.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag := obj.GetTag(i + 1)
@@ -1037,7 +1039,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.TransferSyntax.UID == transfersyntax.JPEGBaseline8Bit.UID {
+	case transfersyntax.JPEGBaseline8Bit.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag := obj.GetTag(i + 1)
@@ -1053,7 +1055,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.TransferSyntax.UID == transfersyntax.JPEGExtended12Bit.UID {
+	case transfersyntax.JPEGExtended12Bit.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag := obj.GetTag(i + 1)
@@ -1063,7 +1065,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.TransferSyntax.UID == transfersyntax.JPEG2000Lossless.UID {
+	case transfersyntax.JPEG2000Lossless.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag := obj.GetTag(i + 1)
@@ -1073,7 +1075,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 			obj.DelTag(i + 1)
 		}
 		obj.DelTag(i + 1)
-	} else if obj.TransferSyntax.UID == transfersyntax.JPEG2000.UID {
+	case transfersyntax.JPEG2000.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
 			tag := obj.GetTag(i + 1)

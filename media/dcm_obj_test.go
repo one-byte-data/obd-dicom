@@ -70,9 +70,21 @@ func Test_dcmObj_ChangeTransferSynx(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			name:     "Should change transfer synxtax to JPEG2000",
+			name:     "Should change transfer synxtax to JPEGLosslessSV1",
 			fileName: "../samples/test.dcm",
-			args:     args{transfersyntax.JPEG2000},
+			args:     args{transfersyntax.JPEGLosslessSV1},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to JPEGBaseline8Bit",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.JPEGBaseline8Bit},
+			wantErr:  true,
+		},
+		{
+			name:     "Should change transfer synxtax to JPEGExtended12Bit",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.JPEGExtended12Bit},
 			wantErr:  false,
 		},
 		{
@@ -82,16 +94,10 @@ func Test_dcmObj_ChangeTransferSynx(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:     "Should change transfer synxtax to JPEGExtended12Bit",
+			name:     "Should change transfer synxtax to JPEG2000",
 			fileName: "../samples/test.dcm",
-			args:     args{transfersyntax.JPEGExtended12Bit},
+			args:     args{transfersyntax.JPEG2000},
 			wantErr:  false,
-		},
-		{
-			name:     "Should change transfer synxtax to JPEGLossless",
-			fileName: "../samples/test.dcm",
-			args:     args{transfersyntax.JPEGLossless},
-			wantErr:  true,
 		},
 	}
 	for _, tt := range tests {

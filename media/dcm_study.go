@@ -1,7 +1,5 @@
 package media
 
-import "log"
-
 // DCMStudy study information structure
 type DCMStudy struct {
 	PatientID          string
@@ -25,8 +23,7 @@ type DCMStudy struct {
 // GetInfo gets information
 func (study *DCMStudy) GetInfo(obj DcmObj) {
 	for i := 0; i < len(obj.GetTags()); i++ {
-		tag := new(DcmTag)
-		tag = obj.GetTag(i)
+		tag := obj.GetTag(i)
 		switch tag.Group {
 		case 0x08:
 			switch tag.Element {
@@ -62,6 +59,5 @@ func (study *DCMStudy) GetInfo(obj DcmObj) {
 				study.StudyInstanceUID = tag.GetString()
 			}
 		}
-		log.Print(tag)
 	}
 }

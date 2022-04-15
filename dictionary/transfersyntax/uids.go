@@ -7,6 +7,18 @@ type TransferSyntax struct {
 	Type        string
 }
 
+var supportedTransferSyntaxes = []*TransferSyntax{
+	ImplicitVRLittleEndian,
+	ExplicitVRLittleEndian,
+	DeflatedExplicitVRLittleEndian,
+	ExplicitVRBigEndian,
+	JPEGLosslessSV1,
+	JPEGBaseline8Bit,
+	JPEGExtended12Bit,
+	JPEG2000Lossless,
+	JPEG2000,
+}
+
 func GetTransferSyntaxFromName(name string) *TransferSyntax {
 	for _, ts := range transferSyntaxes {
 		if ts.Name == name {
@@ -23,4 +35,13 @@ func GetTransferSyntaxFromUID(uid string) *TransferSyntax {
 		}
 	}
 	return nil
+}
+
+func SupportedTransferSyntax(uid string) bool {
+	for _, ts := range supportedTransferSyntaxes {
+		if ts.UID == uid {
+			return true
+		}
+	}
+	return false
 }

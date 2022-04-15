@@ -2,6 +2,8 @@ package media
 
 import (
 	"testing"
+
+	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 )
 
 func TestNewDCMObjFromFile(t *testing.T) {
@@ -29,6 +31,78 @@ func TestNewDCMObjFromFile(t *testing.T) {
 				return
 			}
 			dcmObj.DumpTags()
+		})
+	}
+}
+
+func Test_dcmObj_ChangeTransferSynx(t *testing.T) {
+	type args struct {
+		outTS *transfersyntax.TransferSyntax
+	}
+	tests := []struct {
+		name     string
+		fileName string
+		args     args
+		wantErr  bool
+	}{
+		{
+			name:     "Should change transfer synxtax to ImplicitVRLittleEndian",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.ImplicitVRLittleEndian},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to ExplicitVRLittleEndian",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.ExplicitVRLittleEndian},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to ExplicitVRBigEndian",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.ExplicitVRBigEndian},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to RLELossless",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.RLELossless},
+			wantErr:  true,
+		},
+		{
+			name:     "Should change transfer synxtax to JPEG2000",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.JPEG2000},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to JPEG2000Lossless",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.JPEG2000Lossless},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to JPEGExtended12Bit",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.JPEGExtended12Bit},
+			wantErr:  false,
+		},
+		{
+			name:     "Should change transfer synxtax to JPEGLossless",
+			fileName: "../samples/test.dcm",
+			args:     args{transfersyntax.JPEGLossless},
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dcmObj, err := NewDCMObjFromFile(tt.fileName)
+			if err != nil {
+				panic(err)
+			}
+			if err := dcmObj.ChangeTransferSynx(tt.args.outTS); (err != nil) != tt.wantErr {
+				t.Errorf("dcmObj.ChangeTransferSynx() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }

@@ -183,12 +183,14 @@ func (obj *dcmObj) GetTag(i int) *DcmTag {
 }
 
 func (obj *dcmObj) SetTag(i int, tag *DcmTag) {
+	FillTag(tag)
 	if i <= obj.TagCount() {
 		obj.Tags[i] = tag
 	}
 }
 
 func (obj *dcmObj) InsertTag(index int, tag *DcmTag) {
+	FillTag(tag)
 	obj.Tags = append(obj.Tags[:index+1], obj.Tags[index:]...)
 	obj.Tags[index] = tag
 }
@@ -213,7 +215,12 @@ func (obj *dcmObj) DumpTags() {
 			fmt.Printf("\t(%04X,%04X) %s - %s : (Not displayed)\n", tag.Group, tag.Element, tag.VR, tag.Description)
 			continue
 		}
-		fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
+		switch tag.VR {
+		case "US":
+			fmt.Printf("\t(%04X,%04X) %s - %s : %d\n", tag.Group, tag.Element, tag.VR, tag.Description, binary.LittleEndian.Uint16(tag.Data))
+		default:
+			fmt.Printf("\t(%04X,%04X) %s - %s : %s\n", tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
+		}
 	}
 	fmt.Println()
 }
@@ -235,7 +242,12 @@ func (obj *dcmObj) dumpSeq(indent int) {
 			fmt.Printf("%s(%04X,%04X) %s - %s : (Not displayed)\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description)
 			continue
 		}
-		fmt.Printf("%s(%04X,%04X) %s - %s : %s\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
+		switch tag.VR {
+		case "US":
+			fmt.Printf("%s(%04X,%04X) %s - %s : %d\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description, binary.LittleEndian.Uint16(tag.Data))
+		default:
+			fmt.Printf("%s(%04X,%04X) %s - %s : %s\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
+		}
 	}
 }
 

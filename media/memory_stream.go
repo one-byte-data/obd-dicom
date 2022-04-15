@@ -218,6 +218,9 @@ func (ms *memoryStream) SaveToFile(fileName string) error {
 		if err != nil {
 			return errors.New("ERROR, MemoryStram::SaveToFile, " + err.Error())
 		}
+		if err := file.Sync(); err != nil {
+			return errors.New("ERROR, MemoryStram::SaveToFile::Sync, " + err.Error())
+		}
 		return nil
 	}
 	return errors.New("ERROR, MemoryStram::SaveToFile, failed to read ms.buffer")

@@ -27,10 +27,18 @@ var codes []*tags.Tag
 // FillTag - Populates with data from dictionary
 func FillTag(tag *DcmTag) {
 	dt := GetDictionaryTag(tag.Group, tag.Element)
-	tag.Name = dt.Name
-	tag.Description = dt.Description
-	tag.VR = dt.VR
-	tag.VM = dt.VM
+	if tag.Name == "" {
+		tag.Name = dt.Name
+	}
+	if tag.Description == "" {
+		tag.Description = dt.Description
+	}
+	if tag.VR == "" {
+		tag.VR = dt.VR
+	}
+	if tag.VM == "" {
+		tag.VM = dt.VM
+	}
 }
 
 // GetDictionaryTag - get tag from Dictionary

@@ -81,7 +81,7 @@ func (tag *DcmTag) WriteSeq(group uint16, element uint16, seq DcmObj) {
 		tag.VR = "SQ"
 	}
 	for i := 0; i < seq.TagCount(); i++ {
-		temptag := seq.GetTag(i)
+		temptag := seq.GetTagAt(i)
 		bufdata.WriteTag(temptag, seq.IsExplicitVR())
 	}
 	tag.Length = uint32(bufdata.GetSize())

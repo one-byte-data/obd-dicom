@@ -79,7 +79,7 @@ func Test_dcmObj_ChangeTransferSynx(t *testing.T) {
 			name:     "Should change transfer synxtax to JPEGBaseline8Bit",
 			fileName: "../samples/test2.dcm",
 			args:     args{transfersyntax.JPEGBaseline8Bit},
-			wantErr:  true,
+			wantErr:  false,
 		},
 		{
 			name:     "Should change transfer synxtax to JPEGExtended12Bit",
@@ -89,7 +89,7 @@ func Test_dcmObj_ChangeTransferSynx(t *testing.T) {
 		},
 		{
 			name:     "Should change transfer synxtax to JPEG2000Lossless",
-			fileName: "../samples/test2.dcm",
+			fileName: "../samples/jpeg8.dcm",
 			args:     args{transfersyntax.JPEG2000Lossless},
 			wantErr:  false,
 		},

@@ -365,7 +365,7 @@ func (bd *bufData) WriteObj(obj DcmObj) {
 	// Si lo limpio elimino el meta!!
 	//	bd.MS.Clear()
 	for i := 0; i < obj.TagCount(); i++ {
-		tag := obj.GetTag(i)
+		tag := obj.GetTagAt(i)
 		bd.WriteTag(tag, obj.IsExplicitVR())
 	}
 }

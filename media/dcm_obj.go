@@ -27,7 +27,9 @@ type DcmObj interface {
 	SetExplicitVR(explicit bool)
 	IsBigEndian() bool
 	SetBigEndian(bigEndian bool)
-	GetTag(i int) *DcmTag
+	GetPixelData(frame int) ([]byte, error)
+	GetTagAt(i int) *DcmTag
+	GetTag(tag *tags.Tag) *DcmTag
 	SetTag(i int, tag *DcmTag)
 	InsertTag(i int, tag *DcmTag)
 	DelTag(i int)
@@ -177,9 +179,18 @@ func (obj *dcmObj) TagCount() int {
 	return len(obj.Tags)
 }
 
-// GetTag - return the Tag at position i
-func (obj *dcmObj) GetTag(i int) *DcmTag {
+// GetTagAt - return the Tag at position i
+func (obj *dcmObj) GetTagAt(i int) *DcmTag {
 	return obj.Tags[i]
+}
+
+func (obj *dcmObj) GetTag(tag *tags.Tag) *DcmTag {
+	for _, t := range obj.Tags {
+		if t.Group == tag.Group && t.Element == tag.Element {
+			return t
+		}
+	}
+	return nil
 }
 
 func (obj *dcmObj) SetTag(i int, tag *DcmTag) {
@@ -261,7 +272,7 @@ func (obj *dcmObj) GetUShortGE(group uint16, element uint16) uint16 {
 	var tag *DcmTag
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
-		tag = obj.GetTag(i)
+		tag = obj.GetTagAt(i)
 		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
 			sq++
 		}
@@ -290,7 +301,7 @@ func (obj *dcmObj) GetUIntGE(group uint16, element uint16) uint32 {
 	var tag *DcmTag
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
-		tag = obj.GetTag(i)
+		tag = obj.GetTagAt(i)
 		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
 			sq++
 		}
@@ -319,7 +330,7 @@ func (obj *dcmObj) GetStringGE(group uint16, element uint16) string {
 	var tag *DcmTag
 	sq := 0
 	for i = 0; i < obj.TagCount(); i++ {
-		tag = obj.GetTag(i)
+		tag = obj.GetTagAt(i)
 		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
 			sq++
 		}
@@ -465,6 +476,105 @@ func (obj *dcmObj) SetTransferSyntax(ts *transfersyntax.TransferSyntax) {
 	obj.TransferSyntax = ts
 }
 
+func (obj *dcmObj) GetPixelData(frame int) ([]byte, error) {
+	var i int
+	var rows, cols, bitsa, planar uint16
+	var PhotoInt string
+	sq := 0
+	frames := uint32(0)
+	RGB := false
+	icon := false
+
+	if !transfersyntax.SupportedTransferSyntax(obj.TransferSyntax.UID) {
+		return nil, fmt.Errorf("unsupported transfer synxtax %s", obj.TransferSyntax.Name)
+	}
+
+	for i = 0; i < len(obj.Tags); i++ {
+		tag := obj.GetTagAt(i)
+		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
+			sq++
+		}
+		if sq == 0 {
+			if (tag.Group == 0x0028) && (!icon) {
+				switch tag.Element {
+				case 0x04:
+					PhotoInt = tag.GetString()
+					if !strings.Contains(PhotoInt, "MONO") {
+						RGB = true
+					}
+				case 0x06:
+					planar = tag.GetUShort()
+				case 0x08:
+					uframes, err := strconv.Atoi(tag.GetString())
+					if err != nil {
+						frames = 0
+					} else {
+						frames = uint32(uframes)
+					}
+				case 0x10:
+					rows = tag.GetUShort()
+				case 0x11:
+					cols = tag.GetUShort()
+				case 0x0100:
+					bitsa = tag.GetUShort()
+				}
+			}
+			if (tag.Group == 0x0088) && (tag.Element == 0x0200) && (tag.Length == 0xFFFFFFFF) {
+				icon = true
+			}
+			if (tag.Group == 0x6003) && (tag.Element == 0x1010) && (tag.Length == 0xFFFFFFFF) {
+				icon = true
+			}
+			if (tag.Group == 0x7FE0) && (tag.Element == 0x0010) && (!icon) {
+				size := uint32(cols) * uint32(rows) * uint32(bitsa) / 8
+				if RGB {
+					size = 3 * size
+				}
+				if frames > 0 {
+					size = uint32(frames) * size
+				} else {
+					frames = 1
+				}
+				if size == 0 {
+					return nil, errors.New("ERROR, DcmObj::ConvertTransferSyntax, size=0")
+				}
+
+				if frame > int(frames) {
+					return nil, errors.New("ERROR, invalid frame")
+				}
+
+				if tag.Length == 0xFFFFFFFF {
+					return obj.GetTagAt(i + 2 + frame).Data, nil
+				} else {
+					if RGB && (planar == 1) {
+						var img_offset, img_size uint32
+						img_size = size / frames
+						img := make([]byte, img_size)
+						for f := uint32(0); f < frames; f++ {
+							img_offset = img_size * f
+							for j := uint32(0); j < img_size/3; j++ {
+								img[3*j] = tag.Data[j+img_offset]
+								img[3*j+1] = tag.Data[j+img_size/3+img_offset]
+								img[3*j+2] = tag.Data[j+2*img_size/3+img_offset]
+							}
+							if f == uint32(frame) {
+								return img, nil
+							}
+						}
+						planar = 0
+					} else {
+						return tag.Data, nil
+					}
+				}
+			}
+		}
+		if ((tag.Group == 0xFFFE) && (tag.Element == 0xE00D)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE0DD)) {
+			sq--
+		}
+	}
+	return nil, fmt.Errorf("there was an error getting pixel data")
+}
+
 func (obj *dcmObj) ChangeTransferSynx(outTS *transfersyntax.TransferSyntax) error {
 	flag := false
 
@@ -485,7 +595,7 @@ func (obj *dcmObj) ChangeTransferSynx(outTS *transfersyntax.TransferSyntax) erro
 	}
 
 	for i = 0; i < len(obj.Tags); i++ {
-		tag := obj.GetTag(i)
+		tag := obj.GetTagAt(i)
 		if ((tag.VR == "SQ") && (tag.Length == 0xFFFFFFFF)) || ((tag.Group == 0xFFFE) && (tag.Element == 0xE000) && (tag.Length == 0xFFFFFFFF)) {
 			sq++
 		}
@@ -721,7 +831,7 @@ func (obj *dcmObj) compress(i *int, img []byte, RGB bool, cols uint16, rows uint
 	}
 
 	index = *i
-	tag := obj.GetTag(index)
+	tag := obj.GetTagAt(index)
 
 	switch outTS {
 	case transfersyntax.JPEGLosslessSV1.UID:
@@ -816,7 +926,9 @@ func (obj *dcmObj) compress(i *int, img []byte, RGB bool, cols uint16, rows uint
 						return err
 					}
 				} else {
-					return errors.New("can't use transfer synxtax with bitsa != 8")
+					if err := jpeglib.EIJG12encode(img[offset:], cols, rows, 1, &JPEGData, &JPEGBytes, 0); err != nil {
+						return err
+					}
 				}
 			}
 			newtag = &DcmTag{
@@ -843,9 +955,6 @@ func (obj *dcmObj) compress(i *int, img []byte, RGB bool, cols uint16, rows uint
 		obj.InsertTag(index, newtag)
 		*i = index
 	case transfersyntax.JPEGExtended12Bit.UID:
-		if (bitss == 8) && (bitsa != 16) {
-			return errors.New("can't use transfer synxtax with bitss == 8 and bitsa != 18")
-		}
 		tag.VR = "OB"
 		tag.Length = 0xFFFFFFFF
 		if tag.Data != nil {
@@ -866,9 +975,6 @@ func (obj *dcmObj) compress(i *int, img []byte, RGB bool, cols uint16, rows uint
 		for j = 0; j < frames; j++ {
 			index++
 			offset = j * uint32(cols) * uint32(rows) * uint32(bitsa) / 8
-			if bitss > 12 {
-				return errors.New("can't use transfer synxtax with bitss > 12")
-			}
 			if err := jpeglib.EIJG12encode(img[offset/2:], cols, rows, 1, &JPEGData, &JPEGBytes, 0); err != nil {
 				return err
 			}
@@ -1027,7 +1133,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	case transfersyntax.RLELossless.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
-			tag := obj.GetTag(i + 1)
+			tag := obj.GetTagAt(i + 1)
 			if err := transcoder.RLEdecode(tag.Data, img[offset:], tag.Length, single, PhotoInt); err != nil {
 				return err
 			}
@@ -1038,7 +1144,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	case transfersyntax.JPEGLossless.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
-			tag := obj.GetTag(i + 1)
+			tag := obj.GetTagAt(i + 1)
 			if bitsa == 8 {
 				if err := jpeglib.DIJG8decode(tag.Data, tag.Length, img[offset:], single); err != nil {
 					return err
@@ -1054,7 +1160,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	case transfersyntax.JPEGBaseline8Bit.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
-			tag := obj.GetTag(i + 1)
+			tag := obj.GetTagAt(i + 1)
 			if bitsa == 8 {
 				if err := jpeglib.DIJG8decode(tag.Data, tag.Length, img[offset:], single); err != nil {
 					return err
@@ -1070,7 +1176,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	case transfersyntax.JPEGExtended12Bit.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
-			tag := obj.GetTag(i + 1)
+			tag := obj.GetTagAt(i + 1)
 			if err := jpeglib.DIJG12decode(tag.Data, tag.Length, img[offset:], single); err != nil {
 				return err
 			}
@@ -1080,7 +1186,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	case transfersyntax.JPEG2000Lossless.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
-			tag := obj.GetTag(i + 1)
+			tag := obj.GetTagAt(i + 1)
 			if err := openjpeg.J2Kdecode(tag.Data, tag.Length, img[offset:]); err != nil {
 				return err
 			}
@@ -1090,7 +1196,7 @@ func (obj *dcmObj) uncompress(i int, img []byte, size uint32, frames uint32, bit
 	case transfersyntax.JPEG2000.UID:
 		for j = 0; j < frames; j++ {
 			offset = j * single
-			tag := obj.GetTag(i + 1)
+			tag := obj.GetTagAt(i + 1)
 			if err := openjpeg.J2Kdecode(tag.Data, tag.Length, img[offset:]); err != nil {
 				return err
 			}

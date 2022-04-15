@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 )
 
 // MemoryStream - is an inteface to a memory stream
@@ -27,7 +26,6 @@ type MemoryStream interface {
 	Read(count int) ([]byte, error)
 	ReadFully(rw *bufio.ReadWriter, length int)
 	Write(buffer []byte, count int) (int, error)
-	SaveToFile(fileName string) error
 	Clear()
 }
 
@@ -203,27 +201,6 @@ func (ms *memoryStream) Write(buffer []byte, count int) (int, error) {
 	}
 	ms.Position = ms.Position + count
 	return count, nil
-}
-
-// SaveToFile - Save MemoryStream to File
-func (ms *memoryStream) SaveToFile(fileName string) error {
-	file, err := os.Create(fileName)
-	if err != nil {
-		return errors.New("ERROR, MemoryStram::SaveToFile, " + err.Error())
-	}
-	defer file.Close()
-
-	if bs, err := ms.Read(ms.Size); err == nil {
-		_, err = file.Write(bs)
-		if err != nil {
-			return errors.New("ERROR, MemoryStram::SaveToFile, " + err.Error())
-		}
-		if err := file.Sync(); err != nil {
-			return errors.New("ERROR, MemoryStram::SaveToFile::Sync, " + err.Error())
-		}
-		return nil
-	}
-	return errors.New("ERROR, MemoryStram::SaveToFile, failed to read ms.buffer")
 }
 
 // Clear - Clears the memoryStream

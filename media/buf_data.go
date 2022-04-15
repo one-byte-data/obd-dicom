@@ -35,7 +35,6 @@ type BufData interface {
 	WriteObj(obj DcmObj)
 	Send(rw *bufio.ReadWriter) error
 	GetAllBytes() []byte
-	SaveToFile(FileName string) error
 }
 
 type bufData struct {
@@ -179,7 +178,6 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 		Group:   group,
 		Element: element,
 	}
-	FillTag(tag)
 
 	internalVR := explicitVR
 
@@ -226,6 +224,7 @@ func (bd *bufData) ReadTag(explicitVR bool) (*DcmTag, error) {
 			return nil, err
 		}
 	}
+	FillTag(tag)
 	return tag, nil
 }
 
@@ -385,10 +384,6 @@ func (bd *bufData) Send(rw *bufio.ReadWriter) error {
 
 func (bd *bufData) GetAllBytes() []byte {
 	return bd.MS.GetData()
-}
-
-func (bd *bufData) SaveToFile(fileName string) error {
-	return bd.MS.SaveToFile(fileName)
 }
 
 func (bd *bufData) readString(length int) string {

@@ -370,17 +370,8 @@ func (obj *dcmObj) WriteToBytes() []byte {
 
 // Wrote - Write a DICOM Object to a DICOM File
 func (obj *dcmObj) WriteToFile(fileName string) error {
-	bufdata := NewEmptyBufData()
-
-	if obj.TransferSyntax.UID == transfersyntax.ExplicitVRBigEndian.UID {
-		bufdata.SetBigEndian(true)
-	}
-	SOPClassUID := obj.GetStringGE(0x08, 0x16)
-	SOPInstanceUID := obj.GetStringGE(0x08, 0x18)
-	bufdata.WriteMeta(SOPClassUID, SOPInstanceUID, obj.TransferSyntax.UID)
-	bufdata.WriteObj(obj)
-	bufdata.SetPosition(0)
-	return bufdata.SaveToFile(fileName)
+	data := obj.WriteToBytes()
+	return os.WriteFile(fileName, data, 0644)
 }
 
 func (obj *dcmObj) WriteDate(tag *tags.Tag, date time.Time) {

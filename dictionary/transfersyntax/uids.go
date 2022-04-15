@@ -34,6 +34,13 @@ func GetTransferSyntaxFromUID(uid string) *TransferSyntax {
 			return ts
 		}
 	}
+	// Extra loop to fix old bug
+	uid = string([]rune(uid)[:len(uid)-1])
+	for _, ts := range transferSyntaxes {
+		if ts.UID == uid {
+			return ts
+		}
+	}
 	return nil
 }
 

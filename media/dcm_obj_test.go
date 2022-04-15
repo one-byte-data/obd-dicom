@@ -13,14 +13,28 @@ func TestNewDCMObjFromFile(t *testing.T) {
 		fileName string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name          string
+		args          args
+		wantTagsCount int
+		wantErr       bool
 	}{
 		{
-			name:    "Should load DICOM file",
-			args:    args{fileName: "../samples/test2-3.dcm"},
-			wantErr: false,
+			name:          "Should load DICOM file from bugged DICOM written by us",
+			args:          args{fileName: "../samples/test2-2.dcm"},
+			wantTagsCount: 116,
+			wantErr:       false,
+		},
+		{
+			name:          "Should load DICOM file from post bugged DICOM written by us",
+			args:          args{fileName: "../samples/test2-3.dcm"},
+			wantTagsCount: 116,
+			wantErr:       false,
+		},
+		{
+			name:          "Should load DICOM file",
+			args:          args{fileName: "../samples/test2.dcm"},
+			wantTagsCount: 116,
+			wantErr:       false,
 		},
 	}
 	for _, tt := range tests {
@@ -30,7 +44,10 @@ func TestNewDCMObjFromFile(t *testing.T) {
 				t.Errorf("NewDCMObjFromFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			dcmObj.DumpTags()
+			if len(dcmObj.GetTags()) != tt.wantTagsCount {
+				t.Errorf("NewDCMObjFromFile() count = %v, wantTagsCount %v", len(dcmObj.GetTags()), tt.wantTagsCount)
+				return
+			}
 		})
 	}
 }

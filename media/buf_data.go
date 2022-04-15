@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
-	"fmt"
 
 	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
 )
@@ -254,7 +253,7 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 	if length%2 == 1 {
 		length++
 		if vr == "UI" {
-			content = content + fmt.Sprint(0)
+			content = content + "\x00"
 		} else {
 			content = content + " "
 		}
@@ -286,7 +285,8 @@ func (bd *bufData) ReadMeta() (*transfersyntax.TransferSyntax, error) {
 			pos = bd.GetPosition()
 			tag, _ := bd.ReadTag(true)
 			if (tag.Group == 0x02) && (tag.Element == 0x010) {
-				TransferSyntax = transfersyntax.GetTransferSyntaxFromUID(tag.GetString())
+				uid := tag.GetString()
+				TransferSyntax = transfersyntax.GetTransferSyntaxFromUID(uid)
 			}
 			if tag.Group > 0x02 {
 				fin = true
@@ -336,7 +336,7 @@ func (bd *bufData) WriteMeta(SOPClassUID string, SOPInstanceUID string, Transfer
 	// calculate group length and go Back to group size tag
 	ptr := bd.GetPosition()
 	largo = uint32(bd.GetSize() - 12 - 128 - 4)
-	binary.LittleEndian.PutUint32(buffer, largo)
+	binary.BigEndian.PutUint32(buffer, largo)
 	bd.SetPosition(128 + 4 + 8)
 	bd.MS.Write(buffer, 4)
 	bd.SetPosition(ptr)

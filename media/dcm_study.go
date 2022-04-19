@@ -21,7 +21,7 @@ type DCMStudy struct {
 }
 
 // GetInfo gets information
-func (study *DCMStudy) GetInfo(obj DcmObj) {
+func (study *DCMStudy) GetStudy(obj DcmObj) {
 	for i := 0; i < len(obj.GetTags()); i++ {
 		tag := obj.GetTagAt(i)
 		switch tag.Group {

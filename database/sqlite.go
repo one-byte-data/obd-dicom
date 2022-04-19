@@ -35,3 +35,7 @@ func (s *SQLite) AddSeries(dcmObj media.DcmObj) error {
 func (s *SQLite) AddInstance(dcmObj media.DcmObj) error {
 	return nil
 }
+
+func (s *SQLite) AddDicom(dcmObj media.DcmObj) error {
+	return nil
+}

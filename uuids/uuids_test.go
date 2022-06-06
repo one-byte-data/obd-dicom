@@ -3,7 +3,7 @@ package uuids
 import (
 	"testing"
 
-	"git.onebytedata.com/odb/go-dicom/imp"
+	"github.com/one-byte-data/obd-dicom/imp"
 )
 
 func Test_hash32(t *testing.T) {
@@ -105,7 +105,7 @@ func TestCreateInstanceUID(t *testing.T) {
 		{
 			name: "Should generate instance UID",
 			args: args{
-				RootUID: imp.GetImpClassUID(),
+				RootUID:    imp.GetImpClassUID(),
 				InstNumber: "1",
 			},
 			want: "1.2.826.0.1.3680043.10.90.999.1",

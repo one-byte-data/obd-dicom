@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
+	"github.com/one-byte-data/obd-dicom/dictionary/tags"
 )
 
 type dictionary struct {

@@ -1,6 +1,6 @@
 package database
 
-import "git.onebytedata.com/odb/go-dicom/media"
+import "github.com/one-byte-data/obd-dicom/media"
 
 type Database interface {
 	AddPatient(dcmObj media.DcmObj) error
@@ -8,5 +8,4 @@ type Database interface {
 	AddSeries(dcmObj media.DcmObj) error
 	AddInstance(dcmObj media.DcmObj) error
 	AddDicom(dcmObj media.DcmObj) error
-	
 }

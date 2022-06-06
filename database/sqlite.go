@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"git.onebytedata.com/odb/go-dicom/media"
+	"github.com/one-byte-data/obd-dicom/media"
 
 	_ "github.com/mattn/go-sqlite3"
 )

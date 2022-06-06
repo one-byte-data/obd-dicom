@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
+	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
 )
 
 // BufData - is an interface to buffer manipulation class

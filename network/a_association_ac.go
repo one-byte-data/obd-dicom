@@ -7,8 +7,8 @@ import (
 	"log"
 	"strconv"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
-	"git.onebytedata.com/odb/go-dicom/media"
+	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
+	"github.com/one-byte-data/obd-dicom/media"
 )
 
 // AAssociationAC AAssociationAC

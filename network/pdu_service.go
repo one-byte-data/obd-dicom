@@ -8,11 +8,11 @@ import (
 	"net"
 	"time"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
-	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
-	"git.onebytedata.com/odb/go-dicom/imp"
-	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/network/pdutype"
+	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
+	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
+	"github.com/one-byte-data/obd-dicom/imp"
+	"github.com/one-byte-data/obd-dicom/media"
+	"github.com/one-byte-data/obd-dicom/network/pdutype"
 )
 
 // PDUService - struct for PDUService

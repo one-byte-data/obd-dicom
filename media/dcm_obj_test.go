@@ -3,7 +3,7 @@ package media
 import (
 	"testing"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
+	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
 )
 
 func TestNewDCMObjFromFile(t *testing.T) {

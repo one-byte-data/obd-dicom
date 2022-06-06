@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 
-	"git.onebytedata.com/odb/go-dicom/media"
+	"github.com/one-byte-data/obd-dicom/media"
 )
 
 // PresentationContext - PresentationContext

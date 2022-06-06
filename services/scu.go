@@ -5,13 +5,13 @@ import (
 	"log"
 	"strconv"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
-	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
-	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
-	"git.onebytedata.com/odb/go-dicom/dimsec"
-	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/network"
-	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
+	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
+	"github.com/one-byte-data/obd-dicom/dictionary/tags"
+	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
+	"github.com/one-byte-data/obd-dicom/dimsec"
+	"github.com/one-byte-data/obd-dicom/media"
+	"github.com/one-byte-data/obd-dicom/network"
+	"github.com/one-byte-data/obd-dicom/network/dicomstatus"
 )
 
 // SCU - inteface to a scu

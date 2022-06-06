@@ -3,9 +3,9 @@ package utils
 import (
 	"time"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
-	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/uuids"
+	"github.com/one-byte-data/obd-dicom/dictionary/tags"
+	"github.com/one-byte-data/obd-dicom/media"
+	"github.com/one-byte-data/obd-dicom/uuids"
 )
 
 // DefaultCFindRequest - Creates a default C-Find request

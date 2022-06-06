@@ -3,12 +3,12 @@ package dimsec
 import (
 	"errors"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
-	"git.onebytedata.com/odb/go-dicom/media"
-	"git.onebytedata.com/odb/go-dicom/network"
-	"git.onebytedata.com/odb/go-dicom/network/dicomcommand"
-	"git.onebytedata.com/odb/go-dicom/network/dicomstatus"
-	"git.onebytedata.com/odb/go-dicom/network/priority"
+	"github.com/one-byte-data/obd-dicom/dictionary/tags"
+	"github.com/one-byte-data/obd-dicom/media"
+	"github.com/one-byte-data/obd-dicom/network"
+	"github.com/one-byte-data/obd-dicom/network/dicomcommand"
+	"github.com/one-byte-data/obd-dicom/network/dicomstatus"
+	"github.com/one-byte-data/obd-dicom/network/priority"
 )
 
 // CFindReadRQ CFind request read

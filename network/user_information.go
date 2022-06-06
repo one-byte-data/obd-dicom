@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"git.onebytedata.com/odb/go-dicom/media"
+	"github.com/one-byte-data/obd-dicom/media"
 )
 
 // UserInformation - UserInformation

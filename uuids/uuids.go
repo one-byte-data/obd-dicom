@@ -4,7 +4,7 @@ import (
 	"hash/fnv"
 	"strconv"
 
-	"git.onebytedata.com/odb/go-dicom/imp"
+	"github.com/one-byte-data/obd-dicom/imp"
 )
 
 func hash32(text string) uint32 {

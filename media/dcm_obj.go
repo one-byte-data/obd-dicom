@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"git.onebytedata.com/odb/go-dicom/dictionary/sopclass"
-	"git.onebytedata.com/odb/go-dicom/dictionary/tags"
-	"git.onebytedata.com/odb/go-dicom/dictionary/transfersyntax"
-	"git.onebytedata.com/odb/go-dicom/jpeglib"
-	"git.onebytedata.com/odb/go-dicom/openjpeg"
-	"git.onebytedata.com/odb/go-dicom/transcoder"
+	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
+	"github.com/one-byte-data/obd-dicom/dictionary/tags"
+	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
+	"github.com/one-byte-data/obd-dicom/jpeglib"
+	"github.com/one-byte-data/obd-dicom/openjpeg"
+	"github.com/one-byte-data/obd-dicom/transcoder"
 )
 
 // DcmObj - DICOM Object structure

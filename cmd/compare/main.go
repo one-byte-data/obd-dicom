@@ -6,7 +6,7 @@ import (
 	"log"
 	"reflect"
 
-	"git.onebytedata.com/odb/go-dicom/media"
+	"github.com/one-byte-data/obd-dicom/media"
 )
 
 var version string

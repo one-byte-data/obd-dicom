@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"log"
 
-	"git.onebytedata.com/odb/go-dicom/media"
+	"github.com/one-byte-data/obd-dicom/media"
 )
 
 // PermanentRejectReasons - Permanent association reject reasons

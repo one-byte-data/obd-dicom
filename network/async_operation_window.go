@@ -1,6 +1,6 @@
 package network
 
-import "git.onebytedata.com/odb/go-dicom/media"
+import "github.com/one-byte-data/obd-dicom/media"
 
 // AsyncOperationWindow - AsyncOperationWindow
 type AsyncOperationWindow interface {

@@ -1,0 +1,26 @@
+kind: pipeline
+type: docker
+name: default
+
+workspace:
+  base: /go
+  path: src/github.com/one-byte-data/${DRONE_REPO_NAME}
+
+trigger:
+  event:
+    - push
+    - pull_request
+    - tag
+
+steps:
+  - name: test
+    image: golang:alpine
+    commands:
+      - apk add gcc g++
+      - GOOS=linux GOARCH=amd64 go test -p 1 -coverprofile=coverage.txt ./...
+
+  - name: build
+    image: golang:alpine
+    commands:
+      - apk add gcc g++
+      - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" ./...

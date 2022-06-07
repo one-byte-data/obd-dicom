@@ -23,4 +23,18 @@ steps:
     image: golang:alpine
     commands:
       - apk add gcc g++
-      - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" ./...
+      - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
+      - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/compare cmd/compare/main.go
+
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: github_username
+      password:
+        from_secret: github_password
+      email:
+        from_secret: github_email
+      registry: ghcr.io
+      repo: ghcr.io/one-byte-data/obd-dicom
+      tags: latest

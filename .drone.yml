@@ -9,7 +9,6 @@ workspace:
 trigger:
   event:
     - push
-    - pull_request
     - tag
 
 steps:
@@ -33,8 +32,6 @@ steps:
         from_secret: github_username
       password:
         from_secret: github_password
-      email:
-        from_secret: github_email
       registry: ghcr.io
       repo: ghcr.io/one-byte-data/obd-dicom
       tags: latest

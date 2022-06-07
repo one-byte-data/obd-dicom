@@ -16,17 +16,33 @@ steps:
     image: golang:alpine
     commands:
       - apk add gcc g++
-      - GOOS=linux GOARCH=amd64 go test -p 1 -coverprofile=coverage.txt ./...
+      - go test -p 1 -coverprofile=coverage.txt ./...
 
-  - name: build
+  - name: build-linux-dev
     image: golang:alpine
+    when:
+      branch:
+        - main
+      event:
+        - push
+    environment:
+      GOOS: linux
+      GOARCH: amd64
     commands:
       - apk add gcc g++
-      - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
-      - GOOS=linux GOARCH=amd64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/compare cmd/compare/main.go
+      - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
+      - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/compare cmd/compare/main.go
 
-  - name: docker
+  - name: docker-dev
     image: plugins/docker
+    when:
+      branch:
+        - main
+      event:
+        - push
+    environment:
+      GOOS: linux
+      GOARCH: amd64
     settings:
       username:
         from_secret: github_username
@@ -35,4 +51,52 @@ steps:
       auto_tag: true
       registry: ghcr.io
       repo: ghcr.io/one-byte-data/${DRONE_REPO_NAME}
-      tags: latest
+      tags: dev
+
+  - name: build-linux-latest
+    image: golang:alpine
+    when:
+      branch:
+        - main
+      event:
+        - tag
+    environment:
+      GOOS: linux
+      GOARCH: amd64
+    commands:
+      - apk add gcc g++
+      - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
+      - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/compare cmd/compare/main.go
+  
+  - name: docker-latest
+    image: plugins/docker
+    when:
+      branch:
+        - main
+      event:
+        - tag
+    settings:
+      username:
+        from_secret: github_username
+      password:
+        from_secret: github_password
+      registry: ghcr.io
+      repo: ghcr.io/one-byte-data/${DRONE_REPO_NAME}
+      tags:
+        - latest
+        - ${DRONE_TAG}
+  
+  - name: publish
+    image: plugins/github-release
+    when:
+      branch:
+        - main
+      event:
+        - tag
+    settings:
+      title: "OBD DICOM Tools"
+      api_key:
+        from_secret: github_token
+      files:
+        - build/linux/amd64/obd-dicom
+        - build/linux/amd64/compare

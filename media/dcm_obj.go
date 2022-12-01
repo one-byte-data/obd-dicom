@@ -42,6 +42,7 @@ type DcmObj interface {
 	GetUIntGE(group uint16, element uint16) uint32
 	GetStringGE(group uint16, element uint16) string
 	WriteDate(tag *tags.Tag, date time.Time)
+	WriteDateRange(tag *tags.Tag, startDate time.Time, endDate time.Time)
 	WriteTime(tag *tags.Tag, date time.Time)
 	WriteUint16(tag *tags.Tag, val uint16)
 	WriteUint32(tag *tags.Tag, val uint32)
@@ -386,6 +387,10 @@ func (obj *dcmObj) WriteToFile(fileName string) error {
 
 func (obj *dcmObj) WriteDate(tag *tags.Tag, date time.Time) {
 	obj.WriteString(tag, date.Format("20060102"))
+}
+
+func (obj *dcmObj) WriteDateRange(tag *tags.Tag, startDate time.Time, endDate time.Time) {
+	obj.WriteString(tag, fmt.Sprintf("%s-%s", startDate.Format("20060102"), endDate.Format("20060102")))
 }
 
 func (obj *dcmObj) WriteTime(tag *tags.Tag, date time.Time) {

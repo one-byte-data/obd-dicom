@@ -27,6 +27,7 @@ type DcmObj interface {
 	SetExplicitVR(explicit bool)
 	IsBigEndian() bool
 	SetBigEndian(bigEndian bool)
+	GetDate(tag *tags.Tag) time.Time
 	GetPixelData(frame int) ([]byte, error)
 	GetTagAt(i int) *DcmTag
 	GetTag(tag *tags.Tag) *DcmTag
@@ -271,6 +272,12 @@ func (obj *dcmObj) dumpSeq(indent int) {
 			fmt.Printf("%s(%04X,%04X) %s - %s : %s\n", tabs, tag.Group, tag.Element, tag.VR, tag.Description, tag.Data)
 		}
 	}
+}
+
+func (obj *dcmObj) GetDate(tag *tags.Tag) time.Time {
+	date := obj.GetString(tag)
+	data, _ := time.Parse("20060102", date)
+	return data
 }
 
 func (obj *dcmObj) GetUShort(tag *tags.Tag) uint16 {

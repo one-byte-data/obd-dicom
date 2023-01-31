@@ -1536,6 +1536,54 @@ var XAPerformedProcedureProtocolStorage = &SOPClass{
 	Type:        "SOP Class",
 }
 
+// InventoryStorage - (1.2.840.10008.5.1.4.1.1.201.1) Inventory Storage
+var InventoryStorage = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.201.1",
+	Name:        "InventoryStorage",
+	Description: "Inventory Storage",
+	Type:        "SOP Class",
+}
+
+// InventoryFind - (1.2.840.10008.5.1.4.1.1.201.2) Inventory - FIND
+var InventoryFind = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.201.2",
+	Name:        "InventoryFind",
+	Description: "Inventory - FIND",
+	Type:        "SOP Class",
+}
+
+// InventoryMove - (1.2.840.10008.5.1.4.1.1.201.3) Inventory - MOVE
+var InventoryMove = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.201.3",
+	Name:        "InventoryMove",
+	Description: "Inventory - MOVE",
+	Type:        "SOP Class",
+}
+
+// InventoryGet - (1.2.840.10008.5.1.4.1.1.201.4) Inventory - GET
+var InventoryGet = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.201.4",
+	Name:        "InventoryGet",
+	Description: "Inventory - GET",
+	Type:        "SOP Class",
+}
+
+// InventoryCreation - (1.2.840.10008.5.1.4.1.1.201.5) Inventory Creation
+var InventoryCreation = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.201.5",
+	Name:        "InventoryCreation",
+	Description: "Inventory Creation",
+	Type:        "SOP Class",
+}
+
+// RepositoryQuery - (1.2.840.10008.5.1.4.1.1.201.6) Repository Query
+var RepositoryQuery = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.201.6",
+	Name:        "RepositoryQuery",
+	Description: "Repository Query",
+	Type:        "SOP Class",
+}
+
 // RTImageStorage - (1.2.840.10008.5.1.4.1.1.481.1) RT Image Storage
 var RTImageStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.481.1",
@@ -2497,6 +2545,12 @@ var sopClasses = []*SOPClass{
 	ProtocolApprovalInformationModelGet,
 	XADefinedProcedureProtocolStorage,
 	XAPerformedProcedureProtocolStorage,
+	InventoryStorage,
+	InventoryFind,
+	InventoryMove,
+	InventoryGet,
+	InventoryCreation,
+	RepositoryQuery,
 	RTImageStorage,
 	RTDoseStorage,
 	RTStructureSetStorage,

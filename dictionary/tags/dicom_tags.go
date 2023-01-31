@@ -970,6 +970,16 @@ var SOPClassUID = &Tag{
 	Description: "SOP Class UID",
 }
 
+// AcquisitionUID - (0008,0017) Acquisition UID
+var AcquisitionUID = &Tag{
+	Group:       0x0008,
+	Element:     0x0017,
+	VR:          "UI",
+	VM:          "1",
+	Name:        "AcquisitionUID",
+	Description: "Acquisition UID",
+}
+
 // SOPInstanceUID - (0008,0018) SOP Instance UID
 var SOPInstanceUID = &Tag{
 	Group:       0x0008,
@@ -978,6 +988,16 @@ var SOPInstanceUID = &Tag{
 	VM:          "1",
 	Name:        "SOPInstanceUID",
 	Description: "SOP Instance UID",
+}
+
+// PyramidUID - (0008,0019) Pyramid UID
+var PyramidUID = &Tag{
+	Group:       0x0008,
+	Element:     0x0019,
+	VR:          "UI",
+	VM:          "1",
+	Name:        "PyramidUID",
+	Description: "Pyramid UID",
 }
 
 // RelatedGeneralSOPClassUID - (0008,001A) Related General SOP Class UID
@@ -1900,6 +1920,426 @@ var PrivateDataElementDefinitionSequence = &Tag{
 	Description: "Private Data Element Definition Sequence",
 }
 
+// ScopeOfInventorySequence - (0008,0400) Scope of Inventory Sequence
+var ScopeOfInventorySequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0400,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ScopeOfInventorySequence",
+	Description: "Scope of Inventory Sequence",
+}
+
+// InventoryPurpose - (0008,0401) Inventory Purpose
+var InventoryPurpose = &Tag{
+	Group:       0x0008,
+	Element:     0x0401,
+	VR:          "LT",
+	VM:          "1",
+	Name:        "InventoryPurpose",
+	Description: "Inventory Purpose",
+}
+
+// InventoryInstanceDescription - (0008,0402) Inventory Instance Description
+var InventoryInstanceDescription = &Tag{
+	Group:       0x0008,
+	Element:     0x0402,
+	VR:          "LT",
+	VM:          "1",
+	Name:        "InventoryInstanceDescription",
+	Description: "Inventory Instance Description",
+}
+
+// InventoryContentLevel - (0008,0403) Inventory Level
+var InventoryContentLevel = &Tag{
+	Group:       0x0008,
+	Element:     0x0403,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "InventoryContentLevel",
+	Description: "Inventory Level",
+}
+
+// ItemInventoryDateTime - (0008,0404) Item Inventory DateTime
+var ItemInventoryDateTime = &Tag{
+	Group:       0x0008,
+	Element:     0x0404,
+	VR:          "DT",
+	VM:          "1",
+	Name:        "ItemInventoryDateTime",
+	Description: "Item Inventory DateTime",
+}
+
+// RemovedFromOperationalUse - (0008,0405) Removed from Operational Use
+var RemovedFromOperationalUse = &Tag{
+	Group:       0x0008,
+	Element:     0x0405,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "RemovedFromOperationalUse",
+	Description: "Removed from Operational Use",
+}
+
+// ReasonForRemovalCodeSequence - (0008,0406) Reason for Removal Code Sequence
+var ReasonForRemovalCodeSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0406,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ReasonForRemovalCodeSequence",
+	Description: "Reason for Removal Code Sequence",
+}
+
+// StoredInstanceBaseURI - (0008,0407) Stored Instance Base URI
+var StoredInstanceBaseURI = &Tag{
+	Group:       0x0008,
+	Element:     0x0407,
+	VR:          "UR",
+	VM:          "1",
+	Name:        "StoredInstanceBaseURI",
+	Description: "Stored Instance Base URI",
+}
+
+// FolderAccessURI - (0008,0408) Folder Access URI
+var FolderAccessURI = &Tag{
+	Group:       0x0008,
+	Element:     0x0408,
+	VR:          "UR",
+	VM:          "1",
+	Name:        "FolderAccessURI",
+	Description: "Folder Access URI",
+}
+
+// FileAccessURI - (0008,0409) File Access URI
+var FileAccessURI = &Tag{
+	Group:       0x0008,
+	Element:     0x0409,
+	VR:          "UR",
+	VM:          "1",
+	Name:        "FileAccessURI",
+	Description: "File Access URI",
+}
+
+// ContainerFileType - (0008,040A) Container File Type
+var ContainerFileType = &Tag{
+	Group:       0x0008,
+	Element:     0x040A,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "ContainerFileType",
+	Description: "Container File Type",
+}
+
+// FilenameInContainer - (0008,040B) Filename in Container
+var FilenameInContainer = &Tag{
+	Group:       0x0008,
+	Element:     0x040B,
+	VR:          "UR",
+	VM:          "1",
+	Name:        "FilenameInContainer",
+	Description: "Filename in Container",
+}
+
+// FileOffsetInContainer - (0008,040C) File Offset in Container
+var FileOffsetInContainer = &Tag{
+	Group:       0x0008,
+	Element:     0x040C,
+	VR:          "UV",
+	VM:          "1",
+	Name:        "FileOffsetInContainer",
+	Description: "File Offset in Container",
+}
+
+// FileLengthInContainer - (0008,040D) File Length in Container
+var FileLengthInContainer = &Tag{
+	Group:       0x0008,
+	Element:     0x040D,
+	VR:          "UV",
+	VM:          "1",
+	Name:        "FileLengthInContainer",
+	Description: "File Length in Container",
+}
+
+// StoredInstanceTransferSyntaxUID - (0008,040E) Stored Instance Transfer Syntax UID
+var StoredInstanceTransferSyntaxUID = &Tag{
+	Group:       0x0008,
+	Element:     0x040E,
+	VR:          "UI",
+	VM:          "1",
+	Name:        "StoredInstanceTransferSyntaxUID",
+	Description: "Stored Instance Transfer Syntax UID",
+}
+
+// ExtendedMatchingMechanisms - (0008,040F) Extended Matching Mechanisms
+var ExtendedMatchingMechanisms = &Tag{
+	Group:       0x0008,
+	Element:     0x040F,
+	VR:          "CS",
+	VM:          "1-n",
+	Name:        "ExtendedMatchingMechanisms",
+	Description: "Extended Matching Mechanisms",
+}
+
+// RangeMatchingSequence - (0008,0410) Range Matching Sequence
+var RangeMatchingSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0410,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RangeMatchingSequence",
+	Description: "Range Matching Sequence",
+}
+
+// UIDListMatchingSequence - (0008,0411) List of UID Matching Sequence
+var UIDListMatchingSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0411,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "UIDListMatchingSequence",
+	Description: "List of UID Matching Sequence",
+}
+
+// EmptyValueMatchingSequence - (0008,0412) Empty Value Matching Sequence
+var EmptyValueMatchingSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0412,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "EmptyValueMatchingSequence",
+	Description: "Empty Value Matching Sequence",
+}
+
+// GeneralMatchingSequence - (0008,0413) General Matching Sequence
+var GeneralMatchingSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0413,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "GeneralMatchingSequence",
+	Description: "General Matching Sequence",
+}
+
+// RequestedStatusInterval - (0008,0414) Requested Status Interval
+var RequestedStatusInterval = &Tag{
+	Group:       0x0008,
+	Element:     0x0414,
+	VR:          "US",
+	VM:          "1",
+	Name:        "RequestedStatusInterval",
+	Description: "Requested Status Interval",
+}
+
+// RetainInstances - (0008,0415) Retain Instances
+var RetainInstances = &Tag{
+	Group:       0x0008,
+	Element:     0x0415,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "RetainInstances",
+	Description: "Retain Instances",
+}
+
+// ExpirationDateTime - (0008,0416) Expiration DateTime
+var ExpirationDateTime = &Tag{
+	Group:       0x0008,
+	Element:     0x0416,
+	VR:          "DT",
+	VM:          "1",
+	Name:        "ExpirationDateTime",
+	Description: "Expiration DateTime",
+}
+
+// TransactionStatus - (0008,0417) Transaction Status
+var TransactionStatus = &Tag{
+	Group:       0x0008,
+	Element:     0x0417,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "TransactionStatus",
+	Description: "Transaction Status",
+}
+
+// TransactionStatusComment - (0008,0418) Transaction Status Comment
+var TransactionStatusComment = &Tag{
+	Group:       0x0008,
+	Element:     0x0418,
+	VR:          "LT",
+	VM:          "1",
+	Name:        "TransactionStatusComment",
+	Description: "Transaction Status Comment",
+}
+
+// FileSetAccessSequence - (0008,0419) File Set Access Sequence
+var FileSetAccessSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0419,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "FileSetAccessSequence",
+	Description: "File Set Access Sequence",
+}
+
+// FileAccessSequence - (0008,041A) File Access Sequence
+var FileAccessSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x041A,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "FileAccessSequence",
+	Description: "File Access Sequence",
+}
+
+// RecordKey - (0008,041B) Record Key
+var RecordKey = &Tag{
+	Group:       0x0008,
+	Element:     0x041B,
+	VR:          "OB",
+	VM:          "1",
+	Name:        "RecordKey",
+	Description: "Record Key",
+}
+
+// PriorRecordKey - (0008,041C) Prior Record Key
+var PriorRecordKey = &Tag{
+	Group:       0x0008,
+	Element:     0x041C,
+	VR:          "OB",
+	VM:          "1",
+	Name:        "PriorRecordKey",
+	Description: "Prior Record Key",
+}
+
+// MetadataSequence - (0008,041D) Metadata Sequence
+var MetadataSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x041D,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "MetadataSequence",
+	Description: "Metadata Sequence",
+}
+
+// UpdatedMetadataSequence - (0008,041E) Updated Metadata Sequence
+var UpdatedMetadataSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x041E,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "UpdatedMetadataSequence",
+	Description: "Updated Metadata Sequence",
+}
+
+// StudyUpdateDateTime - (0008,041F) Study Update DateTime
+var StudyUpdateDateTime = &Tag{
+	Group:       0x0008,
+	Element:     0x041F,
+	VR:          "DT",
+	VM:          "1",
+	Name:        "StudyUpdateDateTime",
+	Description: "Study Update DateTime",
+}
+
+// InventoryAccessEndPointsSequence - (0008,0420) Inventory Access End Points Sequence
+var InventoryAccessEndPointsSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0420,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "InventoryAccessEndPointsSequence",
+	Description: "Inventory Access End Points Sequence",
+}
+
+// StudyAccessEndPointsSequence - (0008,0421) Study Access End Points Sequence
+var StudyAccessEndPointsSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0421,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "StudyAccessEndPointsSequence",
+	Description: "Study Access End Points Sequence",
+}
+
+// IncorporatedInventoryInstanceSequence - (0008,0422) Incorporated Inventory Instance Sequence
+var IncorporatedInventoryInstanceSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0422,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "IncorporatedInventoryInstanceSequence",
+	Description: "Incorporated Inventory Instance Sequence",
+}
+
+// InventoriedStudiesSequence - (0008,0423) Inventoried Studies Sequence
+var InventoriedStudiesSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0423,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "InventoriedStudiesSequence",
+	Description: "Inventoried Studies Sequence",
+}
+
+// InventoriedSeriesSequence - (0008,0424) Inventoried Series Sequence
+var InventoriedSeriesSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0424,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "InventoriedSeriesSequence",
+	Description: "Inventoried Series Sequence",
+}
+
+// InventoriedInstancesSequence - (0008,0425) Inventoried Instances Sequence
+var InventoriedInstancesSequence = &Tag{
+	Group:       0x0008,
+	Element:     0x0425,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "InventoriedInstancesSequence",
+	Description: "Inventoried Instances Sequence",
+}
+
+// InventoryCompletionStatus - (0008,0426) Inventory Completion Status
+var InventoryCompletionStatus = &Tag{
+	Group:       0x0008,
+	Element:     0x0426,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "InventoryCompletionStatus",
+	Description: "Inventory Completion Status",
+}
+
+// NumberOfStudyRecordsInInstance - (0008,0427) Number of Study Records in Instance
+var NumberOfStudyRecordsInInstance = &Tag{
+	Group:       0x0008,
+	Element:     0x0427,
+	VR:          "UL",
+	VM:          "1",
+	Name:        "NumberOfStudyRecordsInInstance",
+	Description: "Number of Study Records in Instance",
+}
+
+// TotalNumberOfStudyRecords - (0008,0428) Total Number of Study Records
+var TotalNumberOfStudyRecords = &Tag{
+	Group:       0x0008,
+	Element:     0x0428,
+	VR:          "UV",
+	VM:          "1",
+	Name:        "TotalNumberOfStudyRecords",
+	Description: "Total Number of Study Records",
+}
+
+// MaximumNumberOfRecords - (0008,0429) Maximum Number of Records
+var MaximumNumberOfRecords = &Tag{
+	Group:       0x0008,
+	Element:     0x0429,
+	VR:          "UV",
+	VM:          "1",
+	Name:        "MaximumNumberOfRecords",
+	Description: "Maximum Number of Records",
+}
+
 // NetworkID - (0008,1000) Network ID
 var NetworkID = &Tag{
 	Group:       0x0008,
@@ -2078,6 +2518,16 @@ var AdmittingDiagnosesCodeSequence = &Tag{
 	VM:          "1",
 	Name:        "AdmittingDiagnosesCodeSequence",
 	Description: "Admitting Diagnoses Code Sequence",
+}
+
+// PyramidDescription - (0008,1088) Pyramid Description
+var PyramidDescription = &Tag{
+	Group:       0x0008,
+	Element:     0x1088,
+	VR:          "LO",
+	VM:          "1",
+	Name:        "PyramidDescription",
+	Description: "Pyramid Description",
 }
 
 // ManufacturerModelName - (0008,1090) Manufacturer's Model Name
@@ -3900,6 +4350,16 @@ var LongitudinalTemporalEventType = &Tag{
 	Description: "Longitudinal Temporal Event Type",
 }
 
+// ClinicalTrialTimePointTypeCodeSequence - (0012,0054) Clinical Trial Time Point Type Code Sequence
+var ClinicalTrialTimePointTypeCodeSequence = &Tag{
+	Group:       0x0012,
+	Element:     0x0054,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ClinicalTrialTimePointTypeCodeSequence",
+	Description: "Clinical Trial Time Point Type Code Sequence",
+}
+
 // ClinicalTrialCoordinatingCenterName - (0012,0060) Clinical Trial Coordinating Center Name
 var ClinicalTrialCoordinatingCenterName = &Tag{
 	Group:       0x0012,
@@ -4268,6 +4728,86 @@ var OtherSecondaryApprovalStatus = &Tag{
 	VM:          "1-n",
 	Name:        "OtherSecondaryApprovalStatus",
 	Description: "Other Secondary Approval Status",
+}
+
+// DataElementLabelSequence - (0014,0200) Data Element Label Sequence
+var DataElementLabelSequence = &Tag{
+	Group:       0x0014,
+	Element:     0x0200,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DataElementLabelSequence",
+	Description: "Data Element Label Sequence",
+}
+
+// DataElementLabelItemSequence - (0014,0201) Data Element Label Item Sequence
+var DataElementLabelItemSequence = &Tag{
+	Group:       0x0014,
+	Element:     0x0201,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DataElementLabelItemSequence",
+	Description: "Data Element Label Item Sequence",
+}
+
+// DataElement - (0014,0202) Data Element
+var DataElement = &Tag{
+	Group:       0x0014,
+	Element:     0x0202,
+	VR:          "AT",
+	VM:          "1",
+	Name:        "DataElement",
+	Description: "Data Element",
+}
+
+// DataElementName - (0014,0203) Data Element Name
+var DataElementName = &Tag{
+	Group:       0x0014,
+	Element:     0x0203,
+	VR:          "LO",
+	VM:          "1",
+	Name:        "DataElementName",
+	Description: "Data Element Name",
+}
+
+// DataElementDescription - (0014,0204) Data Element Description
+var DataElementDescription = &Tag{
+	Group:       0x0014,
+	Element:     0x0204,
+	VR:          "LO",
+	VM:          "1",
+	Name:        "DataElementDescription",
+	Description: "Data Element Description",
+}
+
+// DataElementConditionality - (0014,0205) Data Element Conditionality
+var DataElementConditionality = &Tag{
+	Group:       0x0014,
+	Element:     0x0205,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "DataElementConditionality",
+	Description: "Data Element Conditionality",
+}
+
+// DataElementMinimumCharacters - (0014,0206) Data Element Minimum Characters
+var DataElementMinimumCharacters = &Tag{
+	Group:       0x0014,
+	Element:     0x0206,
+	VR:          "IS",
+	VM:          "1",
+	Name:        "DataElementMinimumCharacters",
+	Description: "Data Element Minimum Characters",
+}
+
+// DataElementMaximumCharacters - (0014,0207) Data Element Maximum Characters
+var DataElementMaximumCharacters = &Tag{
+	Group:       0x0014,
+	Element:     0x0207,
+	VR:          "IS",
+	VM:          "1",
+	Name:        "DataElementMaximumCharacters",
+	Description: "Data Element Maximum Characters",
 }
 
 // ActualEnvironmentalConditions - (0014,1010) Actual Environmental Conditions
@@ -8988,6 +9528,16 @@ var DateTimeOfLastCalibration = &Tag{
 	VM:          "1",
 	Name:        "DateTimeOfLastCalibration",
 	Description: "DateTime of Last Calibration",
+}
+
+// CalibrationDateTime - (0018,1203) Calibration DateTime
+var CalibrationDateTime = &Tag{
+	Group:       0x0018,
+	Element:     0x1203,
+	VR:          "DT",
+	VM:          "1",
+	Name:        "CalibrationDateTime",
+	Description: "Calibration DateTime",
 }
 
 // ConvolutionKernel - (0018,1210) Convolution Kernel
@@ -15940,6 +16490,16 @@ var LUTNumber = &Tag{
 	Description: "LUT Number",
 }
 
+// PyramidLabel - (0020,0027) Pyramid Label
+var PyramidLabel = &Tag{
+	Group:       0x0020,
+	Element:     0x0027,
+	VR:          "LO",
+	VM:          "1",
+	Name:        "PyramidLabel",
+	Description: "Pyramid Label",
+}
+
 // ImagePosition - (0020,0030) Image Position
 var ImagePosition = &Tag{
 	Group:       0x0020,
@@ -22360,6 +22920,16 @@ var RequestedProcedureCodeSequence = &Tag{
 	Description: "Requested Procedure Code Sequence",
 }
 
+// RequestedLateralityCodeSequence - (0032,1065) Requested Laterality Code Sequence
+var RequestedLateralityCodeSequence = &Tag{
+	Group:       0x0032,
+	Element:     0x1065,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RequestedLateralityCodeSequence",
+	Description: "Requested Laterality Code Sequence",
+}
+
 // ReasonForVisit - (0032,1066) Reason for Visit
 var ReasonForVisit = &Tag{
 	Group:       0x0032,
@@ -23268,6 +23838,186 @@ var ImpedanceMeasurementCurrentType = &Tag{
 	VM:          "1",
 	Name:        "ImpedanceMeasurementCurrentType",
 	Description: "Impedance Measurement Current Type",
+}
+
+// WaveformAmplifierType - (003A,0317) Waveform Amplifier Type
+var WaveformAmplifierType = &Tag{
+	Group:       0x003A,
+	Element:     0x0317,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "WaveformAmplifierType",
+	Description: "Waveform Amplifier Type",
+}
+
+// FilterLowFrequencyCharacteristicsSequence - (003A,0318) Filter Low Frequency Characteristics Sequence
+var FilterLowFrequencyCharacteristicsSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x0318,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "FilterLowFrequencyCharacteristicsSequence",
+	Description: "Filter Low Frequency Characteristics Sequence",
+}
+
+// FilterHighFrequencyCharacteristicsSequence - (003A,0319) Filter High Frequency Characteristics Sequence
+var FilterHighFrequencyCharacteristicsSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x0319,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "FilterHighFrequencyCharacteristicsSequence",
+	Description: "Filter High Frequency Characteristics Sequence",
+}
+
+// SummarizedFilterLookupTable - (003A,0320) Summarized Filter Lookup Table Sequence
+var SummarizedFilterLookupTable = &Tag{
+	Group:       0x003A,
+	Element:     0x0320,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "SummarizedFilterLookupTable",
+	Description: "Summarized Filter Lookup Table Sequence",
+}
+
+// NotchFilterCharacteristicsSequence - (003A,0321) Notch Filter Characteristics Sequence
+var NotchFilterCharacteristicsSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x0321,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "NotchFilterCharacteristicsSequence",
+	Description: "Notch Filter Characteristics Sequence",
+}
+
+// WaveformFilterType - (003A,0322) Waveform Filter Type
+var WaveformFilterType = &Tag{
+	Group:       0x003A,
+	Element:     0x0322,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "WaveformFilterType",
+	Description: "Waveform Filter Type",
+}
+
+// AnalogFilterCharacteristicsSequence - (003A,0323) Analog Filter Characteristics Sequence
+var AnalogFilterCharacteristicsSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x0323,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AnalogFilterCharacteristicsSequence",
+	Description: "Analog Filter Characteristics Sequence",
+}
+
+// AnalogFilterRollOff - (003A,0324) Analog Filter Roll Off
+var AnalogFilterRollOff = &Tag{
+	Group:       0x003A,
+	Element:     0x0324,
+	VR:          "DS",
+	VM:          "1",
+	Name:        "AnalogFilterRollOff",
+	Description: "Analog Filter Roll Off ",
+}
+
+// AnalogFilterType - (003A,0325) Analog Filter Type Code Sequence
+var AnalogFilterType = &Tag{
+	Group:       0x003A,
+	Element:     0x0325,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AnalogFilterType",
+	Description: "Analog Filter Type Code Sequence",
+}
+
+// DigitalFilterCharacteristicsSequence - (003A,0326) Digital Filter Characteristics Sequence
+var DigitalFilterCharacteristicsSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x0326,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DigitalFilterCharacteristicsSequence",
+	Description: "Digital Filter Characteristics Sequence",
+}
+
+// DigitalFilterOrder - (003A,0327) Digital Filter Order
+var DigitalFilterOrder = &Tag{
+	Group:       0x003A,
+	Element:     0x0327,
+	VR:          "IS",
+	VM:          "1",
+	Name:        "DigitalFilterOrder",
+	Description: "Digital Filter Order",
+}
+
+// DigitalFilterTypeCodeSequence - (003A,0328) Digital Filter Type Code Sequence
+var DigitalFilterTypeCodeSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x0328,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DigitalFilterTypeCodeSequence",
+	Description: "Digital Filter Type Code Sequence",
+}
+
+// WaveformFilterDescription - (003A,0329) Waveform Filter Description
+var WaveformFilterDescription = &Tag{
+	Group:       0x003A,
+	Element:     0x0329,
+	VR:          "ST",
+	VM:          "1",
+	Name:        "WaveformFilterDescription",
+	Description: "Waveform Filter Description",
+}
+
+// FilterLookupTableSequence - (003A,032A) Filter Lookup Table Sequence
+var FilterLookupTableSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x032A,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "FilterLookupTableSequence",
+	Description: "Filter Lookup Table Sequence",
+}
+
+// FilterLookupTableDescription - (003A,032B) Filter Lookup Table Description
+var FilterLookupTableDescription = &Tag{
+	Group:       0x003A,
+	Element:     0x032B,
+	VR:          "ST",
+	VM:          "1",
+	Name:        "FilterLookupTableDescription",
+	Description: "Filter Lookup Table Description",
+}
+
+// FrequencyEncodingCodeSequence - (003A,032C) Frequency Encoding Code Sequence
+var FrequencyEncodingCodeSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x032C,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "FrequencyEncodingCodeSequence",
+	Description: "Frequency Encoding Code Sequence",
+}
+
+// MagnitudeEncodingCodeSequence - (003A,032D) Magnitude Encoding Code Sequence
+var MagnitudeEncodingCodeSequence = &Tag{
+	Group:       0x003A,
+	Element:     0x032D,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "MagnitudeEncodingCodeSequence",
+	Description: "Magnitude Encoding Code Sequence",
+}
+
+// FilterLookupTableData - (003A,032E) Filter Lookup Table Data
+var FilterLookupTableData = &Tag{
+	Group:       0x003A,
+	Element:     0x032E,
+	VR:          "OD",
+	VM:          "1",
+	Name:        "FilterLookupTableData",
+	Description: "Filter Lookup Table Data",
 }
 
 // ScheduledStationAETitle - (0040,0001) Scheduled Station AE Title
@@ -32250,6 +33000,16 @@ var UsedFiducialsSequence = &Tag{
 	Description: "Used Fiducials Sequence",
 }
 
+// UsedRTStructureSetROISequence - (0070,0315) Used RT Structure Set ROI Sequence
+var UsedRTStructureSetROISequence = &Tag{
+	Group:       0x0070,
+	Element:     0x0315,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "UsedRTStructureSetROISequence",
+	Description: "Used RT Structure Set ROI Sequence",
+}
+
 // GraphicCoordinatesDataSequence - (0070,0318) Graphic Coordinates Data Sequence
 var GraphicCoordinatesDataSequence = &Tag{
 	Group:       0x0070,
@@ -39058,6 +39818,16 @@ var RecordedBlockSequence = &Tag{
 	VM:          "1",
 	Name:        "RecordedBlockSequence",
 	Description: "Recorded Block Sequence",
+}
+
+// RecordedBlockSlabSequence - (3008,00D1) Recorded Block Slab Sequence
+var RecordedBlockSlabSequence = &Tag{
+	Group:       0x3008,
+	Element:     0x00D1,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RecordedBlockSlabSequence",
+	Description: "Recorded Block Slab Sequence",
 }
 
 // TreatmentSummaryMeasuredDoseReferenceSequence - (3008,00E0) Treatment Summary Measured Dose Reference Sequence
@@ -45880,6 +46650,156 @@ var ReasonForOmissionDescription = &Tag{
 	Description: "Reason for Omission Description",
 }
 
+// PrescriptionOverviewSequence - (300C,0114) Prescription Overview Sequence
+var PrescriptionOverviewSequence = &Tag{
+	Group:       0x300C,
+	Element:     0x0114,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "PrescriptionOverviewSequence",
+	Description: "Prescription Overview Sequence",
+}
+
+// TotalPrescriptionDose - (300C,0115) Total Prescription Dose
+var TotalPrescriptionDose = &Tag{
+	Group:       0x300C,
+	Element:     0x0115,
+	VR:          "FL",
+	VM:          "1",
+	Name:        "TotalPrescriptionDose",
+	Description: "Total Prescription Dose",
+}
+
+// PlanOverviewSequence - (300C,0116) Plan Overview Sequence
+var PlanOverviewSequence = &Tag{
+	Group:       0x300C,
+	Element:     0x0116,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "PlanOverviewSequence",
+	Description: "Plan Overview Sequence",
+}
+
+// PlanOverviewIndex - (300C,0117) Plan Overview Index
+var PlanOverviewIndex = &Tag{
+	Group:       0x300C,
+	Element:     0x0117,
+	VR:          "US",
+	VM:          "1",
+	Name:        "PlanOverviewIndex",
+	Description: "Plan Overview Index",
+}
+
+// ReferencedPlanOverviewIndex - (300C,0118) Referenced Plan Overview Index
+var ReferencedPlanOverviewIndex = &Tag{
+	Group:       0x300C,
+	Element:     0x0118,
+	VR:          "US",
+	VM:          "1",
+	Name:        "ReferencedPlanOverviewIndex",
+	Description: "Referenced Plan Overview Index",
+}
+
+// NumberOfFractionsIncluded - (300C,0119) Number of Fractions Included
+var NumberOfFractionsIncluded = &Tag{
+	Group:       0x300C,
+	Element:     0x0119,
+	VR:          "US",
+	VM:          "1",
+	Name:        "NumberOfFractionsIncluded",
+	Description: "Number of Fractions Included",
+}
+
+// DoseCalibrationConditionsSequence - (300C,0120) Dose Calibration Conditions Sequence
+var DoseCalibrationConditionsSequence = &Tag{
+	Group:       0x300C,
+	Element:     0x0120,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DoseCalibrationConditionsSequence",
+	Description: "Dose Calibration Conditions Sequence",
+}
+
+// AbsorbedDoseToMetersetRatio - (300C,0121) Absorbed Dose to Meterset Ratio
+var AbsorbedDoseToMetersetRatio = &Tag{
+	Group:       0x300C,
+	Element:     0x0121,
+	VR:          "FD",
+	VM:          "1",
+	Name:        "AbsorbedDoseToMetersetRatio",
+	Description: "Absorbed Dose to Meterset Ratio",
+}
+
+// DelineatedRadiationFieldSize - (300C,0122) Delineated Radiation Field Size
+var DelineatedRadiationFieldSize = &Tag{
+	Group:       0x300C,
+	Element:     0x0122,
+	VR:          "FD",
+	VM:          "2",
+	Name:        "DelineatedRadiationFieldSize",
+	Description: "Delineated Radiation Field Size",
+}
+
+// DoseCalibrationConditionsVerifiedFlag - (300C,0123) Dose Calibration Conditions Verified Flag
+var DoseCalibrationConditionsVerifiedFlag = &Tag{
+	Group:       0x300C,
+	Element:     0x0123,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "DoseCalibrationConditionsVerifiedFlag",
+	Description: "Dose Calibration Conditions Verified Flag",
+}
+
+// CalibrationReferencePointDepth - (300C,0124) Calibration Reference Point Depth
+var CalibrationReferencePointDepth = &Tag{
+	Group:       0x300C,
+	Element:     0x0124,
+	VR:          "FD",
+	VM:          "1",
+	Name:        "CalibrationReferencePointDepth",
+	Description: "Calibration Reference Point Depth",
+}
+
+// GatingBeamHoldTransitionSequence - (300C,0125) Gating Beam Hold Transition Sequence
+var GatingBeamHoldTransitionSequence = &Tag{
+	Group:       0x300C,
+	Element:     0x0125,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "GatingBeamHoldTransitionSequence",
+	Description: "Gating Beam Hold Transition Sequence",
+}
+
+// BeamHoldTransition - (300C,0126) Beam Hold Transition
+var BeamHoldTransition = &Tag{
+	Group:       0x300C,
+	Element:     0x0126,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "BeamHoldTransition",
+	Description: "Beam Hold Transition",
+}
+
+// BeamHoldTransitionDateTime - (300C,0127) Beam Hold Transition DateTime
+var BeamHoldTransitionDateTime = &Tag{
+	Group:       0x300C,
+	Element:     0x0127,
+	VR:          "DT",
+	VM:          "1",
+	Name:        "BeamHoldTransitionDateTime",
+	Description: "Beam Hold Transition DateTime",
+}
+
+// BeamHoldOriginatingDeviceSequence - (300C,0128) Beam Hold Originating Device Sequence
+var BeamHoldOriginatingDeviceSequence = &Tag{
+	Group:       0x300C,
+	Element:     0x0128,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "BeamHoldOriginatingDeviceSequence",
+	Description: "Beam Hold Originating Device Sequence",
+}
+
 // ApprovalStatus - (300E,0002) Approval Status
 var ApprovalStatus = &Tag{
 	Group:       0x300E,
@@ -47390,6 +48310,16 @@ var TomotherapeuticLeafInitialClosedDurations = &Tag{
 	Description: "Tomotherapeutic Leaf Initial Closed Durations",
 }
 
+// ConceptualVolumeIdentificationSequence - (3010,00A0) Conceptual Volume Identification Sequence
+var ConceptualVolumeIdentificationSequence = &Tag{
+	Group:       0x3010,
+	Element:     0x00A0,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ConceptualVolumeIdentificationSequence",
+	Description: "Conceptual Volume Identification Sequence",
+}
+
 // Arbitrary - (4000,0010) Arbitrary
 var Arbitrary = &Tag{
 	Group:       0x4000,
@@ -48690,6 +49620,16 @@ var ExtendedOffsetTableLengths = &Tag{
 	Description: "Extended Offset Table Lengths",
 }
 
+// EncapsulatedPixelDataValueTotalLength - (7FE0,0003) Encapsulated Pixel Data Value Total Length
+var EncapsulatedPixelDataValueTotalLength = &Tag{
+	Group:       0x7FE0,
+	Element:     0x0003,
+	VR:          "UV",
+	VM:          "1",
+	Name:        "EncapsulatedPixelDataValueTotalLength",
+	Description: "Encapsulated Pixel Data Value Total Length",
+}
+
 // FloatPixelData - (7FE0,0008) Float Pixel Data
 var FloatPixelData = &Tag{
 	Group:       0x7FE0,
@@ -48908,7 +49848,9 @@ var tags = []*Tag{
 	InstanceCreatorUID,
 	InstanceCoercionDateTime,
 	SOPClassUID,
+	AcquisitionUID,
 	SOPInstanceUID,
+	PyramidUID,
 	RelatedGeneralSOPClassUID,
 	OriginalSpecializedSOPClassUID,
 	StudyDate,
@@ -49001,6 +49943,48 @@ var tags = []*Tag{
 	PrivateDataElementDescription,
 	PrivateDataElementEncoding,
 	PrivateDataElementDefinitionSequence,
+	ScopeOfInventorySequence,
+	InventoryPurpose,
+	InventoryInstanceDescription,
+	InventoryContentLevel,
+	ItemInventoryDateTime,
+	RemovedFromOperationalUse,
+	ReasonForRemovalCodeSequence,
+	StoredInstanceBaseURI,
+	FolderAccessURI,
+	FileAccessURI,
+	ContainerFileType,
+	FilenameInContainer,
+	FileOffsetInContainer,
+	FileLengthInContainer,
+	StoredInstanceTransferSyntaxUID,
+	ExtendedMatchingMechanisms,
+	RangeMatchingSequence,
+	UIDListMatchingSequence,
+	EmptyValueMatchingSequence,
+	GeneralMatchingSequence,
+	RequestedStatusInterval,
+	RetainInstances,
+	ExpirationDateTime,
+	TransactionStatus,
+	TransactionStatusComment,
+	FileSetAccessSequence,
+	FileAccessSequence,
+	RecordKey,
+	PriorRecordKey,
+	MetadataSequence,
+	UpdatedMetadataSequence,
+	StudyUpdateDateTime,
+	InventoryAccessEndPointsSequence,
+	StudyAccessEndPointsSequence,
+	IncorporatedInventoryInstanceSequence,
+	InventoriedStudiesSequence,
+	InventoriedSeriesSequence,
+	InventoriedInstancesSequence,
+	InventoryCompletionStatus,
+	NumberOfStudyRecordsInInstance,
+	TotalNumberOfStudyRecords,
+	MaximumNumberOfRecords,
 	NetworkID,
 	StationName,
 	StudyDescription,
@@ -49019,6 +50003,7 @@ var tags = []*Tag{
 	OperatorIdentificationSequence,
 	AdmittingDiagnosesDescription,
 	AdmittingDiagnosesCodeSequence,
+	PyramidDescription,
 	ManufacturerModelName,
 	ReferencedResultsSequence,
 	ReferencedStudySequence,
@@ -49201,6 +50186,7 @@ var tags = []*Tag{
 	ClinicalTrialTimePointDescription,
 	LongitudinalTemporalOffsetFromEvent,
 	LongitudinalTemporalEventType,
+	ClinicalTrialTimePointTypeCodeSequence,
 	ClinicalTrialCoordinatingCenterName,
 	PatientIdentityRemoved,
 	DeidentificationMethod,
@@ -49238,6 +50224,14 @@ var tags = []*Tag{
 	MultipleComponentApprovalSequence,
 	OtherApprovalStatus,
 	OtherSecondaryApprovalStatus,
+	DataElementLabelSequence,
+	DataElementLabelItemSequence,
+	DataElement,
+	DataElementName,
+	DataElementDescription,
+	DataElementConditionality,
+	DataElementMinimumCharacters,
+	DataElementMaximumCharacters,
 	ActualEnvironmentalConditions,
 	ExpiryDate,
 	EnvironmentalConditions,
@@ -49710,6 +50704,7 @@ var tags = []*Tag{
 	DateOfLastCalibration,
 	TimeOfLastCalibration,
 	DateTimeOfLastCalibration,
+	CalibrationDateTime,
 	ConvolutionKernel,
 	UpperLowerPixelValues,
 	ActualFrameDuration,
@@ -50405,6 +51400,7 @@ var tags = []*Tag{
 	OverlayNumber,
 	CurveNumber,
 	LUTNumber,
+	PyramidLabel,
 	ImagePosition,
 	ImagePositionPatient,
 	ImageOrientation,
@@ -51047,6 +52043,7 @@ var tags = []*Tag{
 	StudyComponentStatusID,
 	RequestedProcedureDescription,
 	RequestedProcedureCodeSequence,
+	RequestedLateralityCodeSequence,
 	ReasonForVisit,
 	ReasonForVisitCodeSequence,
 	RequestedContrastAgent,
@@ -51138,6 +52135,24 @@ var tags = []*Tag{
 	ImpedanceMeasurementDateTime,
 	ImpedanceMeasurementFrequency,
 	ImpedanceMeasurementCurrentType,
+	WaveformAmplifierType,
+	FilterLowFrequencyCharacteristicsSequence,
+	FilterHighFrequencyCharacteristicsSequence,
+	SummarizedFilterLookupTable,
+	NotchFilterCharacteristicsSequence,
+	WaveformFilterType,
+	AnalogFilterCharacteristicsSequence,
+	AnalogFilterRollOff,
+	AnalogFilterType,
+	DigitalFilterCharacteristicsSequence,
+	DigitalFilterOrder,
+	DigitalFilterTypeCodeSequence,
+	WaveformFilterDescription,
+	FilterLookupTableSequence,
+	FilterLookupTableDescription,
+	FrequencyEncodingCodeSequence,
+	MagnitudeEncodingCodeSequence,
+	FilterLookupTableData,
 	ScheduledStationAETitle,
 	ScheduledProcedureStepStartDate,
 	ScheduledProcedureStepStartTime,
@@ -52036,6 +53051,7 @@ var tags = []*Tag{
 	FiducialIdentifierCodeSequence,
 	ContourUncertaintyRadius,
 	UsedFiducialsSequence,
+	UsedRTStructureSetROISequence,
 	GraphicCoordinatesDataSequence,
 	FiducialUID,
 	ReferencedFiducialUID,
@@ -52717,6 +53733,7 @@ var tags = []*Tag{
 	RecordedWedgeSequence,
 	RecordedCompensatorSequence,
 	RecordedBlockSequence,
+	RecordedBlockSlabSequence,
 	TreatmentSummaryMeasuredDoseReferenceSequence,
 	RecordedSnoutSequence,
 	RecordedRangeShifterSequence,
@@ -53399,6 +54416,21 @@ var tags = []*Tag{
 	OmittedBeamTaskSequence,
 	ReasonForOmission,
 	ReasonForOmissionDescription,
+	PrescriptionOverviewSequence,
+	TotalPrescriptionDose,
+	PlanOverviewSequence,
+	PlanOverviewIndex,
+	ReferencedPlanOverviewIndex,
+	NumberOfFractionsIncluded,
+	DoseCalibrationConditionsSequence,
+	AbsorbedDoseToMetersetRatio,
+	DelineatedRadiationFieldSize,
+	DoseCalibrationConditionsVerifiedFlag,
+	CalibrationReferencePointDepth,
+	GatingBeamHoldTransitionSequence,
+	BeamHoldTransition,
+	BeamHoldTransitionDateTime,
+	BeamHoldOriginatingDeviceSequence,
 	ApprovalStatus,
 	ReviewDate,
 	ReviewTime,
@@ -53550,6 +54582,7 @@ var tags = []*Tag{
 	TomotherapeuticControlPointSequence,
 	TomotherapeuticLeafOpenDurations,
 	TomotherapeuticLeafInitialClosedDurations,
+	ConceptualVolumeIdentificationSequence,
 	Arbitrary,
 	TextComments,
 	ResultsID,
@@ -53680,6 +54713,7 @@ var tags = []*Tag{
 	SpectroscopyData,
 	ExtendedOffsetTable,
 	ExtendedOffsetTableLengths,
+	EncapsulatedPixelDataValueTotalLength,
 	FloatPixelData,
 	DoubleFloatPixelData,
 	PixelData,

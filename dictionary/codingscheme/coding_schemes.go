@@ -104,6 +104,22 @@ var I11 = &CodingScheme{
 	Type:        "Coding Scheme",
 }
 
+// UNS - (1.2.840.10008.2.16.17) Unified numbering system (UNS) for metals and alloys
+var UNS = &CodingScheme{
+	UID:         "1.2.840.10008.2.16.17",
+	Name:        "UNS",
+	Description: "Unified numbering system (UNS) for metals and alloys",
+	Type:        "Coding Scheme",
+}
+
+// RRID - (1.2.840.10008.2.16.18) Research Resource Identification
+var RRID = &CodingScheme{
+	UID:         "1.2.840.10008.2.16.18",
+	Name:        "RRID",
+	Description: "Research Resource Identification",
+	Type:        "Coding Scheme",
+}
+
 var codingSchemes = []*CodingScheme{
 	DCM,
 	MA,
@@ -118,4 +134,6 @@ var codingSchemes = []*CodingScheme{
 	RO,
 	RADELEMENT,
 	I11,
+	UNS,
+	RRID,
 }

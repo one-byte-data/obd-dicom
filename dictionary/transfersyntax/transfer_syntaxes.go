@@ -256,11 +256,27 @@ var MPEG2MPML = &TransferSyntax{
 	Type:        "Transfer Syntax",
 }
 
+// MPEG2MPMLF - (1.2.840.10008.1.2.4.100.1) Fragmentable MPEG2 Main Profile / Main Level
+var MPEG2MPMLF = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.100.1",
+	Name:        "MPEG2MPMLF",
+	Description: "Fragmentable MPEG2 Main Profile / Main Level",
+	Type:        "Transfer Syntax",
+}
+
 // MPEG2MPHL - (1.2.840.10008.1.2.4.101) MPEG2 Main Profile / High Level
 var MPEG2MPHL = &TransferSyntax{
 	UID:         "1.2.840.10008.1.2.4.101",
 	Name:        "MPEG2MPHL",
 	Description: "MPEG2 Main Profile / High Level",
+	Type:        "Transfer Syntax",
+}
+
+// MPEG2MPHLF - (1.2.840.10008.1.2.4.101.1) Fragmentable MPEG2 Main Profile / High Level
+var MPEG2MPHLF = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.101.1",
+	Name:        "MPEG2MPHLF",
+	Description: "Fragmentable MPEG2 Main Profile / High Level",
 	Type:        "Transfer Syntax",
 }
 
@@ -272,11 +288,27 @@ var MPEG4HP41 = &TransferSyntax{
 	Type:        "Transfer Syntax",
 }
 
+// MPEG4HP41F - (1.2.840.10008.1.2.4.102.1) Fragmentable MPEG-4 AVC/H.264 High Profile / Level 4.1
+var MPEG4HP41F = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.102.1",
+	Name:        "MPEG4HP41F",
+	Description: "Fragmentable MPEG-4 AVC/H.264 High Profile / Level 4.1",
+	Type:        "Transfer Syntax",
+}
+
 // MPEG4HP41BD - (1.2.840.10008.1.2.4.103) MPEG-4 AVC/H.264 BD-compatible High Profile / Level 4.1
 var MPEG4HP41BD = &TransferSyntax{
 	UID:         "1.2.840.10008.1.2.4.103",
 	Name:        "MPEG4HP41BD",
 	Description: "MPEG-4 AVC/H.264 BD-compatible High Profile / Level 4.1",
+	Type:        "Transfer Syntax",
+}
+
+// MPEG4HP41BDF - (1.2.840.10008.1.2.4.103.1) Fragmentable MPEG-4 AVC/H.264 BD-compatible High Profile / Level 4.1
+var MPEG4HP41BDF = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.103.1",
+	Name:        "MPEG4HP41BDF",
+	Description: "Fragmentable MPEG-4 AVC/H.264 BD-compatible High Profile / Level 4.1",
 	Type:        "Transfer Syntax",
 }
 
@@ -288,6 +320,14 @@ var MPEG4HP422D = &TransferSyntax{
 	Type:        "Transfer Syntax",
 }
 
+// MPEG4HP422DF - (1.2.840.10008.1.2.4.104.1) Fragmentable MPEG-4 AVC/H.264 High Profile / Level 4.2 For 2D Video
+var MPEG4HP422DF = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.104.1",
+	Name:        "MPEG4HP422DF",
+	Description: "Fragmentable MPEG-4 AVC/H.264 High Profile / Level 4.2 For 2D Video",
+	Type:        "Transfer Syntax",
+}
+
 // MPEG4HP423D - (1.2.840.10008.1.2.4.105) MPEG-4 AVC/H.264 High Profile / Level 4.2 For 3D Video
 var MPEG4HP423D = &TransferSyntax{
 	UID:         "1.2.840.10008.1.2.4.105",
@@ -296,11 +336,27 @@ var MPEG4HP423D = &TransferSyntax{
 	Type:        "Transfer Syntax",
 }
 
+// MPEG4HP423DF - (1.2.840.10008.1.2.4.105.1) Fragmentable MPEG-4 AVC/H.264 High Profile / Level 4.2 For 3D Video
+var MPEG4HP423DF = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.105.1",
+	Name:        "MPEG4HP423DF",
+	Description: "Fragmentable MPEG-4 AVC/H.264 High Profile / Level 4.2 For 3D Video",
+	Type:        "Transfer Syntax",
+}
+
 // MPEG4HP42STEREO - (1.2.840.10008.1.2.4.106) MPEG-4 AVC/H.264 Stereo High Profile / Level 4.2
 var MPEG4HP42STEREO = &TransferSyntax{
 	UID:         "1.2.840.10008.1.2.4.106",
 	Name:        "MPEG4HP42STEREO",
 	Description: "MPEG-4 AVC/H.264 Stereo High Profile / Level 4.2",
+	Type:        "Transfer Syntax",
+}
+
+// MPEG4HP42STEREOF - (1.2.840.10008.1.2.4.106.1) Fragmentable MPEG-4 AVC/H.264 Stereo High Profile / Level 4.2
+var MPEG4HP42STEREOF = &TransferSyntax{
+	UID:         "1.2.840.10008.1.2.4.106.1",
+	Name:        "MPEG4HP42STEREOF",
+	Description: "Fragmentable MPEG-4 AVC/H.264 Stereo High Profile / Level 4.2",
 	Type:        "Transfer Syntax",
 }
 
@@ -409,12 +465,19 @@ var transferSyntaxes = []*TransferSyntax{
 	JPIPReferenced,
 	JPIPReferencedDeflate,
 	MPEG2MPML,
+	MPEG2MPMLF,
 	MPEG2MPHL,
+	MPEG2MPHLF,
 	MPEG4HP41,
+	MPEG4HP41F,
 	MPEG4HP41BD,
+	MPEG4HP41BDF,
 	MPEG4HP422D,
+	MPEG4HP422DF,
 	MPEG4HP423D,
+	MPEG4HP423DF,
 	MPEG4HP42STEREO,
+	MPEG4HP42STEREOF,
 	HEVCMP51,
 	HEVCM10P51,
 	RLELossless,

@@ -30,7 +30,7 @@ steps:
       GOARCH: amd64
     commands:
       - apk add gcc g++
-      - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
+      - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/obd-dicom cmd/obd-dicom/main.go
       - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/compare cmd/compare/main.go
 
   - name: docker-dev
@@ -65,7 +65,7 @@ steps:
       GOARCH: amd64
     commands:
       - apk add gcc g++
-      - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/obd-dicom cmd/odb-dicom/main.go
+      - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/obd-dicom cmd/obd-dicom/main.go
       - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/compare cmd/compare/main.go
   
   - name: docker-latest

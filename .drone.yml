@@ -29,6 +29,8 @@ steps:
       - apk add gcc g++
       - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/obd-dicom cmd/obd-dicom/main.go
       - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/compare cmd/compare/main.go
+      - GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/arm64/obd-dicom cmd/obd-dicom/main.go
+      - GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/arm64/compare cmd/compare/main.go
 
   - name: docker-dev
     image: thegeeklab/drone-docker-buildx:23
@@ -62,6 +64,8 @@ steps:
       - apk add gcc g++
       - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/obd-dicom cmd/obd-dicom/main.go
       - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/compare cmd/compare/main.go
+      - GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/arm64/obd-dicom cmd/obd-dicom/main.go
+      - GOARCH=arm64 go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/arm64/compare cmd/compare/main.go
   
   - name: docker-latest
     image: thegeeklab/drone-docker-buildx:23
@@ -100,3 +104,5 @@ steps:
       files:
         - build/linux/amd64/obd-dicom
         - build/linux/amd64/compare
+        - build/linux/arm64/obd-dicom
+        - build/linux/arm64/compare

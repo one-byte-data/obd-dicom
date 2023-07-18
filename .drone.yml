@@ -65,6 +65,7 @@ steps:
   
   - name: docker-latest
     image: thegeeklab/drone-docker-buildx:23
+    privileged: true
     when:
       branch:
         - main

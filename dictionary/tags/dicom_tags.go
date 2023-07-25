@@ -1950,13 +1950,13 @@ var InventoryInstanceDescription = &Tag{
 	Description: "Inventory Instance Description",
 }
 
-// InventoryContentLevel - (0008,0403) Inventory Level
-var InventoryContentLevel = &Tag{
+// InventoryLevel - (0008,0403) Inventory Level
+var InventoryLevel = &Tag{
 	Group:       0x0008,
 	Element:     0x0403,
 	VR:          "CS",
 	VM:          "1",
-	Name:        "InventoryContentLevel",
+	Name:        "InventoryLevel",
 	Description: "Inventory Level",
 }
 
@@ -2090,13 +2090,13 @@ var RangeMatchingSequence = &Tag{
 	Description: "Range Matching Sequence",
 }
 
-// UIDListMatchingSequence - (0008,0411) List of UID Matching Sequence
-var UIDListMatchingSequence = &Tag{
+// ListOfUIDMatchingSequence - (0008,0411) List of UID Matching Sequence
+var ListOfUIDMatchingSequence = &Tag{
 	Group:       0x0008,
 	Element:     0x0411,
 	VR:          "SQ",
 	VM:          "1",
-	Name:        "UIDListMatchingSequence",
+	Name:        "ListOfUIDMatchingSequence",
 	Description: "List of UID Matching Sequence",
 }
 
@@ -3315,7 +3315,7 @@ var FrameType = &Tag{
 	Group:       0x0008,
 	Element:     0x9007,
 	VR:          "CS",
-	VM:          "4",
+	VM:          "4-5",
 	Name:        "FrameType",
 	Description: "Frame Type",
 }
@@ -21690,6 +21690,16 @@ var ModalityLUTSequence = &Tag{
 	Description: "Modality LUT Sequence",
 }
 
+// VariableModalityLUTSequence - (0028,3001) Variable Modality LUT Sequence
+var VariableModalityLUTSequence = &Tag{
+	Group:       0x0028,
+	Element:     0x3001,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "VariableModalityLUTSequence",
+	Description: "Variable Modality LUT Sequence",
+}
+
 // LUTDescriptor - (0028,3002) LUT Descriptor
 var LUTDescriptor = &Tag{
 	Group:       0x0028,
@@ -38460,6 +38470,546 @@ var FluenceModeID = &Tag{
 	Description: "Fluence Mode ID",
 }
 
+// SelectedFrameNumber - (3002,0100) Selected Frame Number
+var SelectedFrameNumber = &Tag{
+	Group:       0x3002,
+	Element:     0x0100,
+	VR:          "IS",
+	VM:          "1",
+	Name:        "SelectedFrameNumber",
+	Description: "Selected Frame Number",
+}
+
+// SelectedFrameFunctionalGroupsSequence - (3002,0101) Selected Frame Functional Groups Sequence
+var SelectedFrameFunctionalGroupsSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0101,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "SelectedFrameFunctionalGroupsSequence",
+	Description: "Selected Frame Functional Groups Sequence",
+}
+
+// RTImageFrameGeneralContentSequence - (3002,0102) RT Image Frame General Content Sequence
+var RTImageFrameGeneralContentSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0102,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageFrameGeneralContentSequence",
+	Description: "RT Image Frame General Content Sequence",
+}
+
+// RTImageFrameContextSequence - (3002,0103) RT Image Frame Context Sequence
+var RTImageFrameContextSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0103,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageFrameContextSequence",
+	Description: "RT Image Frame Context Sequence",
+}
+
+// RTImageScopeSequence - (3002,0104) RT Image Scope Sequence
+var RTImageScopeSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0104,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageScopeSequence",
+	Description: "RT Image Scope Sequence",
+}
+
+// BeamModifierCoordinatesPresenceFlag - (3002,0105) Beam Modifier Coordinates Presence Flag
+var BeamModifierCoordinatesPresenceFlag = &Tag{
+	Group:       0x3002,
+	Element:     0x0105,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "BeamModifierCoordinatesPresenceFlag",
+	Description: "Beam Modifier Coordinates Presence Flag",
+}
+
+// StartCumulativeMeterset - (3002,0106) Start Cumulative Meterset
+var StartCumulativeMeterset = &Tag{
+	Group:       0x3002,
+	Element:     0x0106,
+	VR:          "FD",
+	VM:          "1",
+	Name:        "StartCumulativeMeterset",
+	Description: "Start Cumulative Meterset",
+}
+
+// StopCumulativeMeterset - (3002,0107) Stop Cumulative Meterset
+var StopCumulativeMeterset = &Tag{
+	Group:       0x3002,
+	Element:     0x0107,
+	VR:          "FD",
+	VM:          "1",
+	Name:        "StopCumulativeMeterset",
+	Description: "Stop Cumulative Meterset",
+}
+
+// RTAcquisitionPatientPositionSequence - (3002,0108) RT Acquisition Patient Position Sequence
+var RTAcquisitionPatientPositionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0108,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTAcquisitionPatientPositionSequence",
+	Description: "RT Acquisition Patient Position Sequence",
+}
+
+// RTImageFrameImagingDevicePositionSequence - (3002,0109) RT Image Frame Imaging Device Position Sequence
+var RTImageFrameImagingDevicePositionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0109,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageFrameImagingDevicePositionSequence",
+	Description: "RT Image Frame Imaging Device Position Sequence",
+}
+
+// RTImageFramekVRadiationAcquisitionSequence - (3002,010A) RT Image Frame kV Radiation Acquisition Sequence
+var RTImageFramekVRadiationAcquisitionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x010A,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageFramekVRadiationAcquisitionSequence",
+	Description: "RT Image Frame kV Radiation Acquisition Sequence",
+}
+
+// RTImageFrameMVRadiationAcquisitionSequence - (3002,010B) RT Image Frame MV Radiation Acquisition Sequence
+var RTImageFrameMVRadiationAcquisitionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x010B,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageFrameMVRadiationAcquisitionSequence",
+	Description: "RT Image Frame MV Radiation Acquisition Sequence",
+}
+
+// RTImageFrameRadiationAcquisitionSequence - (3002,010C) RT Image Frame Radiation Acquisition Sequence
+var RTImageFrameRadiationAcquisitionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x010C,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "RTImageFrameRadiationAcquisitionSequence",
+	Description: "RT Image Frame Radiation Acquisition Sequence",
+}
+
+// ImagingSourcePositionSequence - (3002,010D) Imaging Source Position Sequence
+var ImagingSourcePositionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x010D,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ImagingSourcePositionSequence",
+	Description: "Imaging Source Position Sequence",
+}
+
+// ImageReceptorPositionSequence - (3002,010E) Image Receptor Position Sequence
+var ImageReceptorPositionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x010E,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ImageReceptorPositionSequence",
+	Description: "Image Receptor Position Sequence",
+}
+
+// DevicePositionToEquipmentMappingMatrix - (3002,010F) Device Position to Equipment Mapping Matrix
+var DevicePositionToEquipmentMappingMatrix = &Tag{
+	Group:       0x3002,
+	Element:     0x010F,
+	VR:          "FD",
+	VM:          "16",
+	Name:        "DevicePositionToEquipmentMappingMatrix",
+	Description: "Device Position to Equipment Mapping Matrix",
+}
+
+// DevicePositionParameterSequence - (3002,0110) Device Position Parameter Sequence
+var DevicePositionParameterSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0110,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DevicePositionParameterSequence",
+	Description: "Device Position Parameter Sequence",
+}
+
+// ImagingSourceLocationSpecificationType - (3002,0111) Imaging Source Location Specification Type
+var ImagingSourceLocationSpecificationType = &Tag{
+	Group:       0x3002,
+	Element:     0x0111,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "ImagingSourceLocationSpecificationType",
+	Description: "Imaging Source Location Specification Type",
+}
+
+// ImagingDeviceLocationMatrixSequence - (3002,0112) Imaging Device Location Matrix Sequence
+var ImagingDeviceLocationMatrixSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0112,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ImagingDeviceLocationMatrixSequence",
+	Description: "Imaging Device Location Matrix Sequence",
+}
+
+// ImagingDeviceLocationParameterSequence - (3002,0113) Imaging Device Location Parameter Sequence
+var ImagingDeviceLocationParameterSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0113,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ImagingDeviceLocationParameterSequence",
+	Description: "Imaging Device Location Parameter Sequence",
+}
+
+// ImagingApertureSequence - (3002,0114) Imaging Aperture Sequence
+var ImagingApertureSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0114,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ImagingApertureSequence",
+	Description: "Imaging Aperture Sequence",
+}
+
+// ImagingApertureSpecificationType - (3002,0115) Imaging Aperture Specification Type
+var ImagingApertureSpecificationType = &Tag{
+	Group:       0x3002,
+	Element:     0x0115,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "ImagingApertureSpecificationType",
+	Description: "Imaging Aperture Specification Type",
+}
+
+// NumberOfAcquisitionDevices - (3002,0116) Number of Acquisition Devices
+var NumberOfAcquisitionDevices = &Tag{
+	Group:       0x3002,
+	Element:     0x0116,
+	VR:          "US",
+	VM:          "1",
+	Name:        "NumberOfAcquisitionDevices",
+	Description: "Number of Acquisition Devices",
+}
+
+// AcquisitionDeviceSequence - (3002,0117) Acquisition Device Sequence
+var AcquisitionDeviceSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0117,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AcquisitionDeviceSequence",
+	Description: "Acquisition Device Sequence",
+}
+
+// AcquisitionTaskSequence - (3002,0118) Acquisition Task Sequence
+var AcquisitionTaskSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0118,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AcquisitionTaskSequence",
+	Description: "Acquisition Task Sequence",
+}
+
+// AcquisitionTaskWorkitemCodeSequence - (3002,0119) Acquisition Task Workitem Code Sequence
+var AcquisitionTaskWorkitemCodeSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0119,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AcquisitionTaskWorkitemCodeSequence",
+	Description: "Acquisition Task Workitem Code Sequence",
+}
+
+// AcquisitionSubtaskSequence - (3002,011A) Acquisition Subtask Sequence
+var AcquisitionSubtaskSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x011A,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AcquisitionSubtaskSequence",
+	Description: "Acquisition Subtask Sequence",
+}
+
+// SubtaskWorkitemCodeSequence - (3002,011B) Subtask Workitem Code Sequence
+var SubtaskWorkitemCodeSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x011B,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "SubtaskWorkitemCodeSequence",
+	Description: "Subtask Workitem Code Sequence",
+}
+
+// AcquisitionTaskIndex - (3002,011C) Acquisition Task Index
+var AcquisitionTaskIndex = &Tag{
+	Group:       0x3002,
+	Element:     0x011C,
+	VR:          "US",
+	VM:          "1",
+	Name:        "AcquisitionTaskIndex",
+	Description: "Acquisition Task Index",
+}
+
+// AcquisitionSubtaskIndex - (3002,011D) Acquisition Subtask Index
+var AcquisitionSubtaskIndex = &Tag{
+	Group:       0x3002,
+	Element:     0x011D,
+	VR:          "US",
+	VM:          "1",
+	Name:        "AcquisitionSubtaskIndex",
+	Description: "Acquisition Subtask Index",
+}
+
+// ReferencedBaselineParametersRTRadiationInstanceSequence - (3002,011E) Referenced Baseline Parameters RT Radiation Instance Sequence
+var ReferencedBaselineParametersRTRadiationInstanceSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x011E,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ReferencedBaselineParametersRTRadiationInstanceSequence",
+	Description: "Referenced Baseline Parameters RT Radiation Instance Sequence",
+}
+
+// PositionAcquisitionTemplateIdentificationSequence - (3002,011F) Position Acquisition Template Identification Sequence
+var PositionAcquisitionTemplateIdentificationSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x011F,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "PositionAcquisitionTemplateIdentificationSequence",
+	Description: "Position Acquisition Template Identification Sequence",
+}
+
+// PositionAcquisitionTemplateID - (3002,0120) Position Acquisition Template ID
+var PositionAcquisitionTemplateID = &Tag{
+	Group:       0x3002,
+	Element:     0x0120,
+	VR:          "ST",
+	VM:          "1",
+	Name:        "PositionAcquisitionTemplateID",
+	Description: "Position Acquisition Template ID",
+}
+
+// PositionAcquisitionTemplateName - (3002,0121) Position Acquisition Template Name
+var PositionAcquisitionTemplateName = &Tag{
+	Group:       0x3002,
+	Element:     0x0121,
+	VR:          "LO",
+	VM:          "1",
+	Name:        "PositionAcquisitionTemplateName",
+	Description: "Position Acquisition Template Name",
+}
+
+// PositionAcquisitionTemplateCodeSequence - (3002,0122) Position Acquisition Template Code Sequence
+var PositionAcquisitionTemplateCodeSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0122,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "PositionAcquisitionTemplateCodeSequence",
+	Description: "Position Acquisition Template Code Sequence",
+}
+
+// PositionAcquisitionTemplateDescription - (3002,0123) Position Acquisition Template Description
+var PositionAcquisitionTemplateDescription = &Tag{
+	Group:       0x3002,
+	Element:     0x0123,
+	VR:          "LT",
+	VM:          "1",
+	Name:        "PositionAcquisitionTemplateDescription",
+	Description: "Position Acquisition Template Description",
+}
+
+// AcquisitionTaskApplicabilitySequence - (3002,0124) Acquisition Task Applicability Sequence
+var AcquisitionTaskApplicabilitySequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0124,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AcquisitionTaskApplicabilitySequence",
+	Description: "Acquisition Task Applicability Sequence",
+}
+
+// ProjectionImagingAcquisitionParameterSequence - (3002,0125) Projection Imaging Acquisition Parameter Sequence
+var ProjectionImagingAcquisitionParameterSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0125,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ProjectionImagingAcquisitionParameterSequence",
+	Description: "Projection Imaging Acquisition Parameter Sequence",
+}
+
+// CTImagingAcquisitionParameterSequence - (3002,0126) CT Imaging Acquisition Parameter Sequence
+var CTImagingAcquisitionParameterSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0126,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "CTImagingAcquisitionParameterSequence",
+	Description: "CT Imaging Acquisition Parameter Sequence",
+}
+
+// KVImagingGenerationParametersSequence - (3002,0127) KV Imaging Generation Parameters Sequence
+var KVImagingGenerationParametersSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0127,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "KVImagingGenerationParametersSequence",
+	Description: "KV Imaging Generation Parameters Sequence",
+}
+
+// MVImagingGenerationParametersSequence - (3002,0128) MV Imaging Generation Parameters Sequence
+var MVImagingGenerationParametersSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0128,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "MVImagingGenerationParametersSequence",
+	Description: "MV Imaging Generation Parameters Sequence",
+}
+
+// AcquisitionSignalType - (3002,0129) Acquisition Signal Type
+var AcquisitionSignalType = &Tag{
+	Group:       0x3002,
+	Element:     0x0129,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "AcquisitionSignalType",
+	Description: "Acquisition Signal Type",
+}
+
+// AcquisitionMethod - (3002,012A) Acquisition Method
+var AcquisitionMethod = &Tag{
+	Group:       0x3002,
+	Element:     0x012A,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "AcquisitionMethod",
+	Description: "Acquisition Method",
+}
+
+// ScanStartPositionSequence - (3002,012B) Scan Start Position Sequence
+var ScanStartPositionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x012B,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ScanStartPositionSequence",
+	Description: "Scan Start Position Sequence",
+}
+
+// ScanStopPositionSequence - (3002,012C) Scan Stop Position Sequence
+var ScanStopPositionSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x012C,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ScanStopPositionSequence",
+	Description: "Scan Stop Position Sequence",
+}
+
+// ImagingSourceToBeamModifierDefinitionPlaneDistance - (3002,012D) Imaging Source to Beam Modifier Definition Plane Distance
+var ImagingSourceToBeamModifierDefinitionPlaneDistance = &Tag{
+	Group:       0x3002,
+	Element:     0x012D,
+	VR:          "FD",
+	VM:          "1",
+	Name:        "ImagingSourceToBeamModifierDefinitionPlaneDistance",
+	Description: "Imaging Source to Beam Modifier Definition Plane Distance",
+}
+
+// ScanArcType - (3002,012E) Scan Arc Type
+var ScanArcType = &Tag{
+	Group:       0x3002,
+	Element:     0x012E,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "ScanArcType",
+	Description: "Scan Arc Type",
+}
+
+// DetectorPositioningType - (3002,012F) Detector Positioning Type
+var DetectorPositioningType = &Tag{
+	Group:       0x3002,
+	Element:     0x012F,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "DetectorPositioningType",
+	Description: "Detector Positioning Type",
+}
+
+// AdditionalRTAccessoryDeviceSequence - (3002,0130) Additional RT Accessory Device Sequence
+var AdditionalRTAccessoryDeviceSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0130,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AdditionalRTAccessoryDeviceSequence",
+	Description: "Additional RT Accessory Device Sequence",
+}
+
+// DeviceSpecificAcquisitionParameterSequence - (3002,0131) Device-Specific Acquisition Parameter Sequence
+var DeviceSpecificAcquisitionParameterSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0131,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "DeviceSpecificAcquisitionParameterSequence",
+	Description: "Device-Specific Acquisition Parameter Sequence",
+}
+
+// ReferencedPositionReferenceInstanceSequence - (3002,0132) Referenced Position Reference Instance Sequence
+var ReferencedPositionReferenceInstanceSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0132,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "ReferencedPositionReferenceInstanceSequence",
+	Description: "Referenced Position Reference Instance Sequence",
+}
+
+// EnergyDerivationCodeSequence - (3002,0133) Energy Derivation Code Sequence
+var EnergyDerivationCodeSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0133,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "EnergyDerivationCodeSequence",
+	Description: "Energy Derivation Code Sequence",
+}
+
+// MaximumCumulativeMetersetExposure - (3002,0134) Maximum Cumulative Meterset Exposure
+var MaximumCumulativeMetersetExposure = &Tag{
+	Group:       0x3002,
+	Element:     0x0134,
+	VR:          "FD",
+	VM:          "1",
+	Name:        "MaximumCumulativeMetersetExposure",
+	Description: "Maximum Cumulative Meterset Exposure",
+}
+
+// AcquisitionInitiationSequence - (3002,0135) Acquisition Initiation Sequence
+var AcquisitionInitiationSequence = &Tag{
+	Group:       0x3002,
+	Element:     0x0135,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "AcquisitionInitiationSequence",
+	Description: "Acquisition Initiation Sequence",
+}
+
 // DVHType - (3004,0001) DVH Type
 var DVHType = &Tag{
 	Group:       0x3004,
@@ -39788,6 +40338,46 @@ var BeamLimitingDeviceLeafPairsSequence = &Tag{
 	VM:          "1",
 	Name:        "BeamLimitingDeviceLeafPairsSequence",
 	Description: "Beam Limiting Device Leaf Pairs Sequence",
+}
+
+// EnhancedRTBeamLimitingDeviceSequence - (3008,00A1) Enhanced RT Beam Limiting Device Sequence
+var EnhancedRTBeamLimitingDeviceSequence = &Tag{
+	Group:       0x3008,
+	Element:     0x00A1,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "EnhancedRTBeamLimitingDeviceSequence",
+	Description: "Enhanced RT Beam Limiting Device Sequence",
+}
+
+// EnhancedRTBeamLimitingOpeningSequence - (3008,00A2) Enhanced RT Beam Limiting Opening Sequence
+var EnhancedRTBeamLimitingOpeningSequence = &Tag{
+	Group:       0x3008,
+	Element:     0x00A2,
+	VR:          "SQ",
+	VM:          "1",
+	Name:        "EnhancedRTBeamLimitingOpeningSequence",
+	Description: "Enhanced RT Beam Limiting Opening Sequence",
+}
+
+// EnhancedRTBeamLimitingDeviceDefinitionFlag - (3008,00A3) Enhanced RT Beam Limiting Device Definition Flag
+var EnhancedRTBeamLimitingDeviceDefinitionFlag = &Tag{
+	Group:       0x3008,
+	Element:     0x00A3,
+	VR:          "CS",
+	VM:          "1",
+	Name:        "EnhancedRTBeamLimitingDeviceDefinitionFlag",
+	Description: "Enhanced RT Beam Limiting Device Definition Flag",
+}
+
+// ParallelRTBeamDelimiterOpeningExtents - (3008,00A4) Parallel RT Beam Delimiter Opening Extents
+var ParallelRTBeamDelimiterOpeningExtents = &Tag{
+	Group:       0x3008,
+	Element:     0x00A4,
+	VR:          "FD",
+	VM:          "2-2n",
+	Name:        "ParallelRTBeamDelimiterOpeningExtents",
+	Description: "Parallel RT Beam Delimiter Opening Extents",
 }
 
 // RecordedWedgeSequence - (3008,00B0) Recorded Wedge Sequence
@@ -49946,7 +50536,7 @@ var tags = []*Tag{
 	ScopeOfInventorySequence,
 	InventoryPurpose,
 	InventoryInstanceDescription,
-	InventoryContentLevel,
+	InventoryLevel,
 	ItemInventoryDateTime,
 	RemovedFromOperationalUse,
 	ReasonForRemovalCodeSequence,
@@ -49960,7 +50550,7 @@ var tags = []*Tag{
 	StoredInstanceTransferSyntaxUID,
 	ExtendedMatchingMechanisms,
 	RangeMatchingSequence,
-	UIDListMatchingSequence,
+	ListOfUIDMatchingSequence,
 	EmptyValueMatchingSequence,
 	GeneralMatchingSequence,
 	RequestedStatusInterval,
@@ -51920,6 +52510,7 @@ var tags = []*Tag{
 	LossyImageCompressionRatio,
 	LossyImageCompressionMethod,
 	ModalityLUTSequence,
+	VariableModalityLUTSequence,
 	LUTDescriptor,
 	LUTExplanation,
 	ModalityLUTType,
@@ -53597,6 +54188,60 @@ var tags = []*Tag{
 	PrimaryFluenceModeSequence,
 	FluenceMode,
 	FluenceModeID,
+	SelectedFrameNumber,
+	SelectedFrameFunctionalGroupsSequence,
+	RTImageFrameGeneralContentSequence,
+	RTImageFrameContextSequence,
+	RTImageScopeSequence,
+	BeamModifierCoordinatesPresenceFlag,
+	StartCumulativeMeterset,
+	StopCumulativeMeterset,
+	RTAcquisitionPatientPositionSequence,
+	RTImageFrameImagingDevicePositionSequence,
+	RTImageFramekVRadiationAcquisitionSequence,
+	RTImageFrameMVRadiationAcquisitionSequence,
+	RTImageFrameRadiationAcquisitionSequence,
+	ImagingSourcePositionSequence,
+	ImageReceptorPositionSequence,
+	DevicePositionToEquipmentMappingMatrix,
+	DevicePositionParameterSequence,
+	ImagingSourceLocationSpecificationType,
+	ImagingDeviceLocationMatrixSequence,
+	ImagingDeviceLocationParameterSequence,
+	ImagingApertureSequence,
+	ImagingApertureSpecificationType,
+	NumberOfAcquisitionDevices,
+	AcquisitionDeviceSequence,
+	AcquisitionTaskSequence,
+	AcquisitionTaskWorkitemCodeSequence,
+	AcquisitionSubtaskSequence,
+	SubtaskWorkitemCodeSequence,
+	AcquisitionTaskIndex,
+	AcquisitionSubtaskIndex,
+	ReferencedBaselineParametersRTRadiationInstanceSequence,
+	PositionAcquisitionTemplateIdentificationSequence,
+	PositionAcquisitionTemplateID,
+	PositionAcquisitionTemplateName,
+	PositionAcquisitionTemplateCodeSequence,
+	PositionAcquisitionTemplateDescription,
+	AcquisitionTaskApplicabilitySequence,
+	ProjectionImagingAcquisitionParameterSequence,
+	CTImagingAcquisitionParameterSequence,
+	KVImagingGenerationParametersSequence,
+	MVImagingGenerationParametersSequence,
+	AcquisitionSignalType,
+	AcquisitionMethod,
+	ScanStartPositionSequence,
+	ScanStopPositionSequence,
+	ImagingSourceToBeamModifierDefinitionPlaneDistance,
+	ScanArcType,
+	DetectorPositioningType,
+	AdditionalRTAccessoryDeviceSequence,
+	DeviceSpecificAcquisitionParameterSequence,
+	ReferencedPositionReferenceInstanceSequence,
+	EnergyDerivationCodeSequence,
+	MaximumCumulativeMetersetExposure,
+	AcquisitionInitiationSequence,
 	DVHType,
 	DoseUnits,
 	DoseType,
@@ -53730,6 +54375,10 @@ var tags = []*Tag{
 	ReferencedCalculatedDoseReferenceSequence,
 	ReferencedCalculatedDoseReferenceNumber,
 	BeamLimitingDeviceLeafPairsSequence,
+	EnhancedRTBeamLimitingDeviceSequence,
+	EnhancedRTBeamLimitingOpeningSequence,
+	EnhancedRTBeamLimitingDeviceDefinitionFlag,
+	ParallelRTBeamDelimiterOpeningExtents,
 	RecordedWedgeSequence,
 	RecordedCompensatorSequence,
 	RecordedBlockSequence,

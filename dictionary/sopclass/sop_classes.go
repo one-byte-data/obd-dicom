@@ -752,6 +752,14 @@ var MultipleVolumeRenderingVolumetricPresentationStateStorage = &SOPClass{
 	Type:        "SOP Class",
 }
 
+// VariableModalityLUTPresentationStateStorage - (1.2.840.10008.5.1.4.1.1.11.12) Variable Modality LUT Softcopy Presentation State Storage
+var VariableModalityLUTPresentationStateStorage = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.11.12",
+	Name:        "VariableModalityLUTPresentationStateStorage",
+	Description: "Variable Modality LUT Softcopy Presentation State Storage",
+	Type:        "SOP Class",
+}
+
 // XRayAngiographicImageStorage - (1.2.840.10008.5.1.4.1.1.12.1) X-Ray Angiographic Image Storage
 var XRayAngiographicImageStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.12.1",
@@ -1760,6 +1768,30 @@ var RTTreatmentPreparationStorage = &SOPClass{
 	Type:        "SOP Class",
 }
 
+// EnhancedRTImageStorage - (1.2.840.10008.5.1.4.1.1.481.23) Enhanced RT Image Storage
+var EnhancedRTImageStorage = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.481.23",
+	Name:        "EnhancedRTImageStorage",
+	Description: "Enhanced RT Image Storage",
+	Type:        "SOP Class",
+}
+
+// EnhancedContinuousRTImageStorage - (1.2.840.10008.5.1.4.1.1.481.24) Enhanced Continuous RT Image Storage
+var EnhancedContinuousRTImageStorage = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.481.24",
+	Name:        "EnhancedContinuousRTImageStorage",
+	Description: "Enhanced Continuous RT Image Storage",
+	Type:        "SOP Class",
+}
+
+// RTPatientPositionAcquisitionInstructionStorage - (1.2.840.10008.5.1.4.1.1.481.25) RT Patient Position Acquisition Instruction Storage
+var RTPatientPositionAcquisitionInstructionStorage = &SOPClass{
+	UID:         "1.2.840.10008.5.1.4.1.1.481.25",
+	Name:        "RTPatientPositionAcquisitionInstructionStorage",
+	Description: "RT Patient Position Acquisition Instruction Storage",
+	Type:        "SOP Class",
+}
+
 // DICOSCTImageStorage - (1.2.840.10008.5.1.4.1.1.501.1) DICOS CT Image Storage
 var DICOSCTImageStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.501.1",
@@ -2447,6 +2479,7 @@ var sopClasses = []*SOPClass{
 	VolumeRenderingVolumetricPresentationStateStorage,
 	SegmentedVolumeRenderingVolumetricPresentationStateStorage,
 	MultipleVolumeRenderingVolumetricPresentationStateStorage,
+	VariableModalityLUTPresentationStateStorage,
 	XRayAngiographicImageStorage,
 	EnhancedXAImageStorage,
 	XRayRadiofluoroscopicImageStorage,
@@ -2573,6 +2606,9 @@ var sopClasses = []*SOPClass{
 	RoboticRadiationRecordStorage,
 	RTRadiationSetDeliveryInstructionStorage,
 	RTTreatmentPreparationStorage,
+	EnhancedRTImageStorage,
+	EnhancedContinuousRTImageStorage,
+	RTPatientPositionAcquisitionInstructionStorage,
 	DICOSCTImageStorage,
 	DICOSDigitalXRayImageStorageForPresentation,
 	DICOSDigitalXRayImageStorageForProcessing,

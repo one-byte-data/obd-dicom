@@ -97,7 +97,6 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 
 			status := s.onCStoreRequest(pdu.GetAAssociationRQ(), ddo)
-
 			if err := dimsec.CStoreWriteRSP(pdu, dco, status); err != nil {
 				log.Printf("ERROR, handleConnection, C-Store failed to write response: %s", err.Error())
 				conn.Close()
@@ -113,15 +112,13 @@ func (s *scp) handleConnection(conn net.Conn) {
 			}
 			queryLevel := ddo.GetString(tags.QueryRetrieveLevel)
 
-			results := make([]media.DcmObj, 0)
 			status := dicomstatus.Success
 
 			if s.onCFindRequest == nil {
 				panic("OnCFindRequest() not implemented")
 			}
 
-			results, status = s.onCFindRequest(pdu.GetAAssociationRQ(), queryLevel, ddo)
-
+			results, status := s.onCFindRequest(pdu.GetAAssociationRQ(), queryLevel, ddo)
 			for _, result := range results {
 				err = dimsec.CFindWriteRSP(pdu, dco, result, dicomstatus.Pending)
 				if err != nil {

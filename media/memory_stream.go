@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
 // MemoryStream - is an inteface to a memory stream
@@ -55,7 +55,7 @@ func NewMemoryStreamFromBytes(data []byte) MemoryStream {
 
 // NewMemoryStreamFromFile - Creates an interface to a new memoryStream from file
 func NewMemoryStreamFromFile(fileName string) (MemoryStream, error) {
-	data, err := ioutil.ReadFile(fileName)
+	data, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, err
 	}

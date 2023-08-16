@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -49,7 +48,6 @@ type HTTPParams struct {
 	Headers             map[string]string
 	Queries             map[string]string
 }
-
 
 // NewHTTPClient returns a new http client
 func NewHTTPClient(params HTTPParams) HTTPClient {
@@ -269,14 +267,14 @@ func (h *hTTPClient) sendRequest(request *http.Request) ([]byte, error) {
 	defer response.Body.Close()
 
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			return nil, fmt.Errorf("received unexpected status code %d:%s", response.StatusCode, response.Status)
 		}
 		return body, fmt.Errorf("received unexpected status code %d:%s", response.StatusCode, response.Status)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
 	}

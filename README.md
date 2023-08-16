@@ -22,6 +22,16 @@ if err != nil {
 obj.DumpTags()
 ```
 
+### Send C-Echo Request
+```golang
+scu := services.NewSCU(destination)
+err := scu.EchoSCU(0)
+if err != nil {
+  log.Fatalln(err)
+}
+log.Println("CEcho was successful")
+```
+
 ### Send C-Find Request
 ```golang
 request := utils.DefaultCFindRequest()

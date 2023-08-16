@@ -2,7 +2,7 @@ package media
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"os"
 	"strconv"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/tags"
@@ -76,7 +76,7 @@ func GetDictionaryVR(group uint16, element uint16) string {
 
 func loadPrivateDictionary() {
 	privateDictionaryFile := "./private.xml"
-	data, err := ioutil.ReadFile(privateDictionaryFile)
+	data, err := os.ReadFile(privateDictionaryFile)
 	if err != nil {
 		return
 	}

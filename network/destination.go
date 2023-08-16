@@ -2,6 +2,7 @@ package network
 
 // Destination - a DICOM destination
 type Destination struct {
+	ID        string
 	Name      string
 	HostName  string
 	CalledAE  string

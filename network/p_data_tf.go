@@ -23,8 +23,6 @@ type PDataTF struct {
 
 // ReadDynamic - ReadDynamic
 func (pd *PDataTF) ReadDynamic(ms media.MemoryStream) (err error) {
-	var Count uint32
-
 	if pd.Length == 0 {
 		pd.Reserved1, err = ms.GetByte()
 		if err != nil {
@@ -36,11 +34,11 @@ func (pd *PDataTF) ReadDynamic(ms media.MemoryStream) (err error) {
 		}
 	}
 
-	Count = pd.Length
+	count := pd.Length
 
 	pd.MsgStatus = 0
 
-	for Count > 0 {
+	for count > 0 {
 		pd.pdv.Length, err = ms.GetUint32()
 		if err != nil {
 			return err
@@ -58,7 +56,7 @@ func (pd *PDataTF) ReadDynamic(ms media.MemoryStream) (err error) {
 		ms.ReadData(buff)
 
 		pd.Buffer.Write(buff, int(pd.pdv.Length-2))
-		Count = Count - pd.pdv.Length - 4
+		count = count - pd.pdv.Length - 4
 		pd.Length = pd.Length - pd.pdv.Length - 4
 
 		if pd.pdv.MsgHeader&0x02 > 0 {

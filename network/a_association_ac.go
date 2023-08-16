@@ -189,17 +189,14 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 		case 0x10:
 			aaac.AppContext.ReadDynamic(ms)
 			Count = Count - int(aaac.AppContext.GetSize())
-			break
 		case 0x21:
 			PresContextAccept := NewPresentationContextAccept()
 			PresContextAccept.ReadDynamic(ms)
 			Count = Count - int(PresContextAccept.Size())
 			aaac.PresContextAccepts = append(aaac.PresContextAccepts, PresContextAccept)
-			break
 		case 0x50: // User Information
 			aaac.UserInfo.ReadDynamic(ms)
 			Count = Count - int(aaac.UserInfo.Size())
-			break
 		default:
 			Count = -1
 			return errors.New("ERROR, aaac::ReadDynamic, unknown Item, " + strconv.Itoa(int(TempByte)))

@@ -138,24 +138,19 @@ func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
 		case 0x51:
 			ui.MaxSubLength.ReadDynamic(ms)
 			Count = Count - int(ui.MaxSubLength.Size())
-			break
 		case 0x52:
 			ui.ImpClass.ReadDynamic(ms)
 			Count = Count - int(ui.ImpClass.GetSize())
-			break
 		case 0x53:
 			ui.AsyncOpWindow.ReadDynamic(ms)
 			Count = Count - int(ui.AsyncOpWindow.Size())
-			break
 		case 0x54:
 			ui.SCPSCURole.ReadDynamic(ms)
 			Count = Count - int(ui.SCPSCURole.Size())
 			ui.UserInfoBaggage += uint32(ui.SCPSCURole.Size())
-			break
 		case 0x55:
 			ui.ImpVersion.ReadDynamic(ms)
 			Count = Count - int(ui.ImpVersion.GetSize())
-			break
 		default:
 			ui.UserInfoBaggage = uint32(Count)
 			Count = -1

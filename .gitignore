@@ -9,3 +9,5 @@ Gopkg.toml
 .dll.a
 .exe
 datastore
+.gitconfig
+

@@ -143,6 +143,11 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		pdu.ms.SetPosition(1)
 		pdu.AssocRJ.ReadDynamic(pdu.ms)
 		return fmt.Errorf("ERROR, pduservice::Connect - %s", pdu.AssocRJ.GetReason())
+	case pdutype.AssociationAbortRequest:
+		pdu.readPDU()
+		pdu.ms.SetPosition(1)
+		pdu.AbortRQ.ReadDynamic(pdu.ms)
+		return errors.New("ERROR, pduservice::Connect - Association Aborted")
 	default:
 		return errors.New("ERROR, pduservice::Connect - Corrupt Transmision")
 	}
@@ -224,7 +229,6 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 				}
 				return DCO, nil
 			}
-			break
 		case pdutype.AssociationReleaseRequest:
 			log.Printf("INFO, ASSOC-R-RQ: %s --> %s\n", pdu.AssocRQ.GetCallingAE(), pdu.AssocRQ.GetCalledAE())
 			pdu.ReleaseRQ.ReadDynamic(pdu.ms)
@@ -286,11 +290,11 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 		return errors.New("ERROR, pduservice::Write - PresentationContextID==0")
 	}
 	if ItemType == 0x01 {
-		if pdu.parseDCMIntoRaw(DCO) == false {
+		if !pdu.parseDCMIntoRaw(DCO) {
 			return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
 		}
 	} else {
-		if pdu.parseDCMIntoRaw(DCO) == false {
+		if !pdu.parseDCMIntoRaw(DCO) {
 			return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
 		}
 	}

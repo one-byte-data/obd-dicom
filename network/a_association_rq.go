@@ -195,13 +195,11 @@ func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
 			aarq.AppContext.SetType(TempByte)
 			aarq.AppContext.ReadDynamic(ms)
 			Count = Count - int(aarq.AppContext.GetSize())
-			break
 		case 0x20:
 			PresContext := NewPresentationContext()
 			PresContext.ReadDynamic(ms)
 			Count = Count - int(PresContext.Size())
 			aarq.PresContexts = append(aarq.PresContexts, PresContext)
-			break
 		case 0x50: // User Information
 			aarq.UserInfo.SetItemType(TempByte)
 			aarq.UserInfo.ReadDynamic(ms)

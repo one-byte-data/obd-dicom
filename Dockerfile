@@ -29,4 +29,4 @@ COPY --from=builder /workspace/build/${TARGETOS}/${TARGETARCH}/compare /app/
 
 COPY --from=builder /workspace/build/${TARGETOS}/${TARGETARCH}/obd-dicom /app/
 
-ENTRYPOINT [ "/app/odb-dicom", "-scp", "-calledae", "DICOM_SCP", "-port", "1040", "-datastore", "/datastore" ]
+ENTRYPOINT [ "/app/obd-dicom", "-scp", "-calledae", "DICOM_SCP", "-port", "1040", "-datastore", "/datastore" ]

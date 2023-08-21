@@ -14,7 +14,7 @@ func TestSetDefaultImplementation(t *testing.T) {
 			name: "Should set default implementation",
 			want: &implementation{
 				classUID: "1.2.826.0.1.3680043.10.90.999",
-				version:  "One-Byte-Data",
+				version:  "OBD-Dicom",
 			},
 		},
 	}
@@ -160,7 +160,7 @@ func Test_implementation_GetVersion(t *testing.T) {
 				classUID: "",
 				version:  "",
 			},
-			want: "One-Byte-Data",
+			want: "OBD-Dicom",
 		},
 	}
 	for _, tt := range tests {

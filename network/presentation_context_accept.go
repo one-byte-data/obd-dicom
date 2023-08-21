@@ -114,8 +114,8 @@ func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 	if transferSyntax != nil {
 		tsName = transferSyntax.Name
 	}
-	log.Printf("INFO, ASSOC-AC: \tAccepted Presentation Context %s (%s)\n", pc.GetAbstractSyntax().GetUID(), sopName)
-	log.Printf("INFO, ASSOC-AC: \tAccepted Transfer Synxtax %s (%s)\n", pc.GetTrnSyntax().GetUID(), tsName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted PresentationContext: %s - %s\n", pc.GetAbstractSyntax().GetUID(), sopName)
+	log.Printf("INFO, ASSOC-AC: \tAccepted TransferSynxtax: %s - %s\n", pc.GetTrnSyntax().GetUID(), tsName)
 
 	if err = bd.Send(rw); err == nil {
 		return pc.TrnSyntax.Write(rw)

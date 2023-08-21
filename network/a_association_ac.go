@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
+	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
 	"github.com/one-byte-data/obd-dicom/media"
 )
 
@@ -118,10 +119,11 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 
 	fmt.Println()
 
-	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
-	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
-	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.UserInfo.GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.UserInfo.GetImpVersion().GetUID())
+	log.Printf("INFO, ASSOC-AC: ImpClass: %s\n", aaac.UserInfo.GetImpClass().GetUID())
+	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n\n", aaac.UserInfo.GetImpVersion().GetUID())
+
+	log.Printf("INFO, ASSOC-AC: CalledAE: %s\n", aaac.CalledAE)
+	log.Printf("INFO, ASSOC-AC: CallingAE: %s\n\n", aaac.CallingAE)
 
 	bd.SetBigEndian(true)
 	aaac.Size()
@@ -134,16 +136,20 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 	bd.Write(aaac.CallingAE[:], 16)
 	bd.Write(aaac.Reserved3[:], 32)
 
-	err := bd.Send(rw)
-	if err != nil {
+	if err := bd.Send(rw); err != nil {
 		return err
 	}
-	err = aaac.AppContext.Write(rw)
-	if err != nil {
+	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s - %s\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
+	if err := aaac.AppContext.Write(rw); err != nil {
 		return err
 	}
-	for _, PresContextAccept := range aaac.PresContextAccepts {
-		PresContextAccept.Write(rw)
+	for presIndex, presContextAccept := range aaac.PresContextAccepts {
+		log.Printf("INFO, ASSOC-AC: PresentationContext: %d\n", presIndex + 1)
+		log.Printf("INFO, ASSOC-AC: \tAbstract Syntax: %s - %s\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-AC: \tTransfer Syntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+		if err := presContextAccept.Write(rw); err != nil {
+			return err
+		}
 	}
 	return aaac.UserInfo.Write(rw)
 }

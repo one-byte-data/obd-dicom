@@ -90,17 +90,14 @@ func (pc *presentationContext) Write(rw *bufio.ReadWriter) error {
 	bd.WriteByte(pc.Reserved2)
 	bd.WriteByte(pc.Reserved3)
 	bd.WriteByte(pc.Reserved4)
-	err := bd.Send(rw)
-	if err != nil {
+	if err := bd.Send(rw); err != nil {
 		return err
 	}
-	err = pc.AbsSyntax.Write(rw)
-	if err != nil {
+	if err := pc.AbsSyntax.Write(rw); err != nil {
 		return err
 	}
 	for _, TrnSyntax := range pc.TrnSyntaxs {
-		err := TrnSyntax.Write(rw)
-		if err != nil {
+		if err := TrnSyntax.Write(rw); err != nil {
 			return err
 		}
 	}
@@ -141,7 +138,9 @@ func (pc *presentationContext) ReadDynamic(ms media.MemoryStream) (err error) {
 		return err
 	}
 
-	pc.AbsSyntax.Read(ms)
+	if err := pc.AbsSyntax.Read(ms); err != nil {
+		return err
+	}
 
 	Count := pc.Length - 4 - pc.AbsSyntax.GetSize()
 	for Count > 0 {

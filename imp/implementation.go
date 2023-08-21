@@ -15,7 +15,7 @@ var imp Implementation
 func SetDefaultImplementation() Implementation {
 	imp = &implementation{
 		classUID: "1.2.826.0.1.3680043.10.90.999",
-		version:  "One-Byte-Data",
+		version:  "OBD-Dicom",
 	}
 	return imp
 }

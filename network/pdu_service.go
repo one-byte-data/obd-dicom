@@ -105,8 +105,7 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 	pdu.AssocRQ.SetImpClassUID(imp.GetImpClassUID())
 	pdu.AssocRQ.SetImpVersionName(imp.GetImpVersion())
 
-	err = pdu.AssocRQ.Write(pdu.readWriter)
-	if err != nil {
+	if err = pdu.AssocRQ.Write(pdu.readWriter); err != nil {
 		return err
 	}
 
@@ -119,8 +118,7 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		return err
 	}
 
-	_, err = pdu.ms.GetByte()
-	if err != nil {
+	if _, err = pdu.ms.GetByte(); err != nil {
 		return err
 	}
 
@@ -189,8 +187,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 			return nil, err
 		}
 
-		_, err = pdu.ms.Get()
-		if err != nil {
+		if _, err = pdu.ms.Get(); err != nil {
 			return nil, err
 		}
 

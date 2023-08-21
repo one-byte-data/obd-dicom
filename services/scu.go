@@ -41,16 +41,13 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, sopclass.Verification.UID, timeout)
-	if err != nil {
+	if err := d.openAssociation(pdu, sopclass.Verification.UID, timeout); err != nil {
 		return err
 	}
-	err = dimsec.CEchoWriteRQ(pdu, sopclass.Verification.UID)
-	if err != nil {
+	if err := dimsec.CEchoWriteRQ(pdu, sopclass.Verification.UID); err != nil {
 		return err
 	}
-	err = dimsec.CEchoReadRSP(pdu)
-	if err != nil {
+	if err := dimsec.CEchoReadRSP(pdu); err != nil {
 		return err
 	}
 	pdu.Close()
@@ -63,12 +60,10 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, uint16, error) {
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelFind
 
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
-	if err != nil {
+	if err := d.openAssociation(pdu, SOPClassUID.UID, timeout); err != nil {
 		return results, status, err
 	}
-	err = dimsec.CFindWriteRQ(pdu, Query, SOPClassUID.UID)
-	if err != nil {
+	if err := dimsec.CFindWriteRQ(pdu, Query, SOPClassUID.UID); err != nil {
 		return results, status, err
 	}
 	for status != dicomstatus.Success {
@@ -97,12 +92,10 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (uint16, 
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelMove
 
 	pdu := network.NewPDUService()
-	err := d.openAssociation(pdu, SOPClassUID.UID, timeout)
-	if err != nil {
+	if err := d.openAssociation(pdu, SOPClassUID.UID, timeout); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
-	err = dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID.UID, destAET)
-	if err != nil {
+	if err := dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID.UID, destAET); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
 
@@ -174,7 +167,6 @@ func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, tim
 	PresContext := network.NewPresentationContext()
 	PresContext.SetAbstractSyntax(AbstractSyntax)
 	PresContext.AddTransferSyntax(transfersyntax.ImplicitVRLittleEndian.UID)
-	PresContext.AddTransferSyntax(transfersyntax.ExplicitVRLittleEndian.UID)
 	pdu.AddPresContexts(PresContext)
 
 	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))
@@ -194,8 +186,7 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 	}
 
 	if TrnSyntOUT == DDO.GetTransferSyntax() {
-		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
-		if err != nil {
+		if err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID); err != nil {
 			return status, err
 		}
 		status = dicomstatus.Success

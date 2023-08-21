@@ -16,7 +16,9 @@ import (
 type AAssociationAC interface {
 	GetAppContext() UIDItem
 	SetAppContext(context UIDItem)
+	GetCallingAE() string
 	SetCallingAE(AET string)
+	GetCalledAE() string
 	SetCalledAE(AET string)
 	AddPresContextAccept(context PresentationContextAccept)
 	GetPresContextAccepts() []PresentationContextAccept
@@ -70,12 +72,42 @@ func (aaac *aassociationAC) SetAppContext(context UIDItem) {
 	aaac.AppContext = context
 }
 
+func (aaac *aassociationAC) GetCallingAE() string {
+	temp := []byte{}
+	for _, b := range aaac.CallingAE {
+		if b != 0x00 && b != 0x20 {
+			temp = append(temp, b)
+		}
+	}
+	return string(temp)
+}
+
 func (aaac *aassociationAC) SetCallingAE(AET string) {
 	copy(aaac.CallingAE[:], AET)
+	for index, b := range aaac.CallingAE {
+		if b == 0x00 {
+			aaac.CallingAE[index] = 0x20
+		}
+	}
+}
+
+func (aaac *aassociationAC) GetCalledAE() string {
+	temp := []byte{}
+	for _, b := range aaac.CalledAE {
+		if b != 0x00 && b != 0x20 {
+			temp = append(temp, b)
+		}
+	}
+	return string(temp)
 }
 
 func (aaac *aassociationAC) SetCalledAE(AET string) {
 	copy(aaac.CalledAE[:], AET)
+	for index, b := range aaac.CalledAE {
+		if b == 0x00 {
+			aaac.CalledAE[index] = 0x20
+		}
+	}
 }
 
 func (aaac *aassociationAC) AddPresContextAccept(context PresentationContextAccept) {
@@ -144,7 +176,7 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 		return err
 	}
 	for presIndex, presContextAccept := range aaac.PresContextAccepts {
-		log.Printf("INFO, ASSOC-AC: PresentationContext: %d\n", presIndex + 1)
+		log.Printf("INFO, ASSOC-AC: PresentationContext: %d\n", presIndex+1)
 		log.Printf("INFO, ASSOC-AC: \tAbstract Syntax: %s - %s\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
 		log.Printf("INFO, ASSOC-AC: \tTransfer Syntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
 		if err := presContextAccept.Write(rw); err != nil {

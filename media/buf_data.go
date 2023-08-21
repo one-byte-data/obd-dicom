@@ -21,6 +21,7 @@ type BufData interface {
 	ReadUint16() (uint16, error)
 	ReadUint32() (uint32, error)
 	Write(data []byte, count int) (int, error)
+	WriteAETitle(aeTitle string)
 	WriteByte(value byte) error
 	WriteUint16(value uint16)
 	WriteUint32(value uint32)
@@ -129,6 +130,14 @@ func (bd *bufData) ReadUint32() (uint32, error) {
 
 func (bd *bufData) Write(data []byte, count int) (int, error) {
 	return bd.MS.Write(data, count)
+}
+
+func (bd *bufData) WriteAETitle(aeTitle string) {
+	endPos := bd.GetPosition() + 16
+	bd.WriteString(aeTitle)
+	for bd.GetPosition() < endPos {
+		bd.Write([]byte{0x20}, 1)
+	}
 }
 
 // WriteByte writes a byte

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
 	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
@@ -76,21 +75,41 @@ func (aarq *aassociationRQ) SetAppContext(context UIDItem) {
 }
 
 func (aarq *aassociationRQ) GetCallingAE() string {
-	temp := strings.ReplaceAll(fmt.Sprintf("%s", aarq.CallingAE), "\x20", "\x00")
-	return strings.ReplaceAll(temp, "\x00", "")
+	temp := []byte{}
+	for _, b := range aarq.CallingAE {
+		if b != 0x00 && b != 0x20 {
+			temp = append(temp, b)
+		}
+	}
+	return string(temp)
 }
 
 func (aarq *aassociationRQ) SetCallingAE(AET string) {
 	copy(aarq.CallingAE[:], AET)
+	for index, b := range aarq.CallingAE {
+		if b == 0x00 {
+			aarq.CallingAE[index] = 0x20
+		}
+	}
 }
 
 func (aarq *aassociationRQ) GetCalledAE() string {
-	temp := strings.ReplaceAll(fmt.Sprintf("%s", aarq.CalledAE), "\x20", "\x00")
-	return strings.ReplaceAll(temp, "\x00", "")
+	temp := []byte{}
+	for _, b := range aarq.CalledAE {
+		if b != 0x00 && b != 0x20 {
+			temp = append(temp, b)
+		}
+	}
+	return string(temp)
 }
 
 func (aarq *aassociationRQ) SetCalledAE(AET string) {
 	copy(aarq.CalledAE[:], AET)
+	for index, b := range aarq.CalledAE {
+		if b == 0x00 {
+			aarq.CalledAE[index] = 0x20
+		}
+	}
 }
 
 func (aarq *aassociationRQ) GetPresContexts() []PresentationContext {
@@ -141,7 +160,7 @@ func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
 	fmt.Println()
-	
+
 	log.Printf("INFO, ASSOC-RQ: ImpClass: %s\n", aarq.GetUserInformation().GetImpClass().GetUID())
 	log.Printf("INFO, ASSOC-RQ: ImpVersion: %s\n\n", aarq.GetUserInformation().GetImpVersion().GetUID())
 

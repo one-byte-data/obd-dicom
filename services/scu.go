@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -22,7 +23,7 @@ type SCU interface {
 	StoreSCU(FileName string, timeout int) error
 	SetOnCFindResult(f func(result media.DcmObj))
 	SetOnCMoveResult(f func(result media.DcmObj))
-	openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error
+	openAssociation(pdu network.PDUService, abstractSyntax string, transferSyntaxes []string, timeout int) error
 	writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) (uint16, error)
 }
 
@@ -41,7 +42,7 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
-	if err := d.openAssociation(pdu, sopclass.Verification.UID, timeout); err != nil {
+	if err := d.openAssociation(pdu, sopclass.Verification.UID, []string{}, timeout); err != nil {
 		return err
 	}
 	if err := dimsec.CEchoWriteRQ(pdu, sopclass.Verification.UID); err != nil {
@@ -60,7 +61,7 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, uint16, error) {
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelFind
 
 	pdu := network.NewPDUService()
-	if err := d.openAssociation(pdu, SOPClassUID.UID, timeout); err != nil {
+	if err := d.openAssociation(pdu, SOPClassUID.UID, []string{}, timeout); err != nil {
 		return results, status, err
 	}
 	if err := dimsec.CFindWriteRQ(pdu, Query, SOPClassUID.UID); err != nil {
@@ -92,7 +93,7 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (uint16, 
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelMove
 
 	pdu := network.NewPDUService()
-	if err := d.openAssociation(pdu, SOPClassUID.UID, timeout); err != nil {
+	if err := d.openAssociation(pdu, SOPClassUID.UID, []string{}, timeout); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
 	if err := dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID.UID, destAET); err != nil {
@@ -125,7 +126,7 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 	SOPClassUID := DDO.GetString(tags.SOPClassUID)
 	if len(SOPClassUID) > 0 {
 		pdu := network.NewPDUService()
-		err := d.openAssociation(pdu, SOPClassUID, timeout)
+		err := d.openAssociation(pdu, SOPClassUID, []string{DDO.GetTransferSyntax().UID}, timeout)
 		if err != nil {
 			return err
 		}
@@ -141,7 +142,7 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 			return err
 		}
 		if c != dicomstatus.Success {
-			return errors.New("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
+			return fmt.Errorf("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed - %d", c)
 		}
 
 		pdu.Close()
@@ -158,14 +159,17 @@ func (d *scu) SetOnCMoveResult(f func(result media.DcmObj)) {
 	d.onCMoveResult = f
 }
 
-func (d *scu) openAssociation(pdu network.PDUService, AbstractSyntax string, timeout int) error {
+func (d *scu) openAssociation(pdu network.PDUService, abstractSyntax string, transferSyntaxes []string, timeout int) error {
 	pdu.SetCallingAE(d.destination.CallingAE)
 	pdu.SetCalledAE(d.destination.CalledAE)
 	pdu.SetTimeout(timeout)
 
 	network.Resetuniq()
 	PresContext := network.NewPresentationContext()
-	PresContext.SetAbstractSyntax(AbstractSyntax)
+	PresContext.SetAbstractSyntax(abstractSyntax)
+	for _, ts := range transferSyntaxes {
+		PresContext.AddTransferSyntax(ts)
+	}
 	PresContext.AddTransferSyntax(transfersyntax.ImplicitVRLittleEndian.UID)
 	pdu.AddPresContexts(PresContext)
 
@@ -185,27 +189,25 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 		return dicomstatus.FailureUnableToProcess, errors.New("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
 	}
 
-	if TrnSyntOUT == DDO.GetTransferSyntax() {
+	if TrnSyntOUT.UID == DDO.GetTransferSyntax().UID {
 		if err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID); err != nil {
 			return status, err
 		}
-		status = dicomstatus.Success
-	} else {
-		DDO.SetTransferSyntax(TrnSyntOUT)
-		DDO.SetExplicitVR(true)
-		DDO.SetBigEndian(false)
-		if TrnSyntOUT.UID == transfersyntax.ImplicitVRLittleEndian.UID {
-			DDO.SetExplicitVR(false)
-		}
-		if TrnSyntOUT.UID == transfersyntax.ExplicitVRBigEndian.UID {
-			DDO.SetBigEndian(true)
-		}
-		err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
-		if err != nil {
-			return dicomstatus.FailureUnableToProcess, err
-		}
-		status = dicomstatus.Success
+		return dicomstatus.Success, nil
 	}
 
-	return status, nil
+	DDO.SetTransferSyntax(TrnSyntOUT)
+	DDO.SetExplicitVR(true)
+	DDO.SetBigEndian(false)
+	if TrnSyntOUT.UID == transfersyntax.ImplicitVRLittleEndian.UID {
+		DDO.SetExplicitVR(false)
+	}
+	if TrnSyntOUT.UID == transfersyntax.ExplicitVRBigEndian.UID {
+		DDO.SetBigEndian(true)
+	}
+	err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
+	if err != nil {
+		return dicomstatus.FailureUnableToProcess, err
+	}
+	return dicomstatus.Success, nil
 }

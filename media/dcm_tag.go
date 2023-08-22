@@ -87,7 +87,7 @@ func (tag *DcmTag) WriteSeq(group uint16, element uint16, seq DcmObj) {
 	tag.Length = uint32(bufdata.GetSize())
 	if tag.Length%2 == 1 {
 		tag.Length++
-		bufdata.MS.Write([]byte(nil), 1)
+		bufdata.MS.Write([]byte{0x00}, 1)
 	}
 	if tag.Length > 0 {
 		bufdata.SetPosition(0)

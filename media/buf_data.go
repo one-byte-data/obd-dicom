@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
+	"log"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
 )
@@ -258,13 +259,14 @@ func (bd *bufData) WriteTag(tag *DcmTag, explicitVR bool) {
 
 // WriteStringTag - Writes a String to a DICOM tag
 func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool) {
-	length := uint32(len(content))
+	data := []byte(content)
+	length := uint32(len(data))
 	if length%2 == 1 {
 		length++
 		if vr == "UI" {
-			content = content + "\x00"
+			data = append(data, 0x00)
 		} else {
-			content = content + " "
+			data = append(data, 0x20)
 		}
 	}
 	tag := &DcmTag{
@@ -272,7 +274,7 @@ func (bd *bufData) WriteStringTag(group uint16, element uint16, vr string, conte
 		Element:   element,
 		Length:    length,
 		VR:        vr,
-		Data:      []byte(content),
+		Data:      data,
 		BigEndian: false,
 	}
 	bd.WriteTag(tag, explicitVR)
@@ -359,6 +361,9 @@ func (bd *bufData) ReadObj(obj DcmObj) bool {
 		if tag, err := bd.ReadTag(obj.IsExplicitVR()); err == nil {
 			if !obj.IsExplicitVR() {
 				tag.VR = GetDictionaryVR(tag.Group, tag.Element)
+			}
+			if tag.Length%2 != 0 && tag.VR != "SQ" && tag.Length != 0xffffffff {
+				log.Printf("%s is odd", tag.Name)
 			}
 			obj.Add(tag)
 		}

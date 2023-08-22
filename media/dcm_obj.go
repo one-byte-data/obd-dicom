@@ -460,21 +460,22 @@ func (obj *dcmObj) WriteUint32GE(group uint16, element uint16, vr string, val ui
 
 // WriteStringGE - Writes a String to a DICOM tag
 func (obj *dcmObj) WriteStringGE(group uint16, element uint16, vr string, content string) {
-	length := uint32(len(content))
+	data := []byte(content)
+	length := len(data)
 	if length%2 == 1 {
 		length++
 		if vr == "UI" {
-			content = content + fmt.Sprint(0)
+			data = append(data, 0x00)
 		} else {
-			content = content + " "
+			data = append(data, 0x20)
 		}
 	}
 	tag := &DcmTag{
 		Group:     group,
 		Element:   element,
-		Length:    length,
+		Length:    uint32(length),
 		VR:        vr,
-		Data:      []byte(content),
+		Data:      data,
 		BigEndian: false,
 	}
 	FillTag(tag)
@@ -818,7 +819,7 @@ func (obj *dcmObj) CreatePDF(study DCMStudy, SeriesInstanceUID string, SOPInstan
 	size := uint32(mstream.GetSize())
 	if size%2 == 1 {
 		size++
-		mstream.Append([]byte{0})
+		mstream.Append([]byte{0x00})
 	}
 	obj.WriteString(tags.DocumentTitle, fileName)
 	obj.Add(&DcmTag{

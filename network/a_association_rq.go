@@ -179,15 +179,15 @@ func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 		return err
 	}
 
-	log.Printf("INFO, ASSOC-RQ: ApplicationContext: %s - %s\n", aarq.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aarq.AppContext.GetUID()).Description)
+	log.Printf("INFO, ASSOC-RQ: ApplicationContext: %s (%s)\n", aarq.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aarq.AppContext.GetUID()).Description)
 	if err := aarq.AppContext.Write(rw); err != nil {
 		return err
 	}
 	for presIndex, presContext := range aarq.PresContexts {
 		log.Printf("INFO, ASSOC-RQ: PresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-RQ: \tAbstractSyntax: %s - %s\n", presContext.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContext.GetAbstractSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-RQ: \tAbstractSyntax: %s (%s)\n", presContext.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContext.GetAbstractSyntax().GetUID()).Description)
 		for _, transSyntax := range presContext.GetTransferSyntaxes() {
-			log.Printf("INFO, ASSOC-RQ: \tTransferSyntax: %s - %s\n", transSyntax.GetUID(), transfersyntax.GetTransferSyntaxFromUID(transSyntax.GetUID()).Description)
+			log.Printf("INFO, ASSOC-RQ: \tTransferSyntax: %s (%s)\n", transSyntax.GetUID(), transfersyntax.GetTransferSyntaxFromUID(transSyntax.GetUID()).Description)
 		}
 		if err := presContext.Write(rw); err != nil {
 			return err

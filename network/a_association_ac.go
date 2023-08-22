@@ -169,14 +169,14 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 		return err
 	}
 
-	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s - %s\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
+	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s (%s)\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
 	if err := aaac.AppContext.Write(rw); err != nil {
 		return err
 	}
 	for presIndex, presContextAccept := range aaac.PresContextAccepts {
 		log.Printf("INFO, ASSOC-AC: PresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-AC: \tAbstractSyntax: %s - %s\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
-		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-AC: \tAbstractSyntax: %s (%s)\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s (%s)\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
 		if err := presContextAccept.Write(rw); err != nil {
 			return err
 		}
@@ -244,10 +244,10 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n", aaac.GetUserInformation().GetImpVersion().GetUID())
 	log.Printf("INFO, ASSOC-AC: MaxPDULength: %d\n", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
 	log.Printf("INFO, ASSOC-AC: MaxOpsInvoked/MaxOpsPerformed: %d/%d\n", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
-	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s - %s\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
+	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s (%s)\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
 	for presIndex, presContextAccept := range aaac.PresContextAccepts {
 		log.Printf("INFO, ASSOC-AC: AcceptedPresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s (%s)\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
 	}
 	if Count == 0 {
 		return nil

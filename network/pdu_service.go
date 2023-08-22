@@ -140,14 +140,14 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		pdu.readPDU()
 		pdu.ms.SetPosition(1)
 		pdu.AssocRJ.ReadDynamic(pdu.ms)
-		return fmt.Errorf("ERROR, pduservice::Connect - %s", pdu.AssocRJ.GetReason())
+		return fmt.Errorf("ERROR, pduservice::Connect - Association rejected - %s", pdu.AssocRJ.GetReason())
 	case pdutype.AssociationAbortRequest:
 		pdu.readPDU()
 		pdu.ms.SetPosition(1)
 		pdu.AbortRQ.ReadDynamic(pdu.ms)
-		return errors.New("ERROR, pduservice::Connect - Association Aborted")
+		return fmt.Errorf("ERROR, pduservice::Connect - Association aborted - %s", pdu.AbortRQ.GetReason())
 	default:
-		return errors.New("ERROR, pduservice::Connect - Corrupt Transmision")
+		return fmt.Errorf("ERROR, pduservice::Connect - Corrupt transmision - %b", ItemType)
 	}
 }
 
@@ -170,7 +170,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 		if pdu.Pdata.MsgStatus > 0 {
 			if !pdu.parseRawVRIntoDCM(DCO) {
 				pdu.AbortRQ.Write(pdu.readWriter)
-				return nil, errors.New("ERROR, pduservice::Read, ParseRawVRIntoDCM failed")
+				return nil, errors.New("ERROR, pduservice::Read - ParseRawVRIntoDCM failed")
 			}
 			return DCO, nil
 		}
@@ -356,20 +356,21 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 
 	pdu.AssocAC.SetUserInformation(pdu.AssocRQ.GetUserInformation())
 
-	for _, PresContext := range pdu.AssocRQ.GetPresContexts() {
+	for presIndex, PresContext := range pdu.AssocRQ.GetPresContexts() {
+		log.Printf("INFO, ASSOC-RQ: PresentationContext: %d\n", presIndex)
 		sopName := ""
 		sopClass := sopclass.GetSOPClassFromUID(PresContext.GetAbstractSyntax().GetUID())
 		if sopClass != nil {
 			sopName = sopClass.Name
 		}
-		log.Printf("INFO, ASSOC-RQ: \tPresentation Context %s (%s)\n", PresContext.GetAbstractSyntax().GetUID(), sopName)
+		log.Printf("INFO, ASSOC-RQ: \tAbstractContext: %s (%s)\n", PresContext.GetAbstractSyntax().GetUID(), sopName)
 		for _, TransferSyn := range PresContext.GetTransferSyntaxes() {
 			tsName := ""
 			transferSyntax := transfersyntax.GetTransferSyntaxFromUID(TransferSyn.GetUID())
 			if transferSyntax != nil {
 				tsName = transferSyntax.Name
 			}
-			log.Printf("INFO, ASSOC-RQ: \t\tTransfer Synxtax %s (%s)\n", TransferSyn.GetUID(), tsName)
+			log.Printf("INFO, ASSOC-RQ: \tTransferSynxtax: %s (%s)\n", TransferSyn.GetUID(), tsName)
 		}
 
 		PresContextAccept := NewPresentationContextAccept()

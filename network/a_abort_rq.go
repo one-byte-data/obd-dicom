@@ -8,6 +8,7 @@ import (
 
 // AAbortRQ - AAbortRQ
 type AAbortRQ interface {
+	GetReason() string
 	Size() uint32
 	Write(rw *bufio.ReadWriter) error
 	Read(ms media.MemoryStream) (err error)
@@ -34,6 +35,10 @@ func NewAAbortRQ() AAbortRQ {
 		Source:    0x03,
 		Reason:    0x01,
 	}
+}
+
+func (aarq *aabortRQ) GetReason() string {
+	return PermanentRejectReasons[aarq.Reason]
 }
 
 func (aarq *aabortRQ) Size() uint32 {

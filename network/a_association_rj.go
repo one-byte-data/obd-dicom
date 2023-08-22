@@ -9,6 +9,7 @@ import (
 
 // PermanentRejectReasons - Permanent association reject reasons
 var PermanentRejectReasons map[byte]string = map[byte]string{
+	0: "No reason given",
 	1: "No reason given",
 	2: "Application context not supported",
 	3: "Calling AE not recognized",
@@ -17,6 +18,7 @@ var PermanentRejectReasons map[byte]string = map[byte]string{
 
 // TransientRejectReasons - Transient association reject reasons
 var TransientRejectReasons map[byte]string = map[byte]string{
+	0: "No reason given",
 	1: "Temporary congestion",
 	2: "Local limit exceeded",
 }

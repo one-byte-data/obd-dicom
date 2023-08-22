@@ -4,6 +4,8 @@ import "github.com/one-byte-data/obd-dicom/media"
 
 // AsyncOperationWindow - AsyncOperationWindow
 type AsyncOperationWindow interface {
+	GetMaxNumberOperationsInvoked() uint16
+	GetMaxNumberOperationsPerformed() uint16
 	Size() uint16
 	Read(ms media.MemoryStream) (err error)
 	ReadDynamic(ms media.MemoryStream) (err error)
@@ -22,6 +24,14 @@ func NewAsyncOperationWindow() AsyncOperationWindow {
 	return &asyncOperationWindow{
 		ItemType: 0x53,
 	}
+}
+
+func (async *asyncOperationWindow) GetMaxNumberOperationsInvoked() uint16 {
+	return async.MaxNumberOperationsInvoked
+}
+
+func (async *asyncOperationWindow) GetMaxNumberOperationsPerformed() uint16 {
+	return async.MaxNumberOperationsPerformed
 }
 
 func (async *asyncOperationWindow) Size() uint16 {

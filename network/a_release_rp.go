@@ -37,7 +37,7 @@ func (arrp *areleaseRP) Size() uint32 {
 
 func (arrp *areleaseRP) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
-
+	
 	bd.SetBigEndian(true)
 	arrp.Size()
 	bd.WriteByte(arrp.ItemType)

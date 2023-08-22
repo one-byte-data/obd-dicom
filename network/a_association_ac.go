@@ -3,7 +3,6 @@ package network
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -149,13 +148,11 @@ func (aaac *aassociationAC) Size() uint32 {
 func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	fmt.Println()
-
+	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.GetCallingAE(), aaac.GetCalledAE())
 	log.Printf("INFO, ASSOC-AC: ImpClass: %s\n", aaac.UserInfo.GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n\n", aaac.UserInfo.GetImpVersion().GetUID())
-
-	log.Printf("INFO, ASSOC-AC: CalledAE: %s\n", aaac.CalledAE)
-	log.Printf("INFO, ASSOC-AC: CallingAE: %s\n\n", aaac.CallingAE)
+	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n", aaac.UserInfo.GetImpVersion().GetUID())
+	log.Printf("INFO, ASSOC-AC: MaxPDULength: %d\n", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
+	log.Printf("INFO, ASSOC-AC: MaxOpsInvoked/MaxOpsPerformed: %d/%d\n", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
 
 	bd.SetBigEndian(true)
 	aaac.Size()
@@ -171,14 +168,15 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 	if err := bd.Send(rw); err != nil {
 		return err
 	}
+
 	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s - %s\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
 	if err := aaac.AppContext.Write(rw); err != nil {
 		return err
 	}
 	for presIndex, presContextAccept := range aaac.PresContextAccepts {
 		log.Printf("INFO, ASSOC-AC: PresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-AC: \tAbstract Syntax: %s - %s\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
-		log.Printf("INFO, ASSOC-AC: \tTransfer Syntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-AC: \tAbstractSyntax: %s - %s\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
 		if err := presContextAccept.Write(rw); err != nil {
 			return err
 		}
@@ -241,11 +239,16 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 		}
 	}
 
-	log.Printf("INFO, ASSOC-AC: CalledAE - %s\n", aaac.CalledAE)
-	log.Printf("INFO, ASSOC-AC: CallingAE - %s\n", aaac.CallingAE)
-	log.Printf("INFO, ASSOC-AC: \tImpClass %s\n", aaac.GetUserInformation().GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-AC: \tImpVersion %s\n\n", aaac.GetUserInformation().GetImpVersion().GetUID())
-
+	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.GetCallingAE(), aaac.GetCalledAE())
+	log.Printf("INFO, ASSOC-AC: ImpClass: %s\n", aaac.GetUserInformation().GetImpClass().GetUID())
+	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n", aaac.GetUserInformation().GetImpVersion().GetUID())
+	log.Printf("INFO, ASSOC-AC: MaxPDULength: %d\n", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
+	log.Printf("INFO, ASSOC-AC: MaxOpsInvoked/MaxOpsPerformed: %d/%d\n", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
+	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s - %s\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
+	for presIndex, presContextAccept := range aaac.PresContextAccepts {
+		log.Printf("INFO, ASSOC-AC: AcceptedPresentationContext: %d\n", presIndex+1)
+		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s - %s\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+	}
 	if Count == 0 {
 		return nil
 	}

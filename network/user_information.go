@@ -12,6 +12,7 @@ import (
 type UserInformation interface {
 	GetItemType() byte
 	SetItemType(t byte)
+	GetAsyncOperationWindow() AsyncOperationWindow
 	GetMaxSubLength() MaximumSubLength
 	SetMaxSubLength(length MaximumSubLength)
 	Size() uint16
@@ -56,6 +57,10 @@ func (ui *userInformation) SetItemType(t byte) {
 
 func (ui *userInformation) GetMaxSubLength() MaximumSubLength {
 	return ui.MaxSubLength
+}
+
+func (ui *userInformation) GetAsyncOperationWindow() AsyncOperationWindow {
+	return ui.AsyncOpWindow
 }
 
 func (ui *userInformation) SetMaxSubLength(length MaximumSubLength) {

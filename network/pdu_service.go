@@ -309,7 +309,8 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	if sopClass != nil {
 		sopName = sopClass.Name
 	}
-	log.Printf("INFO, PDU-Service: %s (%s) --> %s", SOPClass, sopName, pdu.GetCallingAE())
+
+	log.Printf("INFO, PDU-Service: %s (%s) --> %s", SOPClass, sopName, pdu.GetCalledAE())
 
 	return pdu.Pdata.Write(pdu.readWriter)
 }

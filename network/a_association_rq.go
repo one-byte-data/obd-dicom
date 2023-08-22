@@ -3,7 +3,6 @@ package network
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -159,13 +158,11 @@ func (aarq *aassociationRQ) Size() uint32 {
 func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	fmt.Println()
-
+	log.Printf("INFO, ASSOC-RQ: %s --> %s\n", aarq.GetCallingAE(), aarq.GetCalledAE())
 	log.Printf("INFO, ASSOC-RQ: ImpClass: %s\n", aarq.GetUserInformation().GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-RQ: ImpVersion: %s\n\n", aarq.GetUserInformation().GetImpVersion().GetUID())
-
-	log.Printf("INFO, ASSOC-RQ: CalledAE: %s\n", aarq.CalledAE)
-	log.Printf("INFO, ASSOC-RQ: CallingAE: %s\n\n", aarq.CallingAE)
+	log.Printf("INFO, ASSOC-RQ: ImpVersion: %s\n", aarq.GetUserInformation().GetImpVersion().GetUID())
+	log.Printf("INFO, ASSOC-RQ: MaxPDULength: %d\n", aarq.GetUserInformation().GetMaxSubLength().GetMaximumLength())
+	log.Printf("INFO, ASSOC-RQ: MaxOpsInvoked/MaxOpsPerformed: %d/%d\n", aarq.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), aarq.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
 
 	bd.SetBigEndian(true)
 	aarq.Size()
@@ -181,15 +178,16 @@ func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 	if err := bd.Send(rw); err != nil {
 		return err
 	}
+
 	log.Printf("INFO, ASSOC-RQ: ApplicationContext: %s - %s\n", aarq.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aarq.AppContext.GetUID()).Description)
 	if err := aarq.AppContext.Write(rw); err != nil {
 		return err
 	}
 	for presIndex, presContext := range aarq.PresContexts {
 		log.Printf("INFO, ASSOC-RQ: PresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-RQ: \tAbstract Syntax: %s - %s\n", presContext.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContext.GetAbstractSyntax().GetUID()).Description)
+		log.Printf("INFO, ASSOC-RQ: \tAbstractSyntax: %s - %s\n", presContext.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContext.GetAbstractSyntax().GetUID()).Description)
 		for _, transSyntax := range presContext.GetTransferSyntaxes() {
-			log.Printf("INFO, ASSOC-RQ: \tTransfer Syntax: %s - %s\n", transSyntax.GetUID(), transfersyntax.GetTransferSyntaxFromUID(transSyntax.GetUID()).Description)
+			log.Printf("INFO, ASSOC-RQ: \tTransferSyntax: %s - %s\n", transSyntax.GetUID(), transfersyntax.GetTransferSyntaxFromUID(transSyntax.GetUID()).Description)
 		}
 		if err := presContext.Write(rw); err != nil {
 			return err
@@ -239,11 +237,6 @@ func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
 			Count = -1
 		}
 	}
-
-	log.Printf("INFO, ASSOC-RQ: CalledAE - %s\n", aarq.CalledAE)
-	log.Printf("INFO, ASSOC-RQ: CallingAE - %s\n", aarq.CallingAE)
-	log.Printf("INFO, ASSOC-RQ: \tImpClass %s\n", aarq.GetUserInformation().GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-RQ: \tImpVersion %s\n\n", aarq.GetUserInformation().GetImpVersion().GetUID())
 
 	if Count == 0 {
 		return nil

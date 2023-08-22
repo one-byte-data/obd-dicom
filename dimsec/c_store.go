@@ -20,9 +20,8 @@ func CStoreReadRQ(pdu network.PDUService, command media.DcmObj) (media.DcmObj, e
 func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) error {
 	DCO := media.NewEmptyDCMObj()
 	var size uint32
-	var valor uint16
 
-	valor = uint16(len(SOPClassUID))
+	valor := uint16(len(SOPClassUID))
 	if valor%2 == 1 {
 		valor++
 	}

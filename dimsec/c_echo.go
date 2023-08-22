@@ -19,9 +19,8 @@ func CEchoReadRQ(DCO media.DcmObj) bool {
 func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) error {
 	DCO := media.NewEmptyDCMObj()
 	var size uint32
-	var valor uint16
 
-	valor = uint16(len(SOPClassUID))
+	valor := uint16(len(SOPClassUID))
 	if valor%2 == 1 {
 		valor++
 	}
@@ -45,7 +44,7 @@ func CEchoReadRSP(pdu network.PDUService) error {
 	}
 	if dco.GetUShort(tags.CommandField) == dicomcommand.CEchoResponse {
 		if dco.GetUShort(tags.Status) == dicomstatus.Success {
-
+			return nil
 		}
 	}
 	return nil
@@ -71,7 +70,7 @@ func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
 		DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
 		DCOR.WriteUint16(tags.CommandField, dicomcommand.CEchoResponse)
 		valor = DCO.GetUShort(tags.MessageID)
-		DCOR.WriteUint16(tags.MessageID, valor)
+		DCOR.WriteUint16(tags.MessageIDBeingRespondedTo, valor)
 		valor = DCO.GetUShort(tags.CommandDataSetType)
 		DCOR.WriteUint16(tags.CommandDataSetType, valor)
 		DCOR.WriteUint16(tags.Status, dicomstatus.Success)

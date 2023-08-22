@@ -102,7 +102,6 @@ func (s *scp) handleConnection(conn net.Conn) {
 				conn.Close()
 				return
 			}
-			log.Println("INFO, handleConnection, C-Store Success")
 		case dicomcommand.CFindRequest:
 			ddo, err := dimsec.CFindReadRQ(pdu)
 			if err != nil {
@@ -133,7 +132,6 @@ func (s *scp) handleConnection(conn net.Conn) {
 				conn.Close()
 				return
 			}
-			log.Println("INFO, handleConnection, C-Find Success")
 		case dicomcommand.CMoveRequest:
 			ddo, err := dimsec.CMoveReadRQ(pdu)
 			if err != nil {
@@ -154,7 +152,6 @@ func (s *scp) handleConnection(conn net.Conn) {
 				conn.Close()
 				return
 			}
-			log.Println("INFO, handleConnection, C-Move Success")
 		case dicomcommand.CEchoRequest:
 			if dimsec.CEchoReadRQ(dco) {
 				if err := dimsec.CEchoWriteRSP(pdu, dco); err != nil {
@@ -162,7 +159,6 @@ func (s *scp) handleConnection(conn net.Conn) {
 					conn.Close()
 					return
 				}
-				log.Println("INFO, handleConnection, C-Echo Success!")
 			}
 		default:
 			log.Printf("ERROR, handleConnection, service not implemented: %d\n", command)

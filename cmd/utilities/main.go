@@ -94,6 +94,8 @@ func writeCopdingSchemesFile(uids []uid) {
 		f.WriteString(fmt.Sprintf("var %s = &CodingScheme{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
+
+		uid.Name = strings.ReplaceAll(uid.Name, " (Retired)", "")
 		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
 		f.WriteString(fmt.Sprintf("  Type: \"%s\",\n", uid.Type))
 		f.WriteString("}\n\n")
@@ -136,6 +138,9 @@ func writeDicomTags(tags []tag) {
 		f.WriteString(fmt.Sprintf("  VR: \"%s\",\n", tag.VR))
 		f.WriteString(fmt.Sprintf("  VM: \"%s\",\n", tag.VM))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", tag.Keyword))
+
+		tag.Name = strings.ReplaceAll(tag.Name, " (Trial)", "")
+		tag.Name = strings.ReplaceAll(tag.Name, " (Retired)", "")
 		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", tag.Name))
 		f.WriteString("}\n\n")
 	}
@@ -170,11 +175,14 @@ func writeSOPClassesFile(uids []uid) {
 		if uid.Type != "SOP Class" && uid.Type != "Application Context Name" {
 			continue
 		}
+
 		sopClasses = append(sopClasses, uid.Keyword)
 		f.WriteString(fmt.Sprintf("// %s - (%s) %s\n", uid.Keyword, uid.UID, uid.Name))
 		f.WriteString(fmt.Sprintf("var %s = &SOPClass{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
+
+		uid.Name = strings.ReplaceAll(uid.Name, " (Retired)", "")
 		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
 		f.WriteString(fmt.Sprintf("  Type: \"%s\",\n", uid.Type))
 		f.WriteString("}\n\n")
@@ -209,12 +217,16 @@ func writeTransferSyntaxesFile(uids []uid) {
 		if uid.Type != "Transfer Syntax" {
 			continue
 		}
+
 		transferSyntaxes = append(transferSyntaxes, uid.Keyword)
 		f.WriteString(fmt.Sprintf("// %s - (%s) %s\n", uid.Keyword, uid.UID, uid.Name))
 		f.WriteString(fmt.Sprintf("var %s = &TransferSyntax{\n", uid.Keyword))
 		f.WriteString(fmt.Sprintf("  UID: \"%s\",\n", uid.UID))
 		f.WriteString(fmt.Sprintf("  Name: \"%s\",\n", uid.Keyword))
-		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", uid.Name))
+
+		uid.Name = strings.ReplaceAll(uid.Name, " (Retired)", "")
+		description := strings.Split(uid.Name, ":")
+		f.WriteString(fmt.Sprintf("  Description: \"%s\",\n", description[0]))
 		f.WriteString(fmt.Sprintf("  Type: \"%s\",\n", uid.Type))
 		f.WriteString("}\n\n")
 	}

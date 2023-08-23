@@ -2867,7 +2867,7 @@ var LossyImageCompressionRetired = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "LossyImageCompressionRetired",
-	Description: "Lossy Image Compression (Retired)",
+	Description: "Lossy Image Compression",
 }
 
 // DerivationDescription - (0008,2111) Derivation Description
@@ -3167,7 +3167,7 @@ var AnatomicStructureSpaceOrRegionCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AnatomicStructureSpaceOrRegionCodeSequenceTrial",
-	Description: "Anatomic Structure Space Or Region Code Sequence (Trial)",
+	Description: "Anatomic Structure Space Or Region Code Sequence",
 }
 
 // AnatomicPortalOfEntranceCodeSequenceTrial - (0008,2253) Anatomic Portal Of Entrance Code Sequence (Trial)
@@ -3177,7 +3177,7 @@ var AnatomicPortalOfEntranceCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AnatomicPortalOfEntranceCodeSequenceTrial",
-	Description: "Anatomic Portal Of Entrance Code Sequence (Trial)",
+	Description: "Anatomic Portal Of Entrance Code Sequence",
 }
 
 // AnatomicApproachDirectionCodeSequenceTrial - (0008,2255) Anatomic Approach Direction Code Sequence (Trial)
@@ -3187,7 +3187,7 @@ var AnatomicApproachDirectionCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AnatomicApproachDirectionCodeSequenceTrial",
-	Description: "Anatomic Approach Direction Code Sequence (Trial)",
+	Description: "Anatomic Approach Direction Code Sequence",
 }
 
 // AnatomicPerspectiveDescriptionTrial - (0008,2256) Anatomic Perspective Description (Trial)
@@ -3197,7 +3197,7 @@ var AnatomicPerspectiveDescriptionTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "AnatomicPerspectiveDescriptionTrial",
-	Description: "Anatomic Perspective Description (Trial)",
+	Description: "Anatomic Perspective Description",
 }
 
 // AnatomicPerspectiveCodeSequenceTrial - (0008,2257) Anatomic Perspective Code Sequence (Trial)
@@ -3207,7 +3207,7 @@ var AnatomicPerspectiveCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AnatomicPerspectiveCodeSequenceTrial",
-	Description: "Anatomic Perspective Code Sequence (Trial)",
+	Description: "Anatomic Perspective Code Sequence",
 }
 
 // AnatomicLocationOfExaminingInstrumentDescriptionTrial - (0008,2258) Anatomic Location Of Examining Instrument Description (Trial)
@@ -3217,7 +3217,7 @@ var AnatomicLocationOfExaminingInstrumentDescriptionTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "AnatomicLocationOfExaminingInstrumentDescriptionTrial",
-	Description: "Anatomic Location Of Examining Instrument Description (Trial)",
+	Description: "Anatomic Location Of Examining Instrument Description",
 }
 
 // AnatomicLocationOfExaminingInstrumentCodeSequenceTrial - (0008,2259) Anatomic Location Of Examining Instrument Code Sequence (Trial)
@@ -3227,7 +3227,7 @@ var AnatomicLocationOfExaminingInstrumentCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AnatomicLocationOfExaminingInstrumentCodeSequenceTrial",
-	Description: "Anatomic Location Of Examining Instrument Code Sequence (Trial)",
+	Description: "Anatomic Location Of Examining Instrument Code Sequence",
 }
 
 // AnatomicStructureSpaceOrRegionModifierCodeSequenceTrial - (0008,225A) Anatomic Structure Space Or Region Modifier Code Sequence (Trial)
@@ -3237,7 +3237,7 @@ var AnatomicStructureSpaceOrRegionModifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AnatomicStructureSpaceOrRegionModifierCodeSequenceTrial",
-	Description: "Anatomic Structure Space Or Region Modifier Code Sequence (Trial)",
+	Description: "Anatomic Structure Space Or Region Modifier Code Sequence",
 }
 
 // OnAxisBackgroundAnatomicStructureCodeSequenceTrial - (0008,225C) On Axis Background Anatomic Structure Code Sequence (Trial)
@@ -3247,7 +3247,7 @@ var OnAxisBackgroundAnatomicStructureCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "OnAxisBackgroundAnatomicStructureCodeSequenceTrial",
-	Description: "On Axis Background Anatomic Structure Code Sequence (Trial)",
+	Description: "On Axis Background Anatomic Structure Code Sequence",
 }
 
 // AlternateRepresentationSequence - (0008,3001) Alternate Representation Sequence
@@ -4587,7 +4587,7 @@ var MaterialPropertiesFileFormatRetired = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "MaterialPropertiesFileFormatRetired",
-	Description: "Material Properties File Format (Retired)",
+	Description: "Material Properties File Format",
 }
 
 // MaterialNotes - (0014,0046) Material Notes
@@ -10957,7 +10957,7 @@ var DopplerSampleVolumeXPositionRetired = &Tag{
 	VR:          "UL",
 	VM:          "1",
 	Name:        "DopplerSampleVolumeXPositionRetired",
-	Description: "Doppler Sample Volume X Position (Retired)",
+	Description: "Doppler Sample Volume X Position",
 }
 
 // DopplerSampleVolumeXPosition - (0018,6039) Doppler Sample Volume X Position
@@ -10977,7 +10977,7 @@ var DopplerSampleVolumeYPositionRetired = &Tag{
 	VR:          "UL",
 	VM:          "1",
 	Name:        "DopplerSampleVolumeYPositionRetired",
-	Description: "Doppler Sample Volume Y Position (Retired)",
+	Description: "Doppler Sample Volume Y Position",
 }
 
 // DopplerSampleVolumeYPosition - (0018,603B) Doppler Sample Volume Y Position
@@ -10997,7 +10997,7 @@ var TMLinePositionX0Retired = &Tag{
 	VR:          "UL",
 	VM:          "1",
 	Name:        "TMLinePositionX0Retired",
-	Description: "TM-Line Position X0 (Retired)",
+	Description: "TM-Line Position X0",
 }
 
 // TMLinePositionX0 - (0018,603D) TM-Line Position X0
@@ -11017,7 +11017,7 @@ var TMLinePositionY0Retired = &Tag{
 	VR:          "UL",
 	VM:          "1",
 	Name:        "TMLinePositionY0Retired",
-	Description: "TM-Line Position Y0 (Retired)",
+	Description: "TM-Line Position Y0",
 }
 
 // TMLinePositionY0 - (0018,603F) TM-Line Position Y0
@@ -11037,7 +11037,7 @@ var TMLinePositionX1Retired = &Tag{
 	VR:          "UL",
 	VM:          "1",
 	Name:        "TMLinePositionX1Retired",
-	Description: "TM-Line Position X1 (Retired)",
+	Description: "TM-Line Position X1",
 }
 
 // TMLinePositionX1 - (0018,6041) TM-Line Position X1
@@ -11057,7 +11057,7 @@ var TMLinePositionY1Retired = &Tag{
 	VR:          "UL",
 	VM:          "1",
 	Name:        "TMLinePositionY1Retired",
-	Description: "TM-Line Position Y1 (Retired)",
+	Description: "TM-Line Position Y1",
 }
 
 // TMLinePositionY1 - (0018,6043) TM-Line Position Y1
@@ -12437,7 +12437,7 @@ var ParallelReductionFactorInPlaneRetired = &Tag{
 	VR:          "FD",
 	VM:          "1",
 	Name:        "ParallelReductionFactorInPlaneRetired",
-	Description: "Parallel Reduction Factor In-plane (Retired)",
+	Description: "Parallel Reduction Factor In-plane",
 }
 
 // TransmitterFrequency - (0018,9098) Transmitter Frequency
@@ -24807,7 +24807,7 @@ var SpecimenDescriptionSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "SpecimenDescriptionSequenceTrial",
-	Description: "Specimen Description Sequence (Trial)",
+	Description: "Specimen Description Sequence",
 }
 
 // SpecimenDescriptionTrial - (0040,0553) Specimen Description (Trial)
@@ -24817,7 +24817,7 @@ var SpecimenDescriptionTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "SpecimenDescriptionTrial",
-	Description: "Specimen Description (Trial)",
+	Description: "Specimen Description",
 }
 
 // SpecimenUID - (0040,0554) Specimen UID
@@ -25027,7 +25027,7 @@ var VitalStainCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "VitalStainCodeSequenceTrial",
-	Description: "Vital Stain Code Sequence (Trial)",
+	Description: "Vital Stain Code Sequence",
 }
 
 // RequestedProcedureID - (0040,1001) Requested Procedure ID
@@ -25167,7 +25167,7 @@ var RequestedProcedureDescriptionTrial = &Tag{
 	VR:          "LO",
 	VM:          "1",
 	Name:        "RequestedProcedureDescriptionTrial",
-	Description: "Requested Procedure Description (Trial)",
+	Description: "Requested Procedure Description",
 }
 
 // PersonIdentificationCodeSequence - (0040,1101) Person Identification Code Sequence
@@ -25257,7 +25257,7 @@ var PlacerOrderNumberImagingServiceRequestRetired = &Tag{
 	VR:          "SH",
 	VM:          "1",
 	Name:        "PlacerOrderNumberImagingServiceRequestRetired",
-	Description: "Placer Order Number / Imaging Service Request (Retired)",
+	Description: "Placer Order Number / Imaging Service Request",
 }
 
 // FillerOrderNumberImagingServiceRequestRetired - (0040,2007) Filler Order Number / Imaging Service Request (Retired)
@@ -25267,7 +25267,7 @@ var FillerOrderNumberImagingServiceRequestRetired = &Tag{
 	VR:          "SH",
 	VM:          "1",
 	Name:        "FillerOrderNumberImagingServiceRequestRetired",
-	Description: "Filler Order Number / Imaging Service Request (Retired)",
+	Description: "Filler Order Number / Imaging Service Request",
 }
 
 // OrderEnteredBy - (0040,2008) Order Entered By
@@ -25927,7 +25927,7 @@ var FindingsFlagTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "FindingsFlagTrial",
-	Description: "Findings Flag (Trial)",
+	Description: "Findings Flag",
 }
 
 // RelationshipType - (0040,A010) Relationship Type
@@ -25947,7 +25947,7 @@ var FindingsSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "FindingsSequenceTrial",
-	Description: "Findings Sequence (Trial)",
+	Description: "Findings Sequence",
 }
 
 // FindingsGroupUIDTrial - (0040,A021) Findings Group UID (Trial)
@@ -25957,7 +25957,7 @@ var FindingsGroupUIDTrial = &Tag{
 	VR:          "UI",
 	VM:          "1",
 	Name:        "FindingsGroupUIDTrial",
-	Description: "Findings Group UID (Trial)",
+	Description: "Findings Group UID",
 }
 
 // ReferencedFindingsGroupUIDTrial - (0040,A022) Referenced Findings Group UID (Trial)
@@ -25967,7 +25967,7 @@ var ReferencedFindingsGroupUIDTrial = &Tag{
 	VR:          "UI",
 	VM:          "1",
 	Name:        "ReferencedFindingsGroupUIDTrial",
-	Description: "Referenced Findings Group UID (Trial)",
+	Description: "Referenced Findings Group UID",
 }
 
 // FindingsGroupRecordingDateTrial - (0040,A023) Findings Group Recording Date (Trial)
@@ -25977,7 +25977,7 @@ var FindingsGroupRecordingDateTrial = &Tag{
 	VR:          "DA",
 	VM:          "1",
 	Name:        "FindingsGroupRecordingDateTrial",
-	Description: "Findings Group Recording Date (Trial)",
+	Description: "Findings Group Recording Date",
 }
 
 // FindingsGroupRecordingTimeTrial - (0040,A024) Findings Group Recording Time (Trial)
@@ -25987,7 +25987,7 @@ var FindingsGroupRecordingTimeTrial = &Tag{
 	VR:          "TM",
 	VM:          "1",
 	Name:        "FindingsGroupRecordingTimeTrial",
-	Description: "Findings Group Recording Time (Trial)",
+	Description: "Findings Group Recording Time",
 }
 
 // FindingsSourceCategoryCodeSequenceTrial - (0040,A026) Findings Source Category Code Sequence (Trial)
@@ -25997,7 +25997,7 @@ var FindingsSourceCategoryCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "FindingsSourceCategoryCodeSequenceTrial",
-	Description: "Findings Source Category Code Sequence (Trial)",
+	Description: "Findings Source Category Code Sequence",
 }
 
 // VerifyingOrganization - (0040,A027) Verifying Organization
@@ -26017,7 +26017,7 @@ var DocumentingOrganizationIdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "DocumentingOrganizationIdentifierCodeSequenceTrial",
-	Description: "Documenting Organization Identifier Code Sequence (Trial)",
+	Description: "Documenting Organization Identifier Code Sequence",
 }
 
 // VerificationDateTime - (0040,A030) Verification DateTime
@@ -26077,7 +26077,7 @@ var MeasurementPrecisionDescriptionTrial = &Tag{
 	VR:          "LO",
 	VM:          "1",
 	Name:        "MeasurementPrecisionDescriptionTrial",
-	Description: "Measurement Precision Description (Trial)",
+	Description: "Measurement Precision Description",
 }
 
 // ContinuityOfContent - (0040,A050) Continuity Of Content
@@ -26097,7 +26097,7 @@ var UrgencyOrPriorityAlertsTrial = &Tag{
 	VR:          "CS",
 	VM:          "1-n",
 	Name:        "UrgencyOrPriorityAlertsTrial",
-	Description: "Urgency or Priority Alerts (Trial)",
+	Description: "Urgency or Priority Alerts",
 }
 
 // SequencingIndicatorTrial - (0040,A060) Sequencing Indicator (Trial)
@@ -26107,7 +26107,7 @@ var SequencingIndicatorTrial = &Tag{
 	VR:          "LO",
 	VM:          "1",
 	Name:        "SequencingIndicatorTrial",
-	Description: "Sequencing Indicator (Trial)",
+	Description: "Sequencing Indicator",
 }
 
 // DocumentIdentifierCodeSequenceTrial - (0040,A066) Document Identifier Code Sequence (Trial)
@@ -26117,7 +26117,7 @@ var DocumentIdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "DocumentIdentifierCodeSequenceTrial",
-	Description: "Document Identifier Code Sequence (Trial)",
+	Description: "Document Identifier Code Sequence",
 }
 
 // DocumentAuthorTrial - (0040,A067) Document Author (Trial)
@@ -26127,7 +26127,7 @@ var DocumentAuthorTrial = &Tag{
 	VR:          "PN",
 	VM:          "1",
 	Name:        "DocumentAuthorTrial",
-	Description: "Document Author (Trial)",
+	Description: "Document Author",
 }
 
 // DocumentAuthorIdentifierCodeSequenceTrial - (0040,A068) Document Author Identifier Code Sequence (Trial)
@@ -26137,7 +26137,7 @@ var DocumentAuthorIdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "DocumentAuthorIdentifierCodeSequenceTrial",
-	Description: "Document Author Identifier Code Sequence (Trial)",
+	Description: "Document Author Identifier Code Sequence",
 }
 
 // IdentifierCodeSequenceTrial - (0040,A070) Identifier Code Sequence (Trial)
@@ -26147,7 +26147,7 @@ var IdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "IdentifierCodeSequenceTrial",
-	Description: "Identifier Code Sequence (Trial)",
+	Description: "Identifier Code Sequence",
 }
 
 // VerifyingObserverSequence - (0040,A073) Verifying Observer Sequence
@@ -26167,7 +26167,7 @@ var ObjectBinaryIdentifierTrial = &Tag{
 	VR:          "OB",
 	VM:          "1",
 	Name:        "ObjectBinaryIdentifierTrial",
-	Description: "Object Binary Identifier (Trial)",
+	Description: "Object Binary Identifier",
 }
 
 // VerifyingObserverName - (0040,A075) Verifying Observer Name
@@ -26187,7 +26187,7 @@ var DocumentingObserverIdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "DocumentingObserverIdentifierCodeSequenceTrial",
-	Description: "Documenting Observer Identifier Code Sequence (Trial)",
+	Description: "Documenting Observer Identifier Code Sequence",
 }
 
 // AuthorObserverSequence - (0040,A078) Author Observer Sequence
@@ -26257,7 +26257,7 @@ var ProcedureIdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ProcedureIdentifierCodeSequenceTrial",
-	Description: "Procedure Identifier Code Sequence (Trial)",
+	Description: "Procedure Identifier Code Sequence",
 }
 
 // VerifyingObserverIdentificationCodeSequence - (0040,A088) Verifying Observer Identification Code Sequence
@@ -26277,7 +26277,7 @@ var ObjectDirectoryBinaryIdentifierTrial = &Tag{
 	VR:          "OB",
 	VM:          "1",
 	Name:        "ObjectDirectoryBinaryIdentifierTrial",
-	Description: "Object Directory Binary Identifier (Trial)",
+	Description: "Object Directory Binary Identifier",
 }
 
 // EquivalentCDADocumentSequence - (0040,A090) Equivalent CDA Document Sequence
@@ -26307,7 +26307,7 @@ var DateOfDocumentOrVerbalTransactionTrial = &Tag{
 	VR:          "DA",
 	VM:          "1",
 	Name:        "DateOfDocumentOrVerbalTransactionTrial",
-	Description: "Date of Document or Verbal Transaction (Trial)",
+	Description: "Date of Document or Verbal Transaction",
 }
 
 // TimeOfDocumentCreationOrVerbalTransactionTrial - (0040,A112) Time of Document Creation or Verbal Transaction (Trial)
@@ -26317,7 +26317,7 @@ var TimeOfDocumentCreationOrVerbalTransactionTrial = &Tag{
 	VR:          "TM",
 	VM:          "1",
 	Name:        "TimeOfDocumentCreationOrVerbalTransactionTrial",
-	Description: "Time of Document Creation or Verbal Transaction (Trial)",
+	Description: "Time of Document Creation or Verbal Transaction",
 }
 
 // DateTime - (0040,A120) DateTime
@@ -26377,7 +26377,7 @@ var ReportStatusIDTrial = &Tag{
 	VR:          "CS",
 	VM:          "2",
 	Name:        "ReportStatusIDTrial",
-	Description: "Report Status ID (Trial)",
+	Description: "Report Status ID",
 }
 
 // TemporalRangeType - (0040,A130) Temporal Range Type
@@ -26477,7 +26477,7 @@ var ObservationCategoryCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ObservationCategoryCodeSequenceTrial",
-	Description: "Observation Category Code Sequence (Trial)",
+	Description: "Observation Category Code Sequence",
 }
 
 // ConceptCodeSequence - (0040,A168) Concept Code Sequence
@@ -26497,7 +26497,7 @@ var BibliographicCitationTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "BibliographicCitationTrial",
-	Description: "Bibliographic Citation (Trial)",
+	Description: "Bibliographic Citation",
 }
 
 // PurposeOfReferenceCodeSequence - (0040,A170) Purpose of Reference Code Sequence
@@ -26527,7 +26527,7 @@ var ReferencedObservationUIDTrial = &Tag{
 	VR:          "UI",
 	VM:          "1",
 	Name:        "ReferencedObservationUIDTrial",
-	Description: "Referenced Observation UID (Trial)",
+	Description: "Referenced Observation UID",
 }
 
 // ReferencedObservationClassTrial - (0040,A173) Referenced Observation Class (Trial)
@@ -26537,7 +26537,7 @@ var ReferencedObservationClassTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ReferencedObservationClassTrial",
-	Description: "Referenced Observation Class (Trial)",
+	Description: "Referenced Observation Class",
 }
 
 // ReferencedObjectObservationClassTrial - (0040,A174) Referenced Object Observation Class (Trial)
@@ -26547,7 +26547,7 @@ var ReferencedObjectObservationClassTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ReferencedObjectObservationClassTrial",
-	Description: "Referenced Object Observation Class (Trial)",
+	Description: "Referenced Object Observation Class",
 }
 
 // AnnotationGroupNumber - (0040,A180) Annotation Group Number
@@ -26567,7 +26567,7 @@ var ObservationDateTrial = &Tag{
 	VR:          "DA",
 	VM:          "1",
 	Name:        "ObservationDateTrial",
-	Description: "Observation Date (Trial)",
+	Description: "Observation Date",
 }
 
 // ObservationTimeTrial - (0040,A193) Observation Time (Trial)
@@ -26577,7 +26577,7 @@ var ObservationTimeTrial = &Tag{
 	VR:          "TM",
 	VM:          "1",
 	Name:        "ObservationTimeTrial",
-	Description: "Observation Time (Trial)",
+	Description: "Observation Time",
 }
 
 // MeasurementAutomationTrial - (0040,A194) Measurement Automation (Trial)
@@ -26587,7 +26587,7 @@ var MeasurementAutomationTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "MeasurementAutomationTrial",
-	Description: "Measurement Automation (Trial)",
+	Description: "Measurement Automation",
 }
 
 // ModifierCodeSequence - (0040,A195) Modifier Code Sequence
@@ -26607,7 +26607,7 @@ var IdentificationDescriptionTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "IdentificationDescriptionTrial",
-	Description: "Identification Description (Trial)",
+	Description: "Identification Description",
 }
 
 // CoordinatesSetGeometricTypeTrial - (0040,A290) Coordinates Set Geometric Type (Trial)
@@ -26617,7 +26617,7 @@ var CoordinatesSetGeometricTypeTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "CoordinatesSetGeometricTypeTrial",
-	Description: "Coordinates Set Geometric Type (Trial)",
+	Description: "Coordinates Set Geometric Type",
 }
 
 // AlgorithmCodeSequenceTrial - (0040,A296) Algorithm Code Sequence (Trial)
@@ -26627,7 +26627,7 @@ var AlgorithmCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "AlgorithmCodeSequenceTrial",
-	Description: "Algorithm Code Sequence (Trial)",
+	Description: "Algorithm Code Sequence",
 }
 
 // AlgorithmDescriptionTrial - (0040,A297) Algorithm Description (Trial)
@@ -26637,7 +26637,7 @@ var AlgorithmDescriptionTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "AlgorithmDescriptionTrial",
-	Description: "Algorithm Description (Trial)",
+	Description: "Algorithm Description",
 }
 
 // PixelCoordinatesSetTrial - (0040,A29A) Pixel Coordinates Set (Trial)
@@ -26647,7 +26647,7 @@ var PixelCoordinatesSetTrial = &Tag{
 	VR:          "SL",
 	VM:          "2-2n",
 	Name:        "PixelCoordinatesSetTrial",
-	Description: "Pixel Coordinates Set (Trial)",
+	Description: "Pixel Coordinates Set",
 }
 
 // MeasuredValueSequence - (0040,A300) Measured Value Sequence
@@ -26677,7 +26677,7 @@ var CurrentObserverTrial = &Tag{
 	VR:          "PN",
 	VM:          "1",
 	Name:        "CurrentObserverTrial",
-	Description: "Current Observer (Trial)",
+	Description: "Current Observer",
 }
 
 // NumericValue - (0040,A30A) Numeric Value
@@ -26697,7 +26697,7 @@ var ReferencedAccessionSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ReferencedAccessionSequenceTrial",
-	Description: "Referenced Accession Sequence (Trial)",
+	Description: "Referenced Accession Sequence",
 }
 
 // ReportStatusCommentTrial - (0040,A33A) Report Status Comment (Trial)
@@ -26707,7 +26707,7 @@ var ReportStatusCommentTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "ReportStatusCommentTrial",
-	Description: "Report Status Comment (Trial)",
+	Description: "Report Status Comment",
 }
 
 // ProcedureContextSequenceTrial - (0040,A340) Procedure Context Sequence (Trial)
@@ -26717,7 +26717,7 @@ var ProcedureContextSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ProcedureContextSequenceTrial",
-	Description: "Procedure Context Sequence (Trial)",
+	Description: "Procedure Context Sequence",
 }
 
 // VerbalSourceTrial - (0040,A352) Verbal Source (Trial)
@@ -26727,7 +26727,7 @@ var VerbalSourceTrial = &Tag{
 	VR:          "PN",
 	VM:          "1",
 	Name:        "VerbalSourceTrial",
-	Description: "Verbal Source (Trial)",
+	Description: "Verbal Source",
 }
 
 // AddressTrial - (0040,A353) Address (Trial)
@@ -26737,7 +26737,7 @@ var AddressTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "AddressTrial",
-	Description: "Address (Trial)",
+	Description: "Address",
 }
 
 // TelephoneNumberTrial - (0040,A354) Telephone Number (Trial)
@@ -26747,7 +26747,7 @@ var TelephoneNumberTrial = &Tag{
 	VR:          "LO",
 	VM:          "1",
 	Name:        "TelephoneNumberTrial",
-	Description: "Telephone Number (Trial)",
+	Description: "Telephone Number",
 }
 
 // VerbalSourceIdentifierCodeSequenceTrial - (0040,A358) Verbal Source Identifier Code Sequence (Trial)
@@ -26757,7 +26757,7 @@ var VerbalSourceIdentifierCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "VerbalSourceIdentifierCodeSequenceTrial",
-	Description: "Verbal Source Identifier Code Sequence (Trial)",
+	Description: "Verbal Source Identifier Code Sequence",
 }
 
 // PredecessorDocumentsSequence - (0040,A360) Predecessor Documents Sequence
@@ -26807,7 +26807,7 @@ var ReportDetailSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ReportDetailSequenceTrial",
-	Description: "Report Detail Sequence (Trial)",
+	Description: "Report Detail Sequence",
 }
 
 // PertinentOtherEvidenceSequence - (0040,A385) Pertinent Other Evidence Sequence
@@ -26837,7 +26837,7 @@ var ObservationSubjectUIDTrial = &Tag{
 	VR:          "UI",
 	VM:          "1",
 	Name:        "ObservationSubjectUIDTrial",
-	Description: "Observation Subject UID (Trial)",
+	Description: "Observation Subject UID",
 }
 
 // ObservationSubjectClassTrial - (0040,A403) Observation Subject Class (Trial)
@@ -26847,7 +26847,7 @@ var ObservationSubjectClassTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ObservationSubjectClassTrial",
-	Description: "Observation Subject Class (Trial)",
+	Description: "Observation Subject Class",
 }
 
 // ObservationSubjectTypeCodeSequenceTrial - (0040,A404) Observation Subject Type Code Sequence (Trial)
@@ -26857,7 +26857,7 @@ var ObservationSubjectTypeCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ObservationSubjectTypeCodeSequenceTrial",
-	Description: "Observation Subject Type Code Sequence (Trial)",
+	Description: "Observation Subject Type Code Sequence",
 }
 
 // CompletionFlag - (0040,A491) Completion Flag
@@ -26937,7 +26937,7 @@ var ObservationSubjectContextFlagTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ObservationSubjectContextFlagTrial",
-	Description: "Observation Subject Context Flag (Trial)",
+	Description: "Observation Subject Context Flag",
 }
 
 // ObserverContextFlagTrial - (0040,A601) Observer Context Flag (Trial)
@@ -26947,7 +26947,7 @@ var ObserverContextFlagTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ObserverContextFlagTrial",
-	Description: "Observer Context Flag (Trial)",
+	Description: "Observer Context Flag",
 }
 
 // ProcedureContextFlagTrial - (0040,A603) Procedure Context Flag (Trial)
@@ -26957,7 +26957,7 @@ var ProcedureContextFlagTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ProcedureContextFlagTrial",
-	Description: "Procedure Context Flag (Trial)",
+	Description: "Procedure Context Flag",
 }
 
 // ContentSequence - (0040,A730) Content Sequence
@@ -26977,7 +26977,7 @@ var RelationshipSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "RelationshipSequenceTrial",
-	Description: "Relationship Sequence (Trial)",
+	Description: "Relationship Sequence",
 }
 
 // RelationshipTypeCodeSequenceTrial - (0040,A732) Relationship Type Code Sequence (Trial)
@@ -26987,7 +26987,7 @@ var RelationshipTypeCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "RelationshipTypeCodeSequenceTrial",
-	Description: "Relationship Type Code Sequence (Trial)",
+	Description: "Relationship Type Code Sequence",
 }
 
 // LanguageCodeSequenceTrial - (0040,A744) Language Code Sequence (Trial)
@@ -26997,7 +26997,7 @@ var LanguageCodeSequenceTrial = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "LanguageCodeSequenceTrial",
-	Description: "Language Code Sequence (Trial)",
+	Description: "Language Code Sequence",
 }
 
 // TabulatedValuesSequence - (0040,A801) Tabulated Values Sequence
@@ -27087,7 +27087,7 @@ var UniformResourceLocatorTrial = &Tag{
 	VR:          "ST",
 	VM:          "1",
 	Name:        "UniformResourceLocatorTrial",
-	Description: "Uniform Resource Locator (Trial)",
+	Description: "Uniform Resource Locator",
 }
 
 // WaveformAnnotationSequence - (0040,B020) Waveform Annotation Sequence
@@ -32217,7 +32217,7 @@ var ImageRotationRetired = &Tag{
 	VR:          "IS",
 	VM:          "1",
 	Name:        "ImageRotationRetired",
-	Description: "Image Rotation (Retired)",
+	Description: "Image Rotation",
 }
 
 // ImageHorizontalFlip - (0070,0041) Image Horizontal Flip
@@ -32247,7 +32247,7 @@ var DisplayedAreaTopLeftHandCornerTrial = &Tag{
 	VR:          "US",
 	VM:          "2",
 	Name:        "DisplayedAreaTopLeftHandCornerTrial",
-	Description: "Displayed Area Top Left Hand Corner (Trial)",
+	Description: "Displayed Area Top Left Hand Corner",
 }
 
 // DisplayedAreaBottomRightHandCornerTrial - (0070,0051) Displayed Area Bottom Right Hand Corner (Trial)
@@ -32257,7 +32257,7 @@ var DisplayedAreaBottomRightHandCornerTrial = &Tag{
 	VR:          "US",
 	VM:          "2",
 	Name:        "DisplayedAreaBottomRightHandCornerTrial",
-	Description: "Displayed Area Bottom Right Hand Corner (Trial)",
+	Description: "Displayed Area Bottom Right Hand Corner",
 }
 
 // DisplayedAreaTopLeftHandCorner - (0070,0052) Displayed Area Top Left Hand Corner
@@ -35287,7 +35287,7 @@ var BeamOrderIndexTrial = &Tag{
 	VR:          "IS",
 	VM:          "1",
 	Name:        "BeamOrderIndexTrial",
-	Description: "Beam Order Index (Trial)",
+	Description: "Beam Order Index",
 }
 
 // AutosequenceFlag - (0074,1025) Autosequence Flag
@@ -35417,7 +35417,7 @@ var DoubleExposureMetersetTrial = &Tag{
 	VR:          "DS",
 	VM:          "1",
 	Name:        "DoubleExposureMetersetTrial",
-	Description: "Double Exposure Meterset (Trial)",
+	Description: "Double Exposure Meterset",
 }
 
 // DoubleExposureFieldDeltaTrial - (0074,103A) Double Exposure Field Delta (Trial)
@@ -35427,7 +35427,7 @@ var DoubleExposureFieldDeltaTrial = &Tag{
 	VR:          "DS",
 	VM:          "4",
 	Name:        "DoubleExposureFieldDeltaTrial",
-	Description: "Double Exposure Field Delta (Trial)",
+	Description: "Double Exposure Field Delta",
 }
 
 // RelatedReferenceRTImageSequence - (0074,1040) Related Reference RT Image Sequence
@@ -37767,7 +37767,7 @@ var ReferencedImageBoxSequenceRetired = &Tag{
 	VR:          "SQ",
 	VM:          "1",
 	Name:        "ReferencedImageBoxSequenceRetired",
-	Description: "Referenced Image Box Sequence (Retired)",
+	Description: "Referenced Image Box Sequence",
 }
 
 // PresentationLUTSequence - (2050,0010) Presentation LUT Sequence
@@ -48967,7 +48967,7 @@ var ReportProductionStatusTrial = &Tag{
 	VR:          "CS",
 	VM:          "1",
 	Name:        "ReportProductionStatusTrial",
-	Description: "Report Production Status (Trial)",
+	Description: "Report Production Status",
 }
 
 // InterpretationRecordedDate - (4008,0100) Interpretation Recorded Date

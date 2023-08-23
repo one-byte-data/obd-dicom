@@ -20,7 +20,7 @@ var MediaStorageDirectoryStorage = &SOPClass{
 var BasicStudyContentNotification = &SOPClass{
 	UID:         "1.2.840.10008.1.9",
 	Name:        "BasicStudyContentNotification",
-	Description: "Basic Study Content Notification SOP Class (Retired)",
+	Description: "Basic Study Content Notification SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -36,7 +36,7 @@ var StorageCommitmentPushModel = &SOPClass{
 var StorageCommitmentPullModel = &SOPClass{
 	UID:         "1.2.840.10008.1.20.2",
 	Name:        "StorageCommitmentPullModel",
-	Description: "Storage Commitment Pull Model SOP Class (Retired)",
+	Description: "Storage Commitment Pull Model SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -68,7 +68,7 @@ var DICOMApplicationContext = &SOPClass{
 var DetachedPatientManagement = &SOPClass{
 	UID:         "1.2.840.10008.3.1.2.1.1",
 	Name:        "DetachedPatientManagement",
-	Description: "Detached Patient Management SOP Class (Retired)",
+	Description: "Detached Patient Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -76,7 +76,7 @@ var DetachedPatientManagement = &SOPClass{
 var DetachedVisitManagement = &SOPClass{
 	UID:         "1.2.840.10008.3.1.2.2.1",
 	Name:        "DetachedVisitManagement",
-	Description: "Detached Visit Management SOP Class (Retired)",
+	Description: "Detached Visit Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -84,7 +84,7 @@ var DetachedVisitManagement = &SOPClass{
 var DetachedStudyManagement = &SOPClass{
 	UID:         "1.2.840.10008.3.1.2.3.1",
 	Name:        "DetachedStudyManagement",
-	Description: "Detached Study Management SOP Class (Retired)",
+	Description: "Detached Study Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -92,7 +92,7 @@ var DetachedStudyManagement = &SOPClass{
 var StudyComponentManagement = &SOPClass{
 	UID:         "1.2.840.10008.3.1.2.3.2",
 	Name:        "StudyComponentManagement",
-	Description: "Study Component Management SOP Class (Retired)",
+	Description: "Study Component Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -124,7 +124,7 @@ var ModalityPerformedProcedureStepNotification = &SOPClass{
 var DetachedResultsManagement = &SOPClass{
 	UID:         "1.2.840.10008.3.1.2.5.1",
 	Name:        "DetachedResultsManagement",
-	Description: "Detached Results Management SOP Class (Retired)",
+	Description: "Detached Results Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -132,7 +132,7 @@ var DetachedResultsManagement = &SOPClass{
 var DetachedInterpretationManagement = &SOPClass{
 	UID:         "1.2.840.10008.3.1.2.6.1",
 	Name:        "DetachedInterpretationManagement",
-	Description: "Detached Interpretation Management SOP Class (Retired)",
+	Description: "Detached Interpretation Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -172,7 +172,7 @@ var BasicColorImageBox = &SOPClass{
 var ReferencedImageBox = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.4.2",
 	Name:        "ReferencedImageBox",
-	Description: "Referenced Image Box SOP Class (Retired)",
+	Description: "Referenced Image Box SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -228,7 +228,7 @@ var PresentationLUT = &SOPClass{
 var ImageOverlayBox = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.24",
 	Name:        "ImageOverlayBox",
-	Description: "Image Overlay Box SOP Class (Retired)",
+	Description: "Image Overlay Box SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -236,7 +236,7 @@ var ImageOverlayBox = &SOPClass{
 var BasicPrintImageOverlayBox = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.24.1",
 	Name:        "BasicPrintImageOverlayBox",
-	Description: "Basic Print Image Overlay Box SOP Class (Retired)",
+	Description: "Basic Print Image Overlay Box SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -244,7 +244,7 @@ var BasicPrintImageOverlayBox = &SOPClass{
 var PrintQueueManagement = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.26",
 	Name:        "PrintQueueManagement",
-	Description: "Print Queue Management SOP Class (Retired)",
+	Description: "Print Queue Management SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -252,7 +252,7 @@ var PrintQueueManagement = &SOPClass{
 var StoredPrintStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.27",
 	Name:        "StoredPrintStorage",
-	Description: "Stored Print Storage SOP Class (Retired)",
+	Description: "Stored Print Storage SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -260,7 +260,7 @@ var StoredPrintStorage = &SOPClass{
 var HardcopyGrayscaleImageStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.29",
 	Name:        "HardcopyGrayscaleImageStorage",
-	Description: "Hardcopy Grayscale Image Storage SOP Class (Retired)",
+	Description: "Hardcopy Grayscale Image Storage SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -268,7 +268,7 @@ var HardcopyGrayscaleImageStorage = &SOPClass{
 var HardcopyColorImageStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.30",
 	Name:        "HardcopyColorImageStorage",
-	Description: "Hardcopy Color Image Storage SOP Class (Retired)",
+	Description: "Hardcopy Color Image Storage SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -276,7 +276,7 @@ var HardcopyColorImageStorage = &SOPClass{
 var PullPrintRequest = &SOPClass{
 	UID:         "1.2.840.10008.5.1.1.31",
 	Name:        "PullPrintRequest",
-	Description: "Pull Print Request SOP Class (Retired)",
+	Description: "Pull Print Request SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -380,7 +380,7 @@ var LegacyConvertedEnhancedCTImageStorage = &SOPClass{
 var UltrasoundMultiFrameImageStorageRetired = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.3",
 	Name:        "UltrasoundMultiFrameImageStorageRetired",
-	Description: "Ultrasound Multi-frame Image Storage (Retired)",
+	Description: "Ultrasound Multi-frame Image Storage",
 	Type:        "SOP Class",
 }
 
@@ -436,7 +436,7 @@ var LegacyConvertedEnhancedMRImageStorage = &SOPClass{
 var NuclearMedicineImageStorageRetired = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.5",
 	Name:        "NuclearMedicineImageStorageRetired",
-	Description: "Nuclear Medicine Image Storage (Retired)",
+	Description: "Nuclear Medicine Image Storage",
 	Type:        "SOP Class",
 }
 
@@ -444,7 +444,7 @@ var NuclearMedicineImageStorageRetired = &SOPClass{
 var UltrasoundImageStorageRetired = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.6",
 	Name:        "UltrasoundImageStorageRetired",
-	Description: "Ultrasound Image Storage (Retired)",
+	Description: "Ultrasound Image Storage",
 	Type:        "SOP Class",
 }
 
@@ -508,7 +508,7 @@ var MultiFrameTrueColorSecondaryCaptureImageStorage = &SOPClass{
 var StandaloneOverlayStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.8",
 	Name:        "StandaloneOverlayStorage",
-	Description: "Standalone Overlay Storage (Retired)",
+	Description: "Standalone Overlay Storage",
 	Type:        "SOP Class",
 }
 
@@ -516,7 +516,7 @@ var StandaloneOverlayStorage = &SOPClass{
 var StandaloneCurveStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.9",
 	Name:        "StandaloneCurveStorage",
-	Description: "Standalone Curve Storage (Retired)",
+	Description: "Standalone Curve Storage",
 	Type:        "SOP Class",
 }
 
@@ -524,7 +524,7 @@ var StandaloneCurveStorage = &SOPClass{
 var WaveformStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.9.1",
 	Name:        "WaveformStorageTrial",
-	Description: "Waveform Storage - Trial (Retired)",
+	Description: "Waveform Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -652,7 +652,7 @@ var BodyPositionWaveformStorage = &SOPClass{
 var StandaloneModalityLUTStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.10",
 	Name:        "StandaloneModalityLUTStorage",
-	Description: "Standalone Modality LUT Storage (Retired)",
+	Description: "Standalone Modality LUT Storage",
 	Type:        "SOP Class",
 }
 
@@ -660,7 +660,7 @@ var StandaloneModalityLUTStorage = &SOPClass{
 var StandaloneVOILUTStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.11",
 	Name:        "StandaloneVOILUTStorage",
-	Description: "Standalone VOI LUT Storage (Retired)",
+	Description: "Standalone VOI LUT Storage",
 	Type:        "SOP Class",
 }
 
@@ -796,7 +796,7 @@ var EnhancedXRFImageStorage = &SOPClass{
 var XRayAngiographicBiPlaneImageStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.12.3",
 	Name:        "XRayAngiographicBiPlaneImageStorage",
-	Description: "X-Ray Angiographic Bi-Plane Image Storage (Retired)",
+	Description: "X-Ray Angiographic Bi-Plane Image Storage",
 	Type:        "SOP Class",
 }
 
@@ -956,7 +956,7 @@ var SurfaceScanPointCloudStorage = &SOPClass{
 var VLImageStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.77.1",
 	Name:        "VLImageStorageTrial",
-	Description: "VL Image Storage - Trial (Retired)",
+	Description: "VL Image Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -964,7 +964,7 @@ var VLImageStorageTrial = &SOPClass{
 var VLMultiFrameImageStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.77.2",
 	Name:        "VLMultiFrameImageStorageTrial",
-	Description: "VL Multi-frame Image Storage - Trial (Retired)",
+	Description: "VL Multi-frame Image Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -1204,7 +1204,7 @@ var CornealTopographyMapStorage = &SOPClass{
 var TextSRStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.88.1",
 	Name:        "TextSRStorageTrial",
-	Description: "Text SR Storage - Trial (Retired)",
+	Description: "Text SR Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -1212,7 +1212,7 @@ var TextSRStorageTrial = &SOPClass{
 var AudioSRStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.88.2",
 	Name:        "AudioSRStorageTrial",
-	Description: "Audio SR Storage - Trial (Retired)",
+	Description: "Audio SR Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -1220,7 +1220,7 @@ var AudioSRStorageTrial = &SOPClass{
 var DetailSRStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.88.3",
 	Name:        "DetailSRStorageTrial",
-	Description: "Detail SR Storage - Trial (Retired)",
+	Description: "Detail SR Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -1228,7 +1228,7 @@ var DetailSRStorageTrial = &SOPClass{
 var ComprehensiveSRStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.88.4",
 	Name:        "ComprehensiveSRStorageTrial",
-	Description: "Comprehensive SR Storage - Trial (Retired)",
+	Description: "Comprehensive SR Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -1460,7 +1460,7 @@ var LegacyConvertedEnhancedPETImageStorage = &SOPClass{
 var StandalonePETCurveStorage = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.1.129",
 	Name:        "StandalonePETCurveStorage",
-	Description: "Standalone PET Curve Storage (Retired)",
+	Description: "Standalone PET Curve Storage",
 	Type:        "SOP Class",
 }
 
@@ -1916,7 +1916,7 @@ var StudyRootQueryRetrieveInformationModelGet = &SOPClass{
 var PatientStudyOnlyQueryRetrieveInformationModelFind = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.2.3.1",
 	Name:        "PatientStudyOnlyQueryRetrieveInformationModelFind",
-	Description: "Patient/Study Only Query/Retrieve Information Model - FIND (Retired)",
+	Description: "Patient/Study Only Query/Retrieve Information Model - FIND",
 	Type:        "SOP Class",
 }
 
@@ -1924,7 +1924,7 @@ var PatientStudyOnlyQueryRetrieveInformationModelFind = &SOPClass{
 var PatientStudyOnlyQueryRetrieveInformationModelMove = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.2.3.2",
 	Name:        "PatientStudyOnlyQueryRetrieveInformationModelMove",
-	Description: "Patient/Study Only Query/Retrieve Information Model - MOVE (Retired)",
+	Description: "Patient/Study Only Query/Retrieve Information Model - MOVE",
 	Type:        "SOP Class",
 }
 
@@ -1932,7 +1932,7 @@ var PatientStudyOnlyQueryRetrieveInformationModelMove = &SOPClass{
 var PatientStudyOnlyQueryRetrieveInformationModelGet = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.1.2.3.3",
 	Name:        "PatientStudyOnlyQueryRetrieveInformationModelGet",
-	Description: "Patient/Study Only Query/Retrieve Information Model - GET (Retired)",
+	Description: "Patient/Study Only Query/Retrieve Information Model - GET",
 	Type:        "SOP Class",
 }
 
@@ -1996,7 +1996,7 @@ var ModalityWorklistInformationModelFind = &SOPClass{
 var GeneralPurposeWorklistInformationModelFind = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.32.1",
 	Name:        "GeneralPurposeWorklistInformationModelFind",
-	Description: "General Purpose Worklist Information Model - FIND (Retired)",
+	Description: "General Purpose Worklist Information Model - FIND",
 	Type:        "SOP Class",
 }
 
@@ -2004,7 +2004,7 @@ var GeneralPurposeWorklistInformationModelFind = &SOPClass{
 var GeneralPurposeScheduledProcedureStep = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.32.2",
 	Name:        "GeneralPurposeScheduledProcedureStep",
-	Description: "General Purpose Scheduled Procedure Step SOP Class (Retired)",
+	Description: "General Purpose Scheduled Procedure Step SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -2012,7 +2012,7 @@ var GeneralPurposeScheduledProcedureStep = &SOPClass{
 var GeneralPurposePerformedProcedureStep = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.32.3",
 	Name:        "GeneralPurposePerformedProcedureStep",
-	Description: "General Purpose Performed Procedure Step SOP Class (Retired)",
+	Description: "General Purpose Performed Procedure Step SOP Class",
 	Type:        "SOP Class",
 }
 
@@ -2028,7 +2028,7 @@ var InstanceAvailabilityNotification = &SOPClass{
 var RTBeamsDeliveryInstructionStorageTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.1",
 	Name:        "RTBeamsDeliveryInstructionStorageTrial",
-	Description: "RT Beams Delivery Instruction Storage - Trial (Retired)",
+	Description: "RT Beams Delivery Instruction Storage - Trial",
 	Type:        "SOP Class",
 }
 
@@ -2036,7 +2036,7 @@ var RTBeamsDeliveryInstructionStorageTrial = &SOPClass{
 var RTConventionalMachineVerificationTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.2",
 	Name:        "RTConventionalMachineVerificationTrial",
-	Description: "RT Conventional Machine Verification - Trial (Retired)",
+	Description: "RT Conventional Machine Verification - Trial",
 	Type:        "SOP Class",
 }
 
@@ -2044,7 +2044,7 @@ var RTConventionalMachineVerificationTrial = &SOPClass{
 var RTIonMachineVerificationTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.3",
 	Name:        "RTIonMachineVerificationTrial",
-	Description: "RT Ion Machine Verification - Trial (Retired)",
+	Description: "RT Ion Machine Verification - Trial",
 	Type:        "SOP Class",
 }
 
@@ -2052,7 +2052,7 @@ var RTIonMachineVerificationTrial = &SOPClass{
 var UnifiedProcedureStepPushTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.4.1",
 	Name:        "UnifiedProcedureStepPushTrial",
-	Description: "Unified Procedure Step - Push SOP Class - Trial (Retired)",
+	Description: "Unified Procedure Step - Push SOP Class - Trial",
 	Type:        "SOP Class",
 }
 
@@ -2060,7 +2060,7 @@ var UnifiedProcedureStepPushTrial = &SOPClass{
 var UnifiedProcedureStepWatchTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.4.2",
 	Name:        "UnifiedProcedureStepWatchTrial",
-	Description: "Unified Procedure Step - Watch SOP Class - Trial (Retired)",
+	Description: "Unified Procedure Step - Watch SOP Class - Trial",
 	Type:        "SOP Class",
 }
 
@@ -2068,7 +2068,7 @@ var UnifiedProcedureStepWatchTrial = &SOPClass{
 var UnifiedProcedureStepPullTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.4.3",
 	Name:        "UnifiedProcedureStepPullTrial",
-	Description: "Unified Procedure Step - Pull SOP Class - Trial (Retired)",
+	Description: "Unified Procedure Step - Pull SOP Class - Trial",
 	Type:        "SOP Class",
 }
 
@@ -2076,7 +2076,7 @@ var UnifiedProcedureStepPullTrial = &SOPClass{
 var UnifiedProcedureStepEventTrial = &SOPClass{
 	UID:         "1.2.840.10008.5.1.4.34.4.4",
 	Name:        "UnifiedProcedureStepEventTrial",
-	Description: "Unified Procedure Step - Event SOP Class - Trial (Retired)",
+	Description: "Unified Procedure Step - Event SOP Class - Trial",
 	Type:        "SOP Class",
 }
 

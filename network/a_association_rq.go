@@ -197,13 +197,10 @@ func (aarq *aassociationRQ) Write(rw *bufio.ReadWriter) error {
 }
 
 func (aarq *aassociationRQ) Read(ms media.MemoryStream) (err error) {
-	aarq.ProtocolVersion, err = ms.GetUint16()
-	if err != nil {
+	if aarq.ProtocolVersion, err = ms.GetUint16(); err != nil {
 		return err
 	}
-
-	aarq.Reserved2, err = ms.GetUint16()
-	if err != nil {
+	if aarq.Reserved2, err = ms.GetUint16(); err != nil {
 		return err
 	}
 

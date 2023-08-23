@@ -37,7 +37,7 @@ func (arrp *areleaseRP) Size() uint32 {
 
 func (arrp *areleaseRP) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
-	
+
 	bd.SetBigEndian(true)
 	arrp.Size()
 	bd.WriteByte(arrp.ItemType)
@@ -49,22 +49,21 @@ func (arrp *areleaseRP) Write(rw *bufio.ReadWriter) error {
 }
 
 func (arrp *areleaseRP) Read(ms media.MemoryStream) (err error) {
-	arrp.ItemType, err = ms.GetByte()
-	if err != nil {
+	if arrp.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return arrp.ReadDynamic(ms)
 }
 
 func (arrp *areleaseRP) ReadDynamic(ms media.MemoryStream) (err error) {
-	arrp.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if arrp.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	arrp.Length, err = ms.GetUint32()
-	if err != nil {
+	if arrp.Length, err = ms.GetUint32(); err != nil {
 		return err
 	}
-	arrp.Reserved2, err = ms.GetUint32()
+	if arrp.Reserved2, err = ms.GetUint32(); err != nil {
+		return err
+	}
 	return
 }

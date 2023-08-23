@@ -20,7 +20,7 @@ func TestGetTransferSyntaxFromName(t *testing.T) {
 			want: &TransferSyntax{
 				UID:         "1.2.840.10008.1.2",
 				Name:        "ImplicitVRLittleEndian",
-				Description: "Implicit VR Little Endian: Default Transfer Syntax for DICOM",
+				Description: "Implicit VR Little Endian",
 				Type:        "Transfer Syntax",
 			},
 		},
@@ -54,7 +54,7 @@ func TestGetTransferSyntaxFromUID(t *testing.T) {
 			want: &TransferSyntax{
 				UID:         "1.2.840.10008.1.2",
 				Name:        "ImplicitVRLittleEndian",
-				Description: "Implicit VR Little Endian: Default Transfer Syntax for DICOM",
+				Description: "Implicit VR Little Endian",
 				Type:        "Transfer Syntax",
 			},
 		},

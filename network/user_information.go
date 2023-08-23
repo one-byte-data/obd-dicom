@@ -105,30 +105,29 @@ func (ui *userInformation) Write(rw *bufio.ReadWriter) (err error) {
 	bd.WriteByte(ui.Reserved1)
 	bd.WriteUint16(ui.Length)
 
-	if err = bd.Send(rw); err == nil {
-		ui.MaxSubLength.Write(rw)
-		ui.ImpClass.Write(rw)
-		ui.ImpVersion.Write(rw)
+	if err = bd.Send(rw); err != nil {
+		return err
 	}
+
+	ui.MaxSubLength.Write(rw)
+	ui.ImpClass.Write(rw)
+	ui.ImpVersion.Write(rw)
 
 	return
 }
 
 func (ui *userInformation) Read(ms media.MemoryStream) (err error) {
-	ui.ItemType, err = ms.GetByte()
-	if err != nil {
+	if ui.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return ui.ReadDynamic(ms)
 }
 
 func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
-	ui.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if ui.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	ui.Length, err = ms.GetUint16()
-	if err != nil {
+	if ui.Length, err = ms.GetUint16(); err != nil {
 		return err
 	}
 

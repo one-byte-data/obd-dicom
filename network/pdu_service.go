@@ -122,8 +122,7 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		return err
 	}
 
-	pdu.pdulength, err = pdu.ms.GetUint32()
-	if err != nil {
+	if pdu.pdulength, err = pdu.ms.GetUint32(); err != nil {
 		return err
 	}
 
@@ -182,8 +181,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 		pdu.ms.ReadFully(pdu.readWriter, 10)
 		pdu.ms.SetPosition(0)
 
-		pdu.pdutype, err = pdu.ms.Get()
-		if err != nil {
+		if pdu.pdutype, err = pdu.ms.Get(); err != nil {
 			return nil, err
 		}
 
@@ -191,20 +189,17 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 			return nil, err
 		}
 
-		pdu.pdulength, err = pdu.ms.GetUint32()
-		if err != nil {
+		if pdu.pdulength, err = pdu.ms.GetUint32(); err != nil {
 			return nil, err
 		}
 
 		switch pdu.pdutype {
 		case pdutype.AssocicationRequest:
 			pdu.readPDU()
-			err := pdu.AssocRQ.Read(pdu.ms)
-			if err != nil {
+			if err := pdu.AssocRQ.Read(pdu.ms); err != nil {
 				return nil, err
 			}
-			err = pdu.interogateAAssociateRQ(pdu.readWriter)
-			if err != nil {
+			if err := pdu.interogateAAssociateRQ(pdu.readWriter); err != nil {
 				return nil, err
 			}
 			return nil, nil
@@ -214,8 +209,7 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 		case pdutype.PDUDataTransfer:
 			pdu.readPDU()
 			pdu.ms.SetPosition(1)
-			err := pdu.Pdata.ReadDynamic(pdu.ms)
-			if err != nil {
+			if err := pdu.Pdata.ReadDynamic(pdu.ms); err != nil {
 				return nil, err
 			}
 			if pdu.Pdata.MsgStatus > 0 {
@@ -286,14 +280,9 @@ func (pdu *pduService) Write(DCO media.DcmObj, SOPClass string, ItemType byte) e
 	if pdu.Pdata.PresentationContextID == 0 {
 		return errors.New("ERROR, pduservice::Write - PresentationContextID==0")
 	}
-	if ItemType == 0x01 {
-		if !pdu.parseDCMIntoRaw(DCO) {
-			return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
-		}
-	} else {
-		if !pdu.parseDCMIntoRaw(DCO) {
-			return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
-		}
+
+	if !pdu.parseDCMIntoRaw(DCO) {
+		return errors.New("ERROR, pduservice::Write - ParseDCMIntoRaw failed")
 	}
 
 	pdu.Pdata.MsgHeader = ItemType
@@ -323,13 +312,7 @@ func (pdu *pduService) interogateAAssociateAC() bool {
 		if presContextAccept.GetResult() == 0 {
 			pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, presContextAccept)
 			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().GetUID() == transfersyntax.ExplicitVRLittleEndian.UID {
-					TS = presContextAccept.GetTrnSyntax().GetUID()
-					PresentationContextID = presContextAccept.GetPresentationContextID()
-				}
-			}
-			if len(TS) == 0 {
-				if presContextAccept.GetTrnSyntax().GetUID() == transfersyntax.ImplicitVRLittleEndian.UID {
+				if presContextAccept.GetTrnSyntax().GetUID() == transfersyntax.ExplicitVRLittleEndian.UID || presContextAccept.GetTrnSyntax().GetUID() == transfersyntax.ImplicitVRLittleEndian.UID {
 					TS = presContextAccept.GetTrnSyntax().GetUID()
 					PresentationContextID = presContextAccept.GetPresentationContextID()
 				}
@@ -351,9 +334,7 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 
 	pdu.AssocAC.SetCalledAE(pdu.AssocRQ.GetCalledAE())
 	pdu.AssocAC.SetCallingAE(pdu.AssocRQ.GetCallingAE())
-
 	pdu.AssocAC.SetAppContext(pdu.AssocRQ.GetAppContext())
-
 	pdu.AssocAC.SetUserInformation(pdu.AssocRQ.GetUserInformation())
 
 	for presIndex, PresContext := range pdu.AssocRQ.GetPresContexts() {

@@ -39,26 +39,24 @@ func (async *asyncOperationWindow) Size() uint16 {
 }
 
 func (async *asyncOperationWindow) Read(ms media.MemoryStream) (err error) {
-	async.ItemType, err = ms.GetByte()
-	if err != nil {
+	if async.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return async.ReadDynamic(ms)
 }
 
 func (async *asyncOperationWindow) ReadDynamic(ms media.MemoryStream) (err error) {
-	async.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if async.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	async.Length, err = ms.GetUint16()
-	if err != nil {
+	if async.Length, err = ms.GetUint16(); err != nil {
 		return err
 	}
-	async.MaxNumberOperationsInvoked, err = ms.GetUint16()
-	if err != nil {
+	if async.MaxNumberOperationsInvoked, err = ms.GetUint16(); err != nil {
 		return err
 	}
-	async.MaxNumberOperationsPerformed, err = ms.GetUint16()
+	if async.MaxNumberOperationsPerformed, err = ms.GetUint16(); err != nil {
+		return err
+	}
 	return
 }

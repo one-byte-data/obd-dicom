@@ -70,8 +70,7 @@ func (pc *presentationContext) GetTransferSyntaxes() []UIDItem {
 }
 
 func (pc *presentationContext) Size() uint16 {
-	pc.Length = 4
-	pc.Length += pc.AbsSyntax.GetSize()
+	pc.Length = 4 + pc.AbsSyntax.GetSize()
 	for _, TrnSyntax := range pc.TrnSyntaxs {
 		pc.Length += TrnSyntax.GetSize()
 	}
@@ -105,39 +104,31 @@ func (pc *presentationContext) Write(rw *bufio.ReadWriter) error {
 }
 
 func (pc *presentationContext) Read(ms media.MemoryStream) (err error) {
-	pc.ItemType, err = ms.GetByte()
-	if err != nil {
+	if pc.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return pc.ReadDynamic(ms)
 }
 
 func (pc *presentationContext) ReadDynamic(ms media.MemoryStream) (err error) {
-	pc.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Length, err = ms.GetUint16()
-	if err != nil {
+	if pc.Length, err = ms.GetUint16(); err != nil {
 		return err
 	}
-	pc.PresentationContextID, err = ms.GetByte()
-	if err != nil {
+	if pc.PresentationContextID, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Reserved2, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved2, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Reserved3, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved3, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Reserved4, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved4, err = ms.GetByte(); err != nil {
 		return err
 	}
-
 	if err := pc.AbsSyntax.Read(ms); err != nil {
 		return err
 	}

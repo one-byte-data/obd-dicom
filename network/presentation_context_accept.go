@@ -106,14 +106,13 @@ func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 
 	sopName := ""
 	tsName := ""
-	sopClass := sopclass.GetSOPClassFromUID(pc.GetAbstractSyntax().GetUID())
-	if sopClass != nil {
+	if sopClass := sopclass.GetSOPClassFromUID(pc.GetAbstractSyntax().GetUID()); sopClass != nil {
 		sopName = sopClass.Name
 	}
-	transferSyntax := transfersyntax.GetTransferSyntaxFromUID(pc.GetTrnSyntax().GetUID())
-	if transferSyntax != nil {
+	if transferSyntax := transfersyntax.GetTransferSyntaxFromUID(pc.GetTrnSyntax().GetUID()); transferSyntax != nil {
 		tsName = transferSyntax.Name
 	}
+
 	log.Printf("INFO, ASSOC-AC: \tAccepted PresentationContext: %s - %s\n", pc.GetAbstractSyntax().GetUID(), sopName)
 	log.Printf("INFO, ASSOC-AC: \tAccepted TransferSynxtax: %s - %s\n", pc.GetTrnSyntax().GetUID(), tsName)
 
@@ -124,38 +123,30 @@ func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 }
 
 func (pc *presentationContextAccept) Read(ms media.MemoryStream) (err error) {
-	pc.ItemType, err = ms.GetByte()
-	if err != nil {
+	if pc.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return pc.ReadDynamic(ms)
 }
 
 func (pc *presentationContextAccept) ReadDynamic(ms media.MemoryStream) (err error) {
-	pc.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Length, err = ms.GetUint16()
-	if err != nil {
+	if pc.Length, err = ms.GetUint16(); err != nil {
 		return err
 	}
-	pc.PresentationContextID, err = ms.GetByte()
-	if err != nil {
+	if pc.PresentationContextID, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Reserved2, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved2, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Result, err = ms.GetByte()
-	if err != nil {
+	if pc.Result, err = ms.GetByte(); err != nil {
 		return err
 	}
-	pc.Reserved4, err = ms.GetByte()
-	if err != nil {
+	if pc.Reserved4, err = ms.GetByte(); err != nil {
 		return err
 	}
-
 	return pc.TrnSyntax.Read(ms)
 }

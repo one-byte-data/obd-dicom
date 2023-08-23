@@ -24,12 +24,10 @@ type PDataTF struct {
 // ReadDynamic - ReadDynamic
 func (pd *PDataTF) ReadDynamic(ms media.MemoryStream) (err error) {
 	if pd.Length == 0 {
-		pd.Reserved1, err = ms.GetByte()
-		if err != nil {
+		if pd.Reserved1, err = ms.GetByte(); err != nil {
 			return
 		}
-		pd.Length, err = ms.GetUint32()
-		if err != nil {
+		if pd.Length, err = ms.GetUint32(); err != nil {
 			return
 		}
 	}
@@ -39,16 +37,13 @@ func (pd *PDataTF) ReadDynamic(ms media.MemoryStream) (err error) {
 	pd.MsgStatus = 0
 
 	for count > 0 {
-		pd.pdv.Length, err = ms.GetUint32()
-		if err != nil {
+		if pd.pdv.Length, err = ms.GetUint32(); err != nil {
 			return err
 		}
-		pd.pdv.PresentationContextID, err = ms.GetByte()
-		if err != nil {
+		if pd.pdv.PresentationContextID, err = ms.GetByte(); err != nil {
 			return err
 		}
-		pd.pdv.MsgHeader, err = ms.GetByte()
-		if err != nil {
+		if pd.pdv.MsgHeader, err = ms.GetByte(); err != nil {
 			return err
 		}
 
@@ -109,24 +104,27 @@ func (pd *PDataTF) Write(rw *bufio.ReadWriter) error {
 		bd.WriteUint32(pd.pdv.Length)
 		bd.WriteByte(pd.pdv.PresentationContextID)
 		bd.WriteByte(pd.MsgHeader)
-		if err := bd.Send(rw); err == nil {
-			buff, err := pd.Buffer.Read(int(pd.BlockSize))
-			if err != nil {
-				return errors.New("ERROR, pdata::Write, " + err.Error())
-			}
 
-			n, err := rw.Write(buff)
-			if err != nil {
-				return errors.New("ERROR, pdata::Write, " + err.Error())
-			}
-			rw.Flush()
-
-			if n != int(pd.BlockSize) {
-				return errors.New("ERROR, pdata::Write, n!=int(pd.BlockSize)")
-			}
-		} else {
+		if err := bd.Send(rw); err != nil {
 			return errors.New("ERROR, pdata::Write, bd.Send(conn) failed")
 		}
+
+		buff, err := pd.Buffer.Read(int(pd.BlockSize))
+		if err != nil {
+			return errors.New("ERROR, pdata::Write, " + err.Error())
+		}
+
+		n, err := rw.Write(buff)
+		if err != nil {
+			return errors.New("ERROR, pdata::Write, " + err.Error())
+		}
+
+		rw.Flush()
+
+		if n != int(pd.BlockSize) {
+			return errors.New("ERROR, pdata::Write, n!=int(pd.BlockSize)")
+		}
+
 		SentSize += pd.BlockSize
 	}
 	pd.Length = TLength

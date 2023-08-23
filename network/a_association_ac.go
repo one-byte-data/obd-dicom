@@ -185,28 +185,23 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 }
 
 func (aaac *aassociationAC) Read(ms media.MemoryStream) (err error) {
-	aaac.ItemType, err = ms.GetByte()
-	if err != nil {
+	if aaac.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return aaac.ReadDynamic(ms)
 }
 
 func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
-	aaac.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if aaac.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aaac.Length, err = ms.GetUint32()
-	if err != nil {
+	if aaac.Length, err = ms.GetUint32(); err != nil {
 		return err
 	}
-	aaac.ProtocolVersion, err = ms.GetUint16()
-	if err != nil {
+	if aaac.ProtocolVersion, err = ms.GetUint16(); err != nil {
 		return err
 	}
-	aaac.Reserved2, err = ms.GetUint16()
-	if err != nil {
+	if aaac.Reserved2, err = ms.GetUint16(); err != nil {
 		return err
 	}
 

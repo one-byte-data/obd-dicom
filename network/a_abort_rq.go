@@ -63,36 +63,29 @@ func (aarq *aabortRQ) Write(rw *bufio.ReadWriter) error {
 }
 
 func (aarq *aabortRQ) Read(ms media.MemoryStream) (err error) {
-	aarq.ItemType, err = ms.GetByte()
-	if err != nil {
+	if aarq.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return aarq.ReadDynamic(ms)
 }
 
 func (aarq *aabortRQ) ReadDynamic(ms media.MemoryStream) (err error) {
-	aarq.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if aarq.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarq.Length, err = ms.GetUint32()
-	if err != nil {
+	if aarq.Length, err = ms.GetUint32(); err != nil {
 		return err
 	}
-	aarq.Reserved2, err = ms.GetByte()
-	if err != nil {
+	if aarq.Reserved2, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarq.Reserved3, err = ms.GetByte()
-	if err != nil {
+	if aarq.Reserved3, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarq.Source, err = ms.GetByte()
-	if err != nil {
+	if aarq.Source, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarq.Reason, err = ms.GetByte()
-	if err != nil {
+	if aarq.Reason, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return

@@ -59,22 +59,21 @@ func (maxim *maximumSubLength) Write(rw *bufio.ReadWriter) bool {
 }
 
 func (maxim *maximumSubLength) Read(ms media.MemoryStream) (err error) {
-	maxim.ItemType, err = ms.GetByte()
-	if err != nil {
+	if maxim.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return maxim.ReadDynamic(ms)
 }
 
 func (maxim *maximumSubLength) ReadDynamic(ms media.MemoryStream) (err error) {
-	maxim.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if maxim.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	maxim.Length, err = ms.GetUint16()
-	if err != nil {
+	if maxim.Length, err = ms.GetUint16(); err != nil {
 		return err
 	}
-	maxim.MaximumLength, err = ms.GetUint32()
+	if maxim.MaximumLength, err = ms.GetUint32(); err != nil {
+		return err
+	}
 	return
 }

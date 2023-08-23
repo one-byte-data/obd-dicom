@@ -86,27 +86,23 @@ func (u *uidItem) Write(rw *bufio.ReadWriter) error {
 }
 
 func (u *uidItem) Read(ms media.MemoryStream) (err error) {
-	u.itemType, err = ms.GetByte()
-	if err != nil {
+	if u.itemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return u.ReadDynamic(ms)
 }
 
 func (u *uidItem) ReadDynamic(ms media.MemoryStream) (err error) {
-	u.reserved1, err = ms.GetByte()
-	if err != nil {
+	if u.reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	u.length, err = ms.GetUint16()
-	if err != nil {
+	if u.length, err = ms.GetUint16(); err != nil {
 		return err
 	}
 
 	buffer := make([]byte, u.length)
-
 	ms.ReadData(buffer)
-
 	u.uid = string(buffer)
+
 	return
 }

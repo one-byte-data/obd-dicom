@@ -53,20 +53,17 @@ func (scpscu *roleSelect) Write(rw *bufio.ReadWriter) bool {
 }
 
 func (scpscu *roleSelect) Read(ms media.MemoryStream) (err error) {
-	scpscu.ItemType, err = ms.GetByte()
-	if err != nil {
+	if scpscu.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return scpscu.ReadDynamic(ms)
 }
 
 func (scpscu *roleSelect) ReadDynamic(ms media.MemoryStream) (err error) {
-	scpscu.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if scpscu.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	scpscu.Length, err = ms.GetUint16()
-	if err != nil {
+	if scpscu.Length, err = ms.GetUint16(); err != nil {
 		return err
 	}
 	tl, err := ms.GetUint16()
@@ -78,10 +75,11 @@ func (scpscu *roleSelect) ReadDynamic(ms media.MemoryStream) (err error) {
 	ms.ReadData(tuid)
 
 	scpscu.uid = string(tuid)
-	scpscu.SCURole, err = ms.GetByte()
-	if err != nil {
+	if scpscu.SCURole, err = ms.GetByte(); err != nil {
 		return err
 	}
-	scpscu.SCPRole, err = ms.GetByte()
+	if scpscu.SCPRole, err = ms.GetByte(); err != nil {
+		return err
+	}
 	return
 }

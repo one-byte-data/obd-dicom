@@ -95,36 +95,29 @@ func (aarj *aassociationRJ) Set(result byte, reason byte) {
 }
 
 func (aarj *aassociationRJ) Read(ms media.MemoryStream) (err error) {
-	aarj.ItemType, err = ms.GetByte()
-	if err != nil {
+	if aarj.ItemType, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return aarj.ReadDynamic(ms)
 }
 
 func (aarj *aassociationRJ) ReadDynamic(ms media.MemoryStream) (err error) {
-	aarj.Reserved1, err = ms.GetByte()
-	if err != nil {
+	if aarj.Reserved1, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarj.Length, err = ms.GetUint32()
-	if err != nil {
+	if aarj.Length, err = ms.GetUint32(); err != nil {
 		return err
 	}
-	aarj.Reserved2, err = ms.GetByte()
-	if err != nil {
+	if aarj.Reserved2, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarj.Result, err = ms.GetByte()
-	if err != nil {
+	if aarj.Result, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarj.Source, err = ms.GetByte()
-	if err != nil {
+	if aarj.Source, err = ms.GetByte(); err != nil {
 		return err
 	}
-	aarj.Reason, err = ms.GetByte()
-	if err != nil {
+	if aarj.Reason, err = ms.GetByte(); err != nil {
 		return err
 	}
 	return

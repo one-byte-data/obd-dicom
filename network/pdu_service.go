@@ -36,7 +36,7 @@ type PDUService interface {
 	interogateAAssociateRQ(rw *bufio.ReadWriter) error
 	parseDCMIntoRaw(DCO media.DcmObj) bool
 	parseRawVRIntoDCM(DCO media.DcmObj) bool
-	readPDU()
+	readPDU() error
 }
 
 type pduService struct {
@@ -111,7 +111,9 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 
 	pdu.ms = media.NewEmptyMemoryStream()
 
-	pdu.ms.ReadFully(rw, 10)
+	if err := pdu.ms.ReadFully(rw, 10); err != nil {
+		return err
+	}
 
 	ItemType, err := pdu.ms.GetByte()
 	if err != nil {
@@ -128,7 +130,9 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 
 	switch ItemType {
 	case pdutype.AssociationAccept:
-		pdu.readPDU()
+		if err := pdu.readPDU(); err != nil {
+			return err
+		}
 		pdu.ms.SetPosition(1)
 		pdu.AssocAC.ReadDynamic(pdu.ms)
 		if !pdu.interogateAAssociateAC() {
@@ -136,12 +140,16 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		}
 		return nil
 	case pdutype.AssociationReject:
-		pdu.readPDU()
+		if err := pdu.readPDU(); err != nil {
+			return err
+		}
 		pdu.ms.SetPosition(1)
 		pdu.AssocRJ.ReadDynamic(pdu.ms)
 		return fmt.Errorf("ERROR, pduservice::Connect - Association rejected - %s", pdu.AssocRJ.GetReason())
 	case pdutype.AssociationAbortRequest:
-		pdu.readPDU()
+		if err := pdu.readPDU(); err != nil {
+			return err
+		}
 		pdu.ms.SetPosition(1)
 		pdu.AbortRQ.ReadDynamic(pdu.ms)
 		return fmt.Errorf("ERROR, pduservice::Connect - Association aborted - %s", pdu.AbortRQ.GetReason())
@@ -178,7 +186,10 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 	for {
 		pdu.ms = media.NewEmptyMemoryStream()
 
-		pdu.ms.ReadFully(pdu.readWriter, 10)
+		if err := pdu.ms.ReadFully(pdu.readWriter, 10); err != nil {
+			return nil, err
+		}
+
 		pdu.ms.SetPosition(0)
 
 		if pdu.pdutype, err = pdu.ms.Get(); err != nil {
@@ -195,7 +206,9 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 
 		switch pdu.pdutype {
 		case pdutype.AssocicationRequest:
-			pdu.readPDU()
+			if err := pdu.readPDU(); err != nil {
+				return nil, err
+			}
 			if err := pdu.AssocRQ.Read(pdu.ms); err != nil {
 				return nil, err
 			}
@@ -204,10 +217,14 @@ func (pdu *pduService) NextPDU() (command media.DcmObj, err error) {
 			}
 			return nil, nil
 		case pdutype.AssociationAccept:
-			pdu.readPDU()
+			if err := pdu.readPDU(); err != nil {
+				return nil, err
+			}
 			return nil, nil
 		case pdutype.PDUDataTransfer:
-			pdu.readPDU()
+			if err := pdu.readPDU(); err != nil {
+				return nil, err
+			}
 			pdu.ms.SetPosition(1)
 			if err := pdu.Pdata.ReadDynamic(pdu.ms); err != nil {
 				return nil, err
@@ -415,9 +432,9 @@ func (pdu *pduService) parseRawVRIntoDCM(DCO media.DcmObj) bool {
 		DCO.SetBigEndian(true)
 	}
 	pdu.Pdata.Buffer.SetPosition(0)
-	return pdu.Pdata.Buffer.ReadObj(DCO)
+	return pdu.Pdata.Buffer.ReadObj(DCO) == nil
 }
 
-func (pdu *pduService) readPDU() {
-	pdu.ms.ReadFully(pdu.readWriter, int(pdu.pdulength)-4)
+func (pdu *pduService) readPDU() error {
+	return pdu.ms.ReadFully(pdu.readWriter, int(pdu.pdulength)-4)
 }

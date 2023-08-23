@@ -40,8 +40,6 @@ func (tag *DcmTag) GetUInt() uint32 {
 		} else {
 			val = binary.LittleEndian.Uint32(tag.Data)
 		}
-	} else {
-		val = 0
 	}
 	return val
 }

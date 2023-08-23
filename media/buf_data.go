@@ -32,7 +32,7 @@ type BufData interface {
 	WriteStringTag(group uint16, element uint16, vr string, content string, explicitVR bool)
 	ReadMeta() (*transfersyntax.TransferSyntax, error)
 	WriteMeta(SOPClassUID string, SOPInstanceUID string, TransferSyntax string)
-	ReadObj(obj DcmObj) bool
+	ReadObj(obj DcmObj) error
 	WriteObj(obj DcmObj)
 	Send(rw *bufio.ReadWriter) error
 	GetAllBytes() []byte
@@ -354,22 +354,21 @@ func (bd *bufData) WriteMeta(SOPClassUID string, SOPInstanceUID string, Transfer
 }
 
 // ReadObj - Read a DICOM Object from a BufData
-func (bd *bufData) ReadObj(obj DcmObj) bool {
-	flag := false
-
+func (bd *bufData) ReadObj(obj DcmObj) error {
 	for bd.GetPosition() < bd.GetSize() {
-		if tag, err := bd.ReadTag(obj.IsExplicitVR()); err == nil {
-			if !obj.IsExplicitVR() {
-				tag.VR = GetDictionaryVR(tag.Group, tag.Element)
-			}
-			if tag.Length%2 != 0 && tag.VR != "SQ" && tag.Length != 0xffffffff {
-				log.Printf("%s is odd", tag.Name)
-			}
-			obj.Add(tag)
+		tag, err := bd.ReadTag(obj.IsExplicitVR())
+		if err != nil {
+			return err
 		}
-		flag = true
+		if !obj.IsExplicitVR() {
+			tag.VR = GetDictionaryVR(tag.Group, tag.Element)
+		}
+		if tag.Length%2 != 0 && tag.VR != "SQ" && tag.Length != 0xffffffff {
+			log.Printf("%s is odd", tag.Name)
+		}
+		obj.Add(tag)
 	}
-	return flag
+	return nil
 }
 
 // WriteObj - Write a DICOM Object to a BufData

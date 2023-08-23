@@ -85,8 +85,6 @@ func NewEmptyDCMObj() DcmObj {
 
 // NewDCMObjFromFile - Read from a DICOM file into a DICOM Object
 func NewDCMObjFromFile(fileName string) (DcmObj, error) {
-	BigEndian := false
-
 	if _, err := os.Stat(fileName); err != nil {
 		if os.IsNotExist(err) {
 			return nil, errors.New("ERROR, DcmObj::Read, file does not exist")
@@ -99,38 +97,16 @@ func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 		return nil, err
 	}
 
-	transferSyntax, err := bufdata.ReadMeta()
-	if err != nil {
-		return nil, err
-	}
-
-	obj := &dcmObj{
-		Tags:           make([]*DcmTag, 0),
-		TransferSyntax: transferSyntax,
-		ExplicitVR:     false,
-		BigEndian:      false,
-		SQtag:          &DcmTag{},
-	}
-
-	if obj.TransferSyntax != nil {
-		if obj.TransferSyntax != transfersyntax.ImplicitVRLittleEndian {
-			obj.ExplicitVR = true
-		}
-		if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
-			BigEndian = true
-		}
-		bufdata.SetBigEndian(BigEndian)
-
-		bufdata.ReadObj(obj)
-	}
-
-	return obj, nil
+	return parseBufData(bufdata)
 }
 
 // NewDCMObjFromBytes - Read from a DICOM bytes into a DICOM Object
 func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
+	return parseBufData(NewBufDataFromBytes(data))
+}
+
+func parseBufData(bufdata BufData) (DcmObj, error) {
 	BigEndian := false
-	bufdata := NewBufDataFromBytes(data)
 
 	transferSyntax, err := bufdata.ReadMeta()
 	if err != nil {
@@ -145,17 +121,22 @@ func NewDCMObjFromBytes(data []byte) (DcmObj, error) {
 		SQtag:          &DcmTag{},
 	}
 
-	if obj.TransferSyntax != nil {
-		if obj.TransferSyntax == transfersyntax.ImplicitVRLittleEndian {
-			obj.ExplicitVR = false
-		} else {
-			obj.ExplicitVR = true
-		}
-		if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
-			BigEndian = true
-		}
-		bufdata.SetBigEndian(BigEndian)
-		bufdata.ReadObj(obj)
+	if obj.TransferSyntax == nil {
+		return nil, fmt.Errorf("unable to read transfer syntax from data")
+	}
+
+	if obj.TransferSyntax == transfersyntax.ImplicitVRLittleEndian {
+		obj.ExplicitVR = false
+	} else {
+		obj.ExplicitVR = true
+	}
+	if obj.TransferSyntax == transfersyntax.ExplicitVRBigEndian {
+		BigEndian = true
+	}
+	bufdata.SetBigEndian(BigEndian)
+
+	if err := bufdata.ReadObj(obj); err != nil {
+		return nil, err
 	}
 
 	return obj, nil

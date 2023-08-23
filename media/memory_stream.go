@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"log"
 	"os"
 )
 
@@ -24,7 +23,7 @@ type MemoryStream interface {
 	Append(data []byte) (int, error)
 	ReadData(input []byte) error
 	Read(count int) ([]byte, error)
-	ReadFully(rw *bufio.ReadWriter, length int)
+	ReadFully(rw *bufio.ReadWriter, length int) error
 	Write(buffer []byte, count int) (int, error)
 	Clear()
 }
@@ -123,15 +122,15 @@ func (ms *memoryStream) ReadData(dst []byte) error {
 	return nil
 }
 
-func (ms *memoryStream) ReadFully(rw *bufio.ReadWriter, length int) {
+func (ms *memoryStream) ReadFully(rw *bufio.ReadWriter, length int) error {
 	data := make([]byte, length)
-	_, err := io.ReadFull(rw, data)
-	if err != nil {
-		log.Print(err)
+	if _, err := io.ReadFull(rw, data); err != nil {
+		return err
 	}
 	rw.Flush()
 	ms.Data = append(ms.Data, data...)
 	ms.Size += length
+	return nil
 }
 
 func (ms *memoryStream) GetData() []byte {

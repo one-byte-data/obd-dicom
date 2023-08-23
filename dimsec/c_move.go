@@ -42,8 +42,7 @@ func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, 
 	DCO.WriteUint16(tags.Priority, priority.Medium)
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
 
-	err := pdu.Write(DCO, SOPClassUID, 0x01)
-	if err != nil {
+	if err := pdu.Write(DCO, SOPClassUID, 0x01); err != nil {
 		return err
 	}
 	return pdu.Write(DDO, SOPClassUID, 0x00)

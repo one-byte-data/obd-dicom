@@ -46,8 +46,7 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 		DCO.WriteString(tags.AffectedSOPInstanceUID, SOPInstance)
 	}
 
-	err := pdu.Write(DCO, SOPClassUID, 0x01)
-	if err != nil {
+	if err := pdu.Write(DCO, SOPClassUID, 0x01); err != nil {
 		return err
 	}
 	return pdu.Write(DDO, SOPClassUID, 0x00)

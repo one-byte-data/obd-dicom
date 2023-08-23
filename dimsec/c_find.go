@@ -35,8 +35,7 @@ func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) 
 	DCO.WriteUint16(tags.Priority, priority.Medium)
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
 
-	err := pdu.Write(DCO, SOPClassUID, 0x01)
-	if err != nil {
+	if err := pdu.Write(DCO, SOPClassUID, 0x01); err != nil {
 		return err
 	}
 	return pdu.Write(DDO, SOPClassUID, 0x00)
@@ -92,10 +91,11 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 		DCOR.WriteUint16(tags.MessageIDBeingRespondedTo, valor)
 		DCOR.WriteUint16(tags.CommandDataSetType, leDSType)
 		DCOR.WriteUint16(tags.Status, status)
-		err := pdu.Write(DCOR, SOPClassUID, 0x01)
-		if err != nil {
+
+		if err := pdu.Write(DCOR, SOPClassUID, 0x01); err != nil {
 			return err
 		}
+
 		if DDO.TagCount() > 0 {
 			return pdu.Write(DDO, SOPClassUID, 0x00)
 		}

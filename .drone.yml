@@ -31,7 +31,7 @@ steps:
       - go build -v -a -ldflags "-X main.version=build.${DRONE_BUILD_NUMBER}" -o build/linux/amd64/compare cmd/compare/main.go
 
   - name: docker-dev
-    image: thegeeklab/drone-docker-buildx:24
+    image: plugins/docker
     privileged: true
     when:
       branch:
@@ -44,9 +44,9 @@ steps:
       password:
         from_secret: github_password
       auto_tag: true
-      platforms:
-        - linux/amd64
-        - darwin/arm64
+      # platforms:
+      #   - linux/amd64
+      #   - darwin/arm64
       registry: ghcr.io
       repo: ghcr.io/one-byte-data/${DRONE_REPO_NAME}
       tags: dev
@@ -64,7 +64,7 @@ steps:
       - go build -v -a -ldflags "-X main.version=build.${DRONE_TAG}" -o build/linux/amd64/compare cmd/compare/main.go
   
   - name: docker-latest
-    image: thegeeklab/drone-docker-buildx:24
+    image: plugins/docker
     privileged: true
     when:
       branch:
@@ -77,9 +77,9 @@ steps:
       password:
         from_secret: github_password
       auto_tag: true
-      platforms:
-        - linux/amd64
-        # - linux/arm64
+      # platforms:
+      #   - linux/amd64
+      #   - linux/arm64
       registry: ghcr.io
       repo: ghcr.io/one-byte-data/${DRONE_REPO_NAME}
       tags:

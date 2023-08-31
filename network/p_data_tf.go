@@ -106,23 +106,23 @@ func (pd *PDataTF) Write(rw *bufio.ReadWriter) error {
 		bd.WriteByte(pd.MsgHeader)
 
 		if err := bd.Send(rw); err != nil {
-			return errors.New("ERROR, pdata::Write, bd.Send(conn) failed")
+			return errors.New("pdata::Write, bd.Send(conn) failed")
 		}
 
 		buff, err := pd.Buffer.Read(int(pd.BlockSize))
 		if err != nil {
-			return errors.New("ERROR, pdata::Write, " + err.Error())
+			return errors.New("pdata::Write, " + err.Error())
 		}
 
 		n, err := rw.Write(buff)
 		if err != nil {
-			return errors.New("ERROR, pdata::Write, " + err.Error())
+			return errors.New("pdata::Write, " + err.Error())
 		}
 
 		rw.Flush()
 
 		if n != int(pd.BlockSize) {
-			return errors.New("ERROR, pdata::Write, n!=int(pd.BlockSize)")
+			return errors.New("pdata::Write, n!=int(pd.BlockSize)")
 		}
 
 		SentSize += pd.BlockSize

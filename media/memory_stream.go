@@ -157,7 +157,7 @@ func (ms *memoryStream) SetSize(size int) {
 func (ms *memoryStream) Read(count int) ([]byte, error) {
 	buffer := make([]byte, count)
 	if count+ms.Position > ms.Size {
-		return nil, errors.New("ERROR, MemoryStream::Read, count+ms.Position > ms.Size")
+		return nil, errors.New("MemoryStream::Read, count+ms.Position > ms.Size")
 	}
 	copy(buffer, ms.Data[ms.Position:ms.Position+count])
 	ms.Position = ms.Position + count
@@ -167,11 +167,11 @@ func (ms *memoryStream) Read(count int) ([]byte, error) {
 func (ms *memoryStream) Append(data []byte) (int, error) {
 	count := len(data)
 	if count == 0 {
-		return -1, errors.New("ERROR, MemoryStream::Append, nothing to write")
+		return -1, errors.New("MemoryStream::Append, nothing to write")
 	}
 
 	if ms.Data == nil {
-		return -1, errors.New("ERROR, MemoryStream:::Append, no Data to append to")
+		return -1, errors.New("MemoryStream:::Append, no Data to append to")
 	}
 
 	ms.Data = append(ms.Data, data...)
@@ -182,11 +182,11 @@ func (ms *memoryStream) Append(data []byte) (int, error) {
 // Write - Write from Buffer into MemoryStream count bytes
 func (ms *memoryStream) Write(buffer []byte, count int) (int, error) {
 	if len(buffer) == 0 {
-		return -1, errors.New("ERROR, MemoryStream::Write, nothing to write")
+		return -1, errors.New("MemoryStream::Write, nothing to write")
 	}
 
 	if ms.Data == nil {
-		return -1, errors.New("ERROR, MemoryStream:::Write, no Data to append to")
+		return -1, errors.New("MemoryStream:::Write, no Data to append to")
 	}
 
 	if ms.Position >= ms.Size {

@@ -17,16 +17,19 @@ func CStoreReadRQ(pdu network.PDUService, command media.DcmObj) (media.DcmObj, e
 }
 
 // CStoreWriteRQ CStore request write
-func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) error {
+func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj) error {
 	DCO := media.NewEmptyDCMObj()
-	var size uint32
 
-	valor := uint16(len(SOPClassUID))
+	sopClassUID := ""
+	for _, presContext := range pdu.GetAAssociationRQ().GetPresContexts() {
+		sopClassUID = presContext.GetAbstractSyntax().GetUID()
+	}
+	valor := uint16(len(sopClassUID))
 	if valor%2 == 1 {
 		valor++
 	}
 
-	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
+	size := uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
 	SOPInstance := DDO.GetString(tags.SOPInstanceUID)
 	length := uint32(len(SOPInstance))
@@ -36,7 +39,7 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 	}
 
 	DCO.WriteUint32(tags.CommandGroupLength, size)
-	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
+	DCO.WriteString(tags.AffectedSOPClassUID, sopClassUID)
 	DCO.WriteUint16(tags.CommandField, dicomcommand.CStoreRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
 	DCO.WriteUint16(tags.Priority, priority.Medium)
@@ -46,10 +49,10 @@ func CStoreWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string)
 		DCO.WriteString(tags.AffectedSOPInstanceUID, SOPInstance)
 	}
 
-	if err := pdu.Write(DCO, SOPClassUID, 0x01); err != nil {
+	if err := pdu.Write(DCO, 0x01); err != nil {
 		return err
 	}
-	return pdu.Write(DDO, SOPClassUID, 0x00)
+	return pdu.Write(DDO, 0x00)
 }
 
 // CStoreReadRSP CStore response read
@@ -62,31 +65,29 @@ func CStoreReadRSP(pdu network.PDUService) (uint16, error) {
 	if dco.GetUShort(tags.CommandField) == dicomcommand.CStoreResponse {
 		return dco.GetUShort(tags.Status), nil
 	}
-	return dicomstatus.FailureUnableToProcess, errors.New("ERROR, CStoreReadRSP, unknown error")
+	return dicomstatus.FailureUnableToProcess, errors.New("CStoreReadRSP, unknown error")
 }
 
 // CStoreWriteRSP CStore response write
 func CStoreWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16) error {
 	DCOR := media.NewEmptyDCMObj()
-	var size uint32
-	var sopclasslength, sopinstancelength uint16
 
 	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 	SOPClassUID := DCO.GetString(tags.AffectedSOPClassUID)
-	sopclasslength = uint16(len(SOPClassUID))
+	sopclasslength := uint16(len(SOPClassUID))
 	if sopclasslength > 0 {
 		if sopclasslength%2 == 1 {
 			sopclasslength++
 		}
 
 		SOPInstance := DCO.GetString(tags.AffectedSOPInstanceUID)
-		sopinstancelength = uint16(len(SOPClassUID))
+		sopinstancelength := uint16(len(SOPClassUID))
 		if sopinstancelength > 0 {
 			if sopinstancelength%2 == 1 {
 				sopinstancelength++
 			}
 
-			size = uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2 + 8 + sopinstancelength)
+			size := uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2 + 8 + sopinstancelength)
 
 			DCOR.WriteUint32(tags.CommandGroupLength, size)
 			DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
@@ -96,8 +97,8 @@ func CStoreWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16) err
 			DCOR.WriteUint16(tags.CommandDataSetType, 0x0101)
 			DCOR.WriteUint16(tags.Status, status)
 			DCOR.WriteString(tags.AffectedSOPInstanceUID, SOPInstance)
-			return pdu.Write(DCOR, SOPClassUID, 0x01)
+			return pdu.Write(DCOR, 0x01)
 		}
 	}
-	return errors.New("ERROR, CStoreWriteRSP, unknown error")
+	return errors.New("CStoreWriteRSP, unknown error")
 }

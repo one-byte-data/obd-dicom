@@ -2,7 +2,7 @@ package network
 
 import (
 	"bufio"
-	"log"
+	"log/slog"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
 	"github.com/one-byte-data/obd-dicom/dictionary/transfersyntax"
@@ -107,14 +107,14 @@ func (pc *presentationContextAccept) Write(rw *bufio.ReadWriter) (err error) {
 	sopName := ""
 	tsName := ""
 	if sopClass := sopclass.GetSOPClassFromUID(pc.GetAbstractSyntax().GetUID()); sopClass != nil {
-		sopName = sopClass.Name
+		sopName = sopClass.Description
 	}
 	if transferSyntax := transfersyntax.GetTransferSyntaxFromUID(pc.GetTrnSyntax().GetUID()); transferSyntax != nil {
-		tsName = transferSyntax.Name
+		tsName = transferSyntax.Description
 	}
 
-	log.Printf("INFO, ASSOC-AC: \tAccepted PresentationContext: %s - %s\n", pc.GetAbstractSyntax().GetUID(), sopName)
-	log.Printf("INFO, ASSOC-AC: \tAccepted TransferSynxtax: %s - %s\n", pc.GetTrnSyntax().GetUID(), tsName)
+	slog.Info("ASSOC-AC: \tAccepted AbstractContext:", "UID", pc.GetAbstractSyntax().GetUID(), "Description", sopName)
+	slog.Info("ASSOC-AC: \tAccepted TransferSynxtax:", "UID", pc.GetTrnSyntax().GetUID(), "Description", tsName)
 
 	if err = bd.Send(rw); err == nil {
 		return pc.TrnSyntax.Write(rw)

@@ -17,28 +17,31 @@ func CFindReadRQ(pdu network.PDUService) (media.DcmObj, error) {
 }
 
 // CFindWriteRQ CFind request write
-func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string) error {
+func CFindWriteRQ(pdu network.PDUService, DDO media.DcmObj) error {
 	DCO := media.NewEmptyDCMObj()
-	var size uint32
 
-	valor := uint16(len(SOPClassUID))
+	sopClassUID := ""
+	for _, presContext := range pdu.GetAAssociationRQ().GetPresContexts() {
+		sopClassUID = presContext.GetAbstractSyntax().GetUID()
+	}
+	valor := uint16(len(sopClassUID))
 	if valor%2 == 1 {
 		valor++
 	}
 
-	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
+	size := uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
 	DCO.WriteUint32(tags.CommandGroupLength, size)
-	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
+	DCO.WriteString(tags.AffectedSOPClassUID, sopClassUID)
 	DCO.WriteUint16(tags.CommandField, dicomcommand.CFindRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
 	DCO.WriteUint16(tags.Priority, priority.Medium)
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
 
-	if err := pdu.Write(DCO, SOPClassUID, 0x01); err != nil {
+	if err := pdu.Write(DCO, 0x01); err != nil {
 		return err
 	}
-	return pdu.Write(DDO, SOPClassUID, 0x00)
+	return pdu.Write(DDO, 0x00)
 }
 
 // CFindReadRSP CFind response read
@@ -59,30 +62,28 @@ func CFindReadRSP(pdu network.PDUService) (media.DcmObj, uint16, error) {
 		}
 		return nil, dco.GetUShort(tags.Status), nil
 	}
-	return nil, dicomstatus.FailureUnableToProcess, errors.New("ERROR, CFindReadRSP, unknown error")
+	return nil, dicomstatus.FailureUnableToProcess, errors.New("CFindReadRSP, unknown error")
 }
 
 // CFindWriteRSP CFind response write
 func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, status uint16) error {
 	DCOR := media.NewEmptyDCMObj()
-	var size uint32
-	var sopclasslength, leDSType uint16
 
 	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 
+	leDSType := uint16(0x0101)
 	if DDO.TagCount() > 0 {
 		leDSType = 0x0102
-	} else {
-		leDSType = 0x0101
 	}
+
 	SOPClassUID := DCO.GetString(tags.AffectedSOPClassUID)
-	sopclasslength = uint16(len(SOPClassUID))
+	sopclasslength := uint16(len(SOPClassUID))
 	if sopclasslength > 0 {
 		if sopclasslength%2 == 1 {
 			sopclasslength++
 		}
 
-		size = uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2)
+		size := uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2)
 
 		DCOR.WriteUint32(tags.CommandGroupLength, size)
 		DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
@@ -92,13 +93,13 @@ func CFindWriteRSP(pdu network.PDUService, DCO media.DcmObj, DDO media.DcmObj, s
 		DCOR.WriteUint16(tags.CommandDataSetType, leDSType)
 		DCOR.WriteUint16(tags.Status, status)
 
-		if err := pdu.Write(DCOR, SOPClassUID, 0x01); err != nil {
+		if err := pdu.Write(DCOR, 0x01); err != nil {
 			return err
 		}
 
 		if DDO.TagCount() > 0 {
-			return pdu.Write(DDO, SOPClassUID, 0x00)
+			return pdu.Write(DDO, 0x00)
 		}
 	}
-	return errors.New("ERROR, CFindReadRSP, unknown error")
+	return errors.New("CFindReadRSP, unknown error")
 }

@@ -147,5 +147,5 @@ func (pc *presentationContext) ReadDynamic(ms media.MemoryStream) (err error) {
 		return nil
 	}
 
-	return errors.New("ERROR, pc::ReadDynamic, Count is not zero")
+	return errors.New("pc::ReadDynamic, Count is not zero")
 }

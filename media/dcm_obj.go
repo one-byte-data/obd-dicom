@@ -87,9 +87,9 @@ func NewEmptyDCMObj() DcmObj {
 func NewDCMObjFromFile(fileName string) (DcmObj, error) {
 	if _, err := os.Stat(fileName); err != nil {
 		if os.IsNotExist(err) {
-			return nil, errors.New("ERROR, DcmObj::Read, file does not exist")
+			return nil, errors.New("DcmObj::Read, file does not exist")
 		}
-		return nil, fmt.Errorf("ERROR: %s", err.Error())
+		return nil, fmt.Errorf("DcmObj::Read %s", err.Error())
 	}
 
 	bufdata, err := NewBufDataFromFile(fileName)
@@ -531,11 +531,11 @@ func (obj *dcmObj) GetPixelData(frame int) ([]byte, error) {
 					frames = 1
 				}
 				if size == 0 {
-					return nil, errors.New("ERROR, DcmObj::ConvertTransferSyntax, size=0")
+					return nil, errors.New("DcmObj::ConvertTransferSyntax, size=0")
 				}
 
 				if frame > int(frames) {
-					return nil, errors.New("ERROR, invalid frame")
+					return nil, errors.New("invalid frame")
 				}
 
 				if tag.Length == 0xFFFFFFFF {
@@ -640,7 +640,7 @@ func (obj *dcmObj) ChangeTransferSynx(outTS *transfersyntax.TransferSyntax) erro
 					frames = 1
 				}
 				if size == 0 {
-					return errors.New("ERROR, DcmObj::ConvertTransferSyntax, size=0")
+					return errors.New("DcmObj::ConvertTransferSyntax, size=0")
 				}
 				img := make([]byte, size)
 				if tag.Length == 0xFFFFFFFF {

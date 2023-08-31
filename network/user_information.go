@@ -44,6 +44,12 @@ func NewUserInformation() UserInformation {
 		MaxSubLength:  NewMaximumSubLength(),
 		AsyncOpWindow: NewAsyncOperationWindow(),
 		SCPSCURole:    NewRoleSelect(),
+		ImpClass: uidItem{
+			itemType: 0x52,
+		},
+		ImpVersion: uidItem{
+			itemType: 0x55,
+		},
 	}
 }
 
@@ -79,7 +85,7 @@ func (ui *userInformation) GetImpClass() UIDItem {
 }
 
 func (ui *userInformation) SetImpClassUID(name string) {
-	ui.ImpClass.SetReserved(0x52)
+	ui.ImpClass.SetType(0x52)
 	ui.ImpClass.SetReserved(0x00)
 	ui.ImpClass.SetUID(name)
 	ui.ImpClass.SetLength(uint16(len(name)))
@@ -158,7 +164,7 @@ func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
 		default:
 			ui.UserInfoBaggage = uint32(Count)
 			Count = -1
-			return errors.New("ERROR, user::ReadDynamic, unknown TempByte: " + strconv.Itoa(int(TempByte)))
+			return errors.New("user::ReadDynamic, unknown TempByte: " + strconv.Itoa(int(TempByte)))
 		}
 	}
 
@@ -166,5 +172,5 @@ func (ui *userInformation) ReadDynamic(ms media.MemoryStream) (err error) {
 		return nil
 	}
 
-	return errors.New("ERROR, user::ReadDynamic, Count is not zero")
+	return errors.New("user::ReadDynamic, Count is not zero")
 }

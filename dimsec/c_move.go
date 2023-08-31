@@ -17,35 +17,37 @@ func CMoveReadRQ(pdu network.PDUService) (media.DcmObj, error) {
 }
 
 // CMoveWriteRQ CMove request write
-func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID string, AETDest string) error {
+func CMoveWriteRQ(pdu network.PDUService, DDO media.DcmObj, AETDest string) error {
 	DCO := media.NewEmptyDCMObj()
-	var size uint32
-	var valor, largo uint16
 
-	largo = uint16(len(AETDest))
+	largo := uint16(len(AETDest))
 	if largo%2 == 1 {
 		largo++
 	}
 
-	valor = uint16(len(SOPClassUID))
+	sopClassUID := ""
+	for _, presContext := range pdu.GetAAssociationRQ().GetPresContexts() {
+		sopClassUID = presContext.GetAbstractSyntax().GetUID()
+	}
+	valor := uint16(len(sopClassUID))
 	if valor%2 == 1 {
 		valor++
 	}
 
-	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + largo + 8 + 2 + 8 + 2)
+	size := uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + largo + 8 + 2 + 8 + 2)
 
 	DCO.WriteUint32(tags.CommandGroupLength, size)
-	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
+	DCO.WriteString(tags.AffectedSOPClassUID, sopClassUID)
 	DCO.WriteUint16(tags.CommandField, dicomcommand.CMoveRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
 	DCO.WriteString(tags.MoveDestination, AETDest)
 	DCO.WriteUint16(tags.Priority, priority.Medium)
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0102)
 
-	if err := pdu.Write(DCO, SOPClassUID, 0x01); err != nil {
+	if err := pdu.Write(DCO, 0x01); err != nil {
 		return err
 	}
-	return pdu.Write(DDO, SOPClassUID, 0x00)
+	return pdu.Write(DDO, 0x00)
 }
 
 // CMoveReadRSP CMove response read
@@ -76,7 +78,6 @@ func CMoveReadRSP(pdu network.PDUService, pending *int) (media.DcmObj, uint16, e
 // CMoveWriteRSP CMove response write
 func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pending uint16) error {
 	DCOR := media.NewEmptyDCMObj()
-	var size uint32
 
 	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 
@@ -87,7 +88,7 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 			sopclasslength++
 		}
 
-		size = uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2 + 8 + 2 + 8 + 2)
+		size := uint32(8 + sopclasslength + 8 + 2 + 8 + 2 + 8 + 2 + 8 + 2 + 8 + 2)
 
 		DCOR.WriteUint32(tags.CommandGroupLength, size)
 		DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
@@ -98,7 +99,7 @@ func CMoveWriteRSP(pdu network.PDUService, DCO media.DcmObj, status uint16, pend
 		DCOR.WriteUint16(tags.Status, status)
 		DCOR.WriteUint16(tags.NumberOfRemainingSuboperations, pending)
 
-		return pdu.Write(DCOR, SOPClassUID, 0x01)
+		return pdu.Write(DCOR, 0x01)
 	}
-	return errors.New("ERROR, CMoveWriteRSP, unknown error")
+	return errors.New("CMoveWriteRSP, unknown error")
 }

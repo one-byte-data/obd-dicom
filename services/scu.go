@@ -42,16 +42,16 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
+	defer pdu.Close()
 	if err := d.openAssociation(pdu, sopclass.Verification.UID, []string{}, timeout); err != nil {
 		return err
 	}
-	if err := dimsec.CEchoWriteRQ(pdu, sopclass.Verification.UID); err != nil {
+	if err := dimsec.CEchoWriteRQ(pdu); err != nil {
 		return err
 	}
 	if err := dimsec.CEchoReadRSP(pdu); err != nil {
 		return err
 	}
-	pdu.Close()
 	return nil
 }
 
@@ -61,10 +61,11 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, uint16, error) {
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelFind
 
 	pdu := network.NewPDUService()
+	defer pdu.Close()
 	if err := d.openAssociation(pdu, SOPClassUID.UID, []string{}, timeout); err != nil {
 		return results, status, err
 	}
-	if err := dimsec.CFindWriteRQ(pdu, Query, SOPClassUID.UID); err != nil {
+	if err := dimsec.CFindWriteRQ(pdu, Query); err != nil {
 		return results, status, err
 	}
 	for status != dicomstatus.Success {
@@ -83,7 +84,6 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, uint16, error) {
 		}
 	}
 
-	pdu.Close()
 	return results, status, nil
 }
 
@@ -93,10 +93,11 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (uint16, 
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelMove
 
 	pdu := network.NewPDUService()
+	defer pdu.Close()
 	if err := d.openAssociation(pdu, SOPClassUID.UID, []string{}, timeout); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
-	if err := dimsec.CMoveWriteRQ(pdu, Query, SOPClassUID.UID, destAET); err != nil {
+	if err := dimsec.CMoveWriteRQ(pdu, Query, destAET); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
 
@@ -112,8 +113,6 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (uint16, 
 			log.Println("No onCMoveResult event found")
 		}
 	}
-
-	pdu.Close()
 	return status, nil
 }
 
@@ -126,6 +125,7 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 	SOPClassUID := DDO.GetString(tags.SOPClassUID)
 	if len(SOPClassUID) > 0 {
 		pdu := network.NewPDUService()
+		defer pdu.Close()
 		err := d.openAssociation(pdu, SOPClassUID, []string{DDO.GetTransferSyntax().UID}, timeout)
 		if err != nil {
 			return err
@@ -135,20 +135,18 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 			return err
 		}
 		if r != dicomstatus.Success {
-			return errors.New("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
+			return errors.New("serviceuser::StoreSCU, dimsec.CStoreReadRSP failed")
 		}
 		c, err := dimsec.CStoreReadRSP(pdu)
 		if err != nil {
 			return err
 		}
 		if c != dicomstatus.Success {
-			return fmt.Errorf("ERROR, serviceuser::StoreSCU, dimsec.CStoreReadRSP failed - %d", c)
+			return fmt.Errorf("serviceuser::StoreSCU, dimsec.CStoreReadRSP failed - %d", c)
 		}
-
-		pdu.Close()
 		return nil
 	}
-	return errors.New("ERROR, serviceuser::StoreSCU, OpenAssociation failed, RAET: " + d.destination.CalledAE)
+	return errors.New("serviceuser::StoreSCU, OpenAssociation failed, RAET: " + d.destination.CalledAE)
 }
 
 func (d *scu) SetOnCFindResult(f func(result media.DcmObj)) {
@@ -171,6 +169,7 @@ func (d *scu) openAssociation(pdu network.PDUService, abstractSyntax string, tra
 		PresContext.AddTransferSyntax(ts)
 	}
 	PresContext.AddTransferSyntax(transfersyntax.ImplicitVRLittleEndian.UID)
+	PresContext.AddTransferSyntax(transfersyntax.ExplicitVRLittleEndian.UID)
 	pdu.AddPresContexts(PresContext)
 
 	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))
@@ -181,16 +180,16 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 
 	PCID := pdu.GetPresentationContextID()
 	if PCID == 0 {
-		return dicomstatus.FailureUnableToProcess, errors.New("ERROR, serviceuser::WriteStoreRQ, PCID==0")
+		return dicomstatus.FailureUnableToProcess, errors.New("serviceuser::WriteStoreRQ, PCID==0")
 	}
 	TrnSyntOUT := pdu.GetTransferSyntax(PCID)
 
 	if TrnSyntOUT == nil {
-		return dicomstatus.FailureUnableToProcess, errors.New("ERROR, serviceuser::WriteStoreRQ, TrnSyntOut is empty")
+		return dicomstatus.FailureUnableToProcess, errors.New("serviceuser::WriteStoreRQ, TrnSyntOut is empty")
 	}
 
 	if TrnSyntOUT.UID == DDO.GetTransferSyntax().UID {
-		if err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID); err != nil {
+		if err := dimsec.CStoreWriteRQ(pdu, DDO); err != nil {
 			return status, err
 		}
 		return dicomstatus.Success, nil
@@ -205,7 +204,7 @@ func (d *scu) writeStoreRQ(pdu network.PDUService, DDO media.DcmObj, SOPClassUID
 	if TrnSyntOUT.UID == transfersyntax.ExplicitVRBigEndian.UID {
 		DDO.SetBigEndian(true)
 	}
-	err := dimsec.CStoreWriteRQ(pdu, DDO, SOPClassUID)
+	err := dimsec.CStoreWriteRQ(pdu, DDO)
 	if err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}

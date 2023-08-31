@@ -3,7 +3,7 @@ package network
 import (
 	"bufio"
 	"errors"
-	"log"
+	"log/slog"
 	"strconv"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
@@ -148,11 +148,11 @@ func (aaac *aassociationAC) Size() uint32 {
 func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 	bd := media.NewEmptyBufData()
 
-	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.GetCallingAE(), aaac.GetCalledAE())
-	log.Printf("INFO, ASSOC-AC: ImpClass: %s\n", aaac.UserInfo.GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n", aaac.UserInfo.GetImpVersion().GetUID())
-	log.Printf("INFO, ASSOC-AC: MaxPDULength: %d\n", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
-	log.Printf("INFO, ASSOC-AC: MaxOpsInvoked/MaxOpsPerformed: %d/%d\n", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
+	slog.Info("ASSOC-AC:", "CallingAE", aaac.GetCallingAE(), "CalledAE", aaac.GetCalledAE())
+	slog.Info("ASSOC-AC:", "ImpClass", aaac.UserInfo.GetImpClass().GetUID())
+	slog.Info("ASSOC-AC:", "ImpVersion", aaac.UserInfo.GetImpVersion().GetUID())
+	slog.Info("ASSOC-AC:", "MaxPDULength", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
+	slog.Info("ASSOC-AC:", "MaxOpsInvoked", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), "MaxOpsPerformed", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
 
 	bd.SetBigEndian(true)
 	aaac.Size()
@@ -169,14 +169,10 @@ func (aaac *aassociationAC) Write(rw *bufio.ReadWriter) error {
 		return err
 	}
 
-	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s (%s)\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
 	if err := aaac.AppContext.Write(rw); err != nil {
 		return err
 	}
-	for presIndex, presContextAccept := range aaac.PresContextAccepts {
-		log.Printf("INFO, ASSOC-AC: PresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-AC: \tAbstractSyntax: %s (%s)\n", presContextAccept.GetAbstractSyntax().GetUID(), sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
-		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s (%s)\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+	for _, presContextAccept := range aaac.PresContextAccepts {
 		if err := presContextAccept.Write(rw); err != nil {
 			return err
 		}
@@ -210,6 +206,7 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 	ms.ReadData(aaac.Reserved3[:])
 
 	Count := int(aaac.Length - 4 - 16 - 16 - 32)
+
 	for Count > 0 {
 		TempByte, err := ms.GetByte()
 		if err != nil {
@@ -230,23 +227,24 @@ func (aaac *aassociationAC) ReadDynamic(ms media.MemoryStream) (err error) {
 			Count = Count - int(aaac.UserInfo.Size())
 		default:
 			Count = -1
-			return errors.New("ERROR, aaac::ReadDynamic, unknown Item, " + strconv.Itoa(int(TempByte)))
+			return errors.New("aaac::ReadDynamic, unknown Item " + strconv.Itoa(int(TempByte)))
 		}
 	}
 
-	log.Printf("INFO, ASSOC-AC: %s <-- %s\n", aaac.GetCallingAE(), aaac.GetCalledAE())
-	log.Printf("INFO, ASSOC-AC: ImpClass: %s\n", aaac.GetUserInformation().GetImpClass().GetUID())
-	log.Printf("INFO, ASSOC-AC: ImpVersion: %s\n", aaac.GetUserInformation().GetImpVersion().GetUID())
-	log.Printf("INFO, ASSOC-AC: MaxPDULength: %d\n", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
-	log.Printf("INFO, ASSOC-AC: MaxOpsInvoked/MaxOpsPerformed: %d/%d\n", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
-	log.Printf("INFO, ASSOC-AC: ApplicationContext: %s (%s)\n", aaac.AppContext.GetUID(), sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
+	slog.Info("ASSOC-AC:", "CallingAE", aaac.GetCallingAE(), "CalledAE", aaac.GetCalledAE())
+	slog.Info("ASSOC-AC:", "ImpClass", aaac.GetUserInformation().GetImpClass().GetUID())
+	slog.Info("ASSOC-AC:", "ImpVersion", aaac.GetUserInformation().GetImpVersion().GetUID())
+	slog.Info("ASSOC-AC:", "MaxPDULength", aaac.GetUserInformation().GetMaxSubLength().GetMaximumLength())
+	slog.Info("ASSOC-AC:", "MaxOpsInvoked", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsInvoked(), "MaxOpsPerformed", aaac.GetUserInformation().GetAsyncOperationWindow().GetMaxNumberOperationsPerformed())
+	slog.Info("ASSOC-AC: ApplicationContext", "UID", aaac.AppContext.GetUID(), "Description", sopclass.GetSOPClassFromUID(aaac.AppContext.GetUID()).Description)
 	for presIndex, presContextAccept := range aaac.PresContextAccepts {
-		log.Printf("INFO, ASSOC-AC: AcceptedPresentationContext: %d\n", presIndex+1)
-		log.Printf("INFO, ASSOC-AC: \tTransferSyntax: %s (%s)\n", presContextAccept.GetTrnSyntax().GetUID(), transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
+		slog.Info("ASSOC-AC: AcceptedPresentationContext", "Index", presIndex+1)
+		//slog.Info("ASSOC-AC: \tAccepted AbstractSyntax", "UID", presContextAccept.GetAbstractSyntax().GetUID(), "Description", sopclass.GetSOPClassFromUID(presContextAccept.GetAbstractSyntax().GetUID()).Description)
+		slog.Info("ASSOC-AC: \tAccepted TransferSyntax", "UID", presContextAccept.GetTrnSyntax().GetUID(), "Description", transfersyntax.GetTransferSyntaxFromUID(presContextAccept.GetTrnSyntax().GetUID()).Description)
 	}
 	if Count == 0 {
 		return nil
 	}
 
-	return errors.New("ERROR, aarq::ReadDynamic, Count is not zero")
+	return errors.New("aarq::ReadDynamic, Count is not zero")
 }

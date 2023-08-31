@@ -16,31 +16,34 @@ func CEchoReadRQ(DCO media.DcmObj) bool {
 }
 
 // CEchoWriteRQ CEcho request write
-func CEchoWriteRQ(pdu network.PDUService, SOPClassUID string) error {
+func CEchoWriteRQ(pdu network.PDUService) error {
 	DCO := media.NewEmptyDCMObj()
-	var size uint32
 
-	valor := uint16(len(SOPClassUID))
+	sopClassUID := ""
+	for _, presContext := range pdu.GetAAssociationRQ().GetPresContexts() {
+		sopClassUID = presContext.GetAbstractSyntax().GetUID()
+	}
+	valor := uint16(len(sopClassUID))
 	if valor%2 == 1 {
 		valor++
 	}
 
-	size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
+	size := uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
 	DCO.WriteUint32(tags.CommandGroupLength, size)
-	DCO.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
+	DCO.WriteString(tags.AffectedSOPClassUID, sopClassUID)
 	DCO.WriteUint16(tags.CommandField, dicomcommand.CEchoRequest)
 	DCO.WriteUint16(tags.MessageID, network.Uniq16odd())
 	DCO.WriteUint16(tags.CommandDataSetType, 0x0101)
 
-	return pdu.Write(DCO, SOPClassUID, 0x01)
+	return pdu.Write(DCO, 0x01)
 }
 
 // CEchoReadRSP CEcho response read
 func CEchoReadRSP(pdu network.PDUService) error {
 	dco, err := pdu.NextPDU()
 	if err != nil {
-		return errors.New("ERROR, CEchoReadRSP, failed pdu.Read(&DCO)")
+		return errors.New("CEchoReadRSP, failed pdu.Read(&DCO)")
 	}
 	if dco.GetUShort(tags.CommandField) == dicomcommand.CEchoResponse {
 		if dco.GetUShort(tags.Status) == dicomstatus.Success {
@@ -53,18 +56,16 @@ func CEchoReadRSP(pdu network.PDUService) error {
 // CEchoWriteRSP CEcho response write
 func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
 	DCOR := media.NewEmptyDCMObj()
-	var size uint32
-	var valor uint16
 
 	DCOR.SetTransferSyntax(DCO.GetTransferSyntax())
 	SOPClassUID := DCO.GetString(tags.AffectedSOPClassUID)
-	valor = uint16(len(SOPClassUID))
+	valor := uint16(len(SOPClassUID))
 	if valor > 0 {
 		if valor%2 == 1 {
 			valor++
 		}
 
-		size = uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
+		size := uint32(8 + valor + 8 + 2 + 8 + 2 + 8 + 2)
 
 		DCOR.WriteUint32(tags.CommandGroupLength, size)
 		DCOR.WriteString(tags.AffectedSOPClassUID, SOPClassUID)
@@ -74,7 +75,7 @@ func CEchoWriteRSP(pdu network.PDUService, DCO media.DcmObj) error {
 		valor = DCO.GetUShort(tags.CommandDataSetType)
 		DCOR.WriteUint16(tags.CommandDataSetType, valor)
 		DCOR.WriteUint16(tags.Status, dicomstatus.Success)
-		return pdu.Write(DCOR, SOPClassUID, 0x01)
+		return pdu.Write(DCOR, 0x01)
 	}
-	return errors.New("ERROR, CEchoReadRSP, unknown error")
+	return errors.New("CEchoReadRSP, unknown error")
 }

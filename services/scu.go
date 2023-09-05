@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"strconv"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/sopclass"
@@ -42,10 +42,10 @@ func NewSCU(destination *network.Destination) SCU {
 
 func (d *scu) EchoSCU(timeout int) error {
 	pdu := network.NewPDUService()
-	defer pdu.Close()
 	if err := d.openAssociation(pdu, sopclass.Verification.UID, []string{}, timeout); err != nil {
 		return err
 	}
+	defer pdu.Close()
 	if err := dimsec.CEchoWriteRQ(pdu); err != nil {
 		return err
 	}
@@ -61,10 +61,10 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, uint16, error) {
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelFind
 
 	pdu := network.NewPDUService()
-	defer pdu.Close()
 	if err := d.openAssociation(pdu, SOPClassUID.UID, []string{}, timeout); err != nil {
 		return results, status, err
 	}
+	defer pdu.Close()
 	if err := dimsec.CFindWriteRQ(pdu, Query); err != nil {
 		return results, status, err
 	}
@@ -79,7 +79,7 @@ func (d *scu) FindSCU(Query media.DcmObj, timeout int) (int, uint16, error) {
 			if d.onCFindResult != nil {
 				d.onCFindResult(ddo)
 			} else {
-				log.Println("No onCFindResult event found")
+				slog.Warn("No onCFindResult event found")
 			}
 		}
 	}
@@ -93,10 +93,10 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (uint16, 
 	SOPClassUID := sopclass.StudyRootQueryRetrieveInformationModelMove
 
 	pdu := network.NewPDUService()
-	defer pdu.Close()
 	if err := d.openAssociation(pdu, SOPClassUID.UID, []string{}, timeout); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
+	defer pdu.Close()
 	if err := dimsec.CMoveWriteRQ(pdu, Query, destAET); err != nil {
 		return dicomstatus.FailureUnableToProcess, err
 	}
@@ -110,7 +110,7 @@ func (d *scu) MoveSCU(destAET string, Query media.DcmObj, timeout int) (uint16, 
 		if d.onCMoveResult != nil {
 			d.onCMoveResult(ddo)
 		} else {
-			log.Println("No onCMoveResult event found")
+			slog.Warn("No onCMoveResult event found")
 		}
 	}
 	return status, nil
@@ -125,11 +125,11 @@ func (d *scu) StoreSCU(FileName string, timeout int) error {
 	SOPClassUID := DDO.GetString(tags.SOPClassUID)
 	if len(SOPClassUID) > 0 {
 		pdu := network.NewPDUService()
-		defer pdu.Close()
 		err := d.openAssociation(pdu, SOPClassUID, []string{DDO.GetTransferSyntax().UID}, timeout)
 		if err != nil {
 			return err
 		}
+		defer pdu.Close()
 		r, err := d.writeStoreRQ(pdu, DDO, SOPClassUID)
 		if err != nil {
 			return err

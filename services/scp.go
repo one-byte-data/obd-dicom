@@ -3,7 +3,7 @@ package services
 import (
 	"bufio"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 
 	"github.com/one-byte-data/obd-dicom/dictionary/tags"
@@ -53,10 +53,10 @@ func (s *scp) Start() error {
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
-			log.Print(err)
+			slog.Error(err.Error())
 			continue
 		}
-		log.Println("INFO, handleConnection, new connection from: ", conn.RemoteAddr())
+		slog.Info("handleConnection, new connection", "ADDRESS", conn.RemoteAddr())
 		go s.handleConnection(conn)
 	}
 }
@@ -87,7 +87,7 @@ func (s *scp) handleConnection(conn net.Conn) {
 		case dicomcommand.CStoreRequest:
 			ddo, err := dimsec.CStoreReadRQ(pdu, dco)
 			if err != nil {
-				log.Printf("ERROR, handleConnection, C-Store failed to read request : %s", err.Error())
+				slog.Error("handleConnection, C-Store failed to read request", "ERROR", err.Error())
 				conn.Close()
 				return
 			}
@@ -98,14 +98,14 @@ func (s *scp) handleConnection(conn net.Conn) {
 
 			status := s.onCStoreRequest(pdu.GetAAssociationRQ(), ddo)
 			if err := dimsec.CStoreWriteRSP(pdu, dco, status); err != nil {
-				log.Printf("ERROR, handleConnection, C-Store failed to write response: %s", err.Error())
+				slog.Error("handleConnection, C-Store failed to write response", "ERROR", err.Error())
 				conn.Close()
 				return
 			}
 		case dicomcommand.CFindRequest:
 			ddo, err := dimsec.CFindReadRQ(pdu)
 			if err != nil {
-				log.Println("ERROR, handleConnection, C-Find failed to read request!")
+				slog.Error("handleConnection, C-Find failed to read request!")
 				conn.Close()
 				return
 			}
@@ -121,21 +121,21 @@ func (s *scp) handleConnection(conn net.Conn) {
 			for _, result := range results {
 				err = dimsec.CFindWriteRSP(pdu, dco, result, dicomstatus.Pending)
 				if err != nil {
-					log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
+					slog.Error("handleConnection, C-Find failed to write response", "ERROR", err.Error())
 					conn.Close()
 					return
 				}
 			}
 
 			if err := dimsec.CFindWriteRSP(pdu, dco, dco, status); err != nil {
-				log.Printf("ERROR, handleConnection, C-Find failed to write response: %s", err.Error())
+				slog.Error("handleConnection, C-Find failed to write response", "ERROR", err.Error())
 				conn.Close()
 				return
 			}
 		case dicomcommand.CMoveRequest:
 			ddo, err := dimsec.CMoveReadRQ(pdu)
 			if err != nil {
-				log.Println("ERROR, handleConnection, C-Move failed to read request!")
+				slog.Error("handleConnection, C-Move failed to read request!")
 				conn.Close()
 				return
 			}
@@ -148,20 +148,20 @@ func (s *scp) handleConnection(conn net.Conn) {
 			status := s.onCMoveRequest(pdu.GetAAssociationRQ(), moveLevel, ddo)
 
 			if err := dimsec.CMoveWriteRSP(pdu, dco, status, 0x00); err != nil {
-				log.Printf("ERROR, handleConnection, C-Move failed to write response: %s", err.Error())
+				slog.Error("slog.ErrorhandleConnection, C-Move failed to write response", "ERROR", err.Error())
 				conn.Close()
 				return
 			}
 		case dicomcommand.CEchoRequest:
 			if dimsec.CEchoReadRQ(dco) {
 				if err := dimsec.CEchoWriteRSP(pdu, dco); err != nil {
-					log.Println("ERROR, handleConnection, C-Echo failed to write response!")
+					slog.Error("handleConnection, C-Echo failed to write response!")
 					conn.Close()
 					return
 				}
 			}
 		default:
-			log.Printf("ERROR, handleConnection, service not implemented: %d\n", command)
+			slog.Error("handleConnection, service not implemented", "COMMAND", command)
 			conn.Close()
 			return
 		}

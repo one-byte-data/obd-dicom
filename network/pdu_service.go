@@ -137,7 +137,7 @@ func (pdu *pduService) Connect(IP string, Port string) error {
 		pdu.ms.SetPosition(1)
 		pdu.AssocAC.ReadDynamic(pdu.ms)
 		if !pdu.interogateAAssociateAC() {
-			return errors.New("pduservice::Connect - InterogateAAssociateAC failed")
+			return errors.New("pduservice::Connect - No accepted presentation contexts found")
 		}
 		return nil
 	case pdutype.AssociationReject:

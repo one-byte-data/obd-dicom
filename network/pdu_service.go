@@ -311,9 +311,10 @@ func (pdu *pduService) Write(DCO media.DcmObj, ItemType byte) error {
 	// Fixed MaxLength - 6 20200811
 	pdu.Pdata.BlockSize = pdu.AssocAC.GetMaxSubLength() - 6
 
-	sopClass := sopclass.GetSOPClassFromUID(DCO.GetString(tags.AffectedSOPClassUID))
-
-	slog.Info("PDU-Service: SOP Class", "UID", sopClass.UID, "Description", sopClass.Description, "CalledAE", pdu.GetCalledAE())
+	if ItemType > 0x00 {
+		sopClass := sopclass.GetSOPClassFromUID(DCO.GetString(tags.AffectedSOPClassUID))
+		slog.Info("PDU-Service: SOP Class", "UID", sopClass.UID, "Description", sopClass.Description, "CalledAE", pdu.GetCalledAE())
+	}
 
 	return pdu.Pdata.Write(pdu.readWriter)
 }

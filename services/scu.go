@@ -169,7 +169,6 @@ func (d *scu) openAssociation(pdu network.PDUService, abstractSyntax string, tra
 		PresContext.AddTransferSyntax(ts)
 	}
 	PresContext.AddTransferSyntax(transfersyntax.ImplicitVRLittleEndian.UID)
-	PresContext.AddTransferSyntax(transfersyntax.ExplicitVRLittleEndian.UID)
 	pdu.AddPresContexts(PresContext)
 
 	return pdu.Connect(d.destination.HostName, strconv.Itoa(d.destination.Port))

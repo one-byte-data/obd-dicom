@@ -17,6 +17,8 @@ func TestNewUserInformation(t *testing.T) {
 				MaxSubLength:  NewMaximumSubLength(),
 				AsyncOpWindow: NewAsyncOperationWindow(),
 				SCPSCURole:    NewRoleSelect(),
+				ImpClass:      uidItem{itemType: 0x52},
+				ImpVersion:    uidItem{itemType: 0x55},
 			},
 		},
 	}

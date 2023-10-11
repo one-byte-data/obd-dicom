@@ -374,27 +374,19 @@ func (pdu *pduService) interogateAAssociateRQ(rw *bufio.ReadWriter) error {
 
 		PresContextAccept := NewPresentationContextAccept()
 		PresContextAccept.SetResult(4)
-		PresContextAccept.SetTransferSyntax("")
 		PresContextAccept.SetAbstractSyntax(PresContext.GetAbstractSyntax().GetUID())
 		TS := ""
 		for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-			if TrnSyntax.GetUID() == transfersyntax.ExplicitVRLittleEndian.UID {
-				TS = TrnSyntax.GetUID()
-			}
+			TS = TrnSyntax.GetUID()
 		}
 		if TS == "" {
-			for _, TrnSyntax := range PresContext.GetTransferSyntaxes() {
-				if TrnSyntax.GetUID() == transfersyntax.ImplicitVRLittleEndian.UID {
-					TS = TrnSyntax.GetUID()
-				}
-			}
+			TS = transfersyntax.ImplicitVRLittleEndian.UID
 		}
-		if len(TS) > 0 {
-			PresContextAccept.SetResult(0)
-			PresContextAccept.SetTransferSyntax(TS)
-			PresContextAccept.SetPresentationContextID(PresContext.GetPresentationContextID())
-			pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, PresContextAccept)
-		}
+
+		PresContextAccept.SetResult(0)
+		PresContextAccept.SetTransferSyntax(TS)
+		PresContextAccept.SetPresentationContextID(PresContext.GetPresentationContextID())
+		pdu.AcceptedPresentationContexts = append(pdu.AcceptedPresentationContexts, PresContextAccept)
 		pdu.AssocAC.AddPresContextAccept(PresContextAccept)
 	}
 
